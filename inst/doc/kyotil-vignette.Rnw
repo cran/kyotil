@@ -1,0 +1,63 @@
+%\VignetteIndexEntry{kyotil}
+%\VignetteDepends{}
+%\VignetteKeyWords{}
+%\VignettePackage{kyotil}
+%\VignetteEngine{knitr}
+
+\documentclass{article}%
+\usepackage[colorlinks,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{natbib}%
+\setcounter{MaxMatrixCols}{30}
+%TCIDATA{OutputFilter=latex2.dll}
+%TCIDATA{Version=5.50.0.2960}
+%TCIDATA{LastRevised=Sunday, June 02, 2013 14:49:03}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=BibTeX}
+%TCIDATA{Language=American English}
+%BeginMSIPreambleData
+\providecommand{\U}[1]{\protect\rule{.1in}{.1in}}
+%EndMSIPreambleData
+\setcounter{secnumdepth}{3}
+
+\begin{document}
+
+\title{kyotil - Some Examples}
+\author{Youyi Fong \& Krisztian Sebestyen\\Fred Hutchinson Cancer Research Center}
+\maketitle
+
+<<setup, include=FALSE, cache=FALSE>>=
+# set global chunk options
+library(knitr)
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', fig.show='hold',dev='pdf',
+warning=FALSE,dev.args=list(family="Palatino"), tidy.opts=list(keep.blank.line=FALSE, width.cutoff=60))
+options(replace.assign=TRUE,width=90)
+#render_listings()
+@
+
+<<loadnCal, include=FALSE, cache=FALSE, tidy=TRUE, echo=TRUE>>=
+library(kyotil)
+library(MASS)
+set.seed(1)
+@
+
+
+\section{Plotting functions}
+
+The function \textit{corplot} makes a scatterplot and prints Pearson and Spearman correlations in the title, e.g. Figure~\ref{fig:corplot}.
+
+<<corplot, include=TRUE, cache=FALSE, tidy=TRUE, echo=TRUE, eval=TRUE, fig.width=8, fig.height=8.5, fig.pos="tbp", fig.cap="ncal graphical output, drm fit.">>=
+dat=data.frame(mvrnorm(100,c(0,0),matrix(c(1,.5,.5,1),2,2)))
+names(dat)=c("x","y")
+corplot(y~x, dat, main="Some Title", plot.abline=TRUE)
+@
+
+
+
+
+\end{document}

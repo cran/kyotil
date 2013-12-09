@@ -1,0 +1,30 @@
+useDynLib(kyotil)
+
+export(as.binary, binom.coef, expit, H, logDiffExp, logit, logMeanExp, logSumExp, logSumExpFor2, permn, Stirling2) 
+
+export(concatList, AR1, EXCH, fill.jagged.array, getMidPoints, getUpperRight, last, mix, rep.data.frame, rep.matrix, 
+    rep.matrix.block, shift.left, shift.right, thin.rows, ThinRows, tr)
+
+export("%+%", concatList, contain, endsWith, escapeUnderline, fileStem, firstIndex, getExt, getFileStem, getStem, 
+    lastIndex, myprint, myprint.default, remove.prefix, startsWith)
+
+export(binary, binary2, f2c, ftoi, keepWarnings, meanmed, methods4, myaggregate, myreshapewide, mysapply, myscale, 
+    mysystem, mytapply, read.sv, read.tsv, table.prop, unix)
+
+export(abline.pt.slope, abline.pts, butterfly.plot, empty.plot, getMfrow, my.forest.plot, my.interaction.plot, 
+    myboxplot, myboxplot.formula, myboxplot.list, mylegend, mymatplot, mypairs, mypdf, mypostscript, panel.cor, 
+    panel.hist, panel.nothing, corplot, corplot.default, corplot.formula)
+
+export(format.int, make.latex.coef.table, mytex, mytex.begin, mytex.end, mywrite, mywrite.csv, roundup)
+
+export(dbern, dcorbern, dmixnorm, dnorm.norm.gamma, rbern, rejective.sampling, rnorm.cor, rnorm.norm.gamma)
+
+export(coef.geese, getFixedEf, getFixedEf.coxph, getFixedEf.gam, getFixedEf.gee, getFixedEf.geese, getFixedEf.glm, getFixedEf.inla, 
+    getFixedEf.lm, getFixedEf.lme, getFixedEf.logistf, getFixedEf.matrix, getFixedEf.MIresult, getFixedEf.stm, getFormattedSummary, 
+    getVarComponent, getVarComponent.hyperpar.inla, getVarComponent.matrix, interaction.table, predict.geese, residuals.geese, vcov.geese, vcov.logistf)
+
+export(hosmerlem, quick.t.test, sign.test, tukey.mtest, vector.t.test)
+
+export(getK)
+
+export(.as.double, DXD, symprod, txSy)
