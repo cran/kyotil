@@ -46,7 +46,7 @@ methods4(classes, super = FALSE, ANY = FALSE)
 
 myaggregate(x, by, FUN, new.col.name = "aggregate.value", ...)
 
-myreshapewide(dat, category.var, outcome.var, idvar = NULL)
+myreshapewide(formula, dat, idvar = NULL)
 
 mysapply(X, FUN, ..., simplify = TRUE, USE.NAMES = TRUE, ret.mat = TRUE)
 
@@ -60,7 +60,7 @@ read.sv(file, header = TRUE, ...)
 
 read.tsv(file, header = TRUE, sep = "\t", ...)
 
-table.prop(x, y, digit = 1, style = 2)
+table.prop(x, y, digit = 1, style = 2,whole.table.add.to.1=FALSE)
 
 unix()
 }
@@ -78,6 +78,8 @@ unix()
   \item{f}{
 %%     ~~Describe \code{f} here~~
 }
+  \item{formula}{
+a formula object.}
 
 
   \item{expr}{
@@ -104,8 +106,8 @@ unix()
   \item{by}{
 %%     ~~Describe \code{by} here~~
 }
-  \item{FUN}{
-%%     ~~Describe \code{FUN} here~~
+  \item{whole.table.add.to.1}{
+Boolean
 }
   \item{new.col.name}{
 %%     ~~Describe \code{new.col.name} here~~
@@ -116,12 +118,6 @@ unix()
 
   \item{dat}{
 %%     ~~Describe \code{dat} here~~
-}
-  \item{category.var}{
-%%     ~~Describe \code{category.var} here~~
-}
-  \item{outcome.var}{
-%%     ~~Describe \code{outcome.var} here~~
 }
   \item{idvar}{
 %%     ~~Describe \code{idvar} here~~
@@ -170,6 +166,9 @@ unix()
 %%     ~~Describe \code{style} here~~
 }
 
+  \item{FUN}{
+%%     ~~Describe \code{FUN} here~~
+}
 }
 \examples{
 

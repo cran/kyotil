@@ -13,7 +13,6 @@
 \alias{getFixedEf.matrix}
 \alias{getFixedEf.mer}
 \alias{getFixedEf.MIresult}
-\alias{getFixedEf.stm}
 \alias{getFixedEf2}
 \alias{getFormattedSummary}
 \alias{getVarComponent}
@@ -60,8 +59,6 @@ getFixedEf(object, ...)
 \method{getFixedEf}{matrix}(object, ...)
 
 \method{getFixedEf}{MIresult}(object, ...)
-
-\method{getFixedEf}{stm}(object, ...)
 
 \method{getVarComponent}{hyperpar.inla}(object, transformation = NULL, ...)
 
@@ -159,7 +156,7 @@ getFormattedSummary: from a list of fits, say lmer, inla fits, return formatted 
  random=TRUE returns variance components
  type=1: est
  type=2: est (se)
- type=3: est (2.5%, 97.5%)
+ type=3: est (2.5 percent, 97.5 percent)
  type=4: est   se
 
 

@@ -4,7 +4,7 @@
 \alias{butterfly.plot}
 \alias{empty.plot}
 \alias{getMfrow}
-\alias{my.forest.plot}
+\alias{myforestplot}
 \alias{my.interaction.plot}
 \alias{myboxplot}
 \alias{myboxplot.formula}
@@ -41,7 +41,8 @@ empty.plot()
 
 getMfrow(len)
 
-my.forest.plot(dat, xlim = NULL, xlab = "", main = "", col.1 = "red", col.2 = "blue")
+myforestplot(dat, xlim = NULL, xlab = "", main = "", col.1 = "red", col.2 = "blue",
+    plot.labels=TRUE,order=FALSE,decreasing=FALSE)
 
 my.interaction.plot(dat, x.ori = 0, xaxislabels = rep("", 2), cex.axis = 1, add = FALSE,
     xlab = "", ylab = "", pcol = NULL, lcol = NULL, ...)
@@ -49,16 +50,17 @@ my.interaction.plot(dat, x.ori = 0, xaxislabels = rep("", 2), cex.axis = 1, add 
 myboxplot(object, ...)
 
 \method{myboxplot}{formula}(formula, data, cex = 0.5, ylab = "", xlab = "", main = "", 
-box = TRUE, at = NULL, pch = 1, col = 1, test = c("t", "w"), ...)
+    box = TRUE, at = NULL, pch = 1, col = 1, test = c("t", "w","f","k"), 
+    reshape.formula=NULL, ...)
 
 \method{myboxplot}{list}(object, cex = 0.5, ylab = "", xlab = "", main = "", box = TRUE,
     at = NULL, pch = 1, col = 1, test = c("t", "w"), ...)
 
 mylegend(legend, x, lty = NULL, bty = "n", ...)
 
-mymatplot(x, make.legend = TRUE, legend = NULL, legend.x = 9, lty = 1:5, pch = NULL, 
+mymatplot(x, y, make.legend = TRUE, legend = NULL, legend.x = 9, lty = 1:5, pch = NULL, 
     col = 1:6, legend.title = NULL, legend.cex = 1, xlab = NULL, ylab = "", 
-    draw.x.axis = TRUE, bg = NA, ...)
+    draw.x.axis = TRUE, bg = NA, legend.inset=0, lwd=1, at=NULL, ...)
 
 mypairs(dat, method = "pearson")
 
@@ -78,7 +80,8 @@ corplot(object, ...)
 \method{corplot}{default}(object, y, ...)
 
 \method{corplot}{formula}(formula, data, main = "", method = c("pearson", "spearman"), 
-    col = 1, cex = 0.5, plot.abline = TRUE, ...)
+    col = 1, cex = 0.5, add.diagonal.line = TRUE, add.lm.fit=FALSE,add=FALSE,log="", 
+    same.xylim=FALSE, xlim=NULL,ylim=NULL,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -101,12 +104,26 @@ corplot(object, ...)
   \item{dat}{
 %%     ~~Describe \code{dat} here~~
 }
+  \item{lwd}{
+line width.
+}
+  \item{legend.inset}{
+legend inset
+}
   \item{dat2}{
 %%     ~~Describe \code{dat2} here~~
 }
   \item{add}{
 %%     ~~Describe \code{add} here~~
 }
+  \item{log}{
+}
+  \item{add.lm.fit}{
+}
+  \item{reshape.formula}{
+a formula object.
+}
+
   \item{xaxislabels}{
 %%     ~~Describe \code{xaxislabels} here~~
 }
@@ -129,7 +146,12 @@ corplot(object, ...)
 %%     ~~Describe \code{len} here~~
 }
 
+  \item{same.xylim}{Boolean. Whether xlim and ylim should be the same
+}
   \item{xlim}{
+%%     ~~Describe \code{xlim} here~~
+}
+  \item{ylim}{
 %%     ~~Describe \code{xlim} here~~
 }
   \item{main}{
@@ -257,16 +279,27 @@ corplot(object, ...)
 %%     ~~Describe \code{prefix} here~~
 }
   \item{cex.cor}{
-%%     ~~Describe \code{cex.cor} here~~
+}
+  \item{plot.labels}{Boolean}
+  \item{order}{Boolean}
+  \item{decreasing}{Boolean}
+
+
+
+
+
+  \item{add.diagonal.line}{
+%%     ~~Describe \code{add.diagonal.line} here~~
+}
 }
 
+\details{
+myboxplot shows data points along with boxes. The data poins are jittered and the pattern of jittering is made reproducible in repeated calls.
 
-
-
-
-  \item{plot.abline}{
-%%     ~~Describe \code{plot.abline} here~~
-}
+myforestplot is modified from code from Allan deCamp/SCHARP.
+dat should have three columns. first column should be point estimate, second and third lci and uci, fourth p value. 
+col.1 is the color used for CIs that do not include null, col.2 is used for CIs that do include null.
+If order is TRUE, the rows are ordered by the first column of dat. descreasing can be used to change the behavior of order.
 }
 \examples{
 mypdf(mfrow=c(1,2))

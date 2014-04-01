@@ -1,5 +1,9 @@
 // Author: Krisztian Sebestyen <ksebestyen@gmail.com>
 
+#include <R.h>
+#include <Rinternals.h>
+
+
 #ifndef MATRIX_UTILS
 #define MATRIX_UTILS
 // note: do not declare integers as character constants if longer than 1 character as it is dependent
@@ -30,6 +34,7 @@ void C_singval_dgesvd(int* nrx,int* ncx,double* _x,double* s,int* info);
 
 void dxd_(int* n, double* d1,double* _x,double* d2,double* _y);
 void dxd(int* n, double* d1,double* _x,double* d2,double* _y);
+SEXP dxd2(SEXP _d1, SEXP _x, SEXP _d2);
 
 void lower_trap(int nrx,int ncx,double* x,double* diag,int k,double* L);
 void upper_trap(int nrx,int ncx,double* x,double* diag,int k,double* U);

@@ -17,6 +17,6 @@ set.seed(1)
 ## ----corplot, include=TRUE, cache=FALSE, tidy=TRUE, echo=TRUE, eval=TRUE, fig.width=8, fig.height=8.5, fig.pos="tbp", fig.cap="ncal graphical output, drm fit."----
 dat=data.frame(mvrnorm(100,c(0,0),matrix(c(1,.5,.5,1),2,2)))
 names(dat)=c("x","y")
-corplot(y~x, dat, main="Some Title", plot.abline=TRUE)
+corplot(y~x, dat, main="Some Title", add.diagonal.line=TRUE)
 
 

@@ -1,7 +1,6 @@
 getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FALSE){
     
-    # should not use mysapply here 
-    t(mysapply(fits, function (fit) {
+    sapply(fits, simplify="array", function (fit) {
         if (random) {
             tmp = getVarComponent (fit)
             if (class(fit)=="mer" & type!=1) {
@@ -14,21 +13,22 @@ getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FAL
         
         if (type==1)
             # this is the best way to format: first round, then nsmall
-            format(round(tmp[,1], est.digits), nsmall=est.digits, scientific=FALSE) 
+            format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) 
         else if (type==2)
-            format(round(tmp[,1], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
-                format(round(tmp[,2], est.digits), nsmall=se.digits, scientific=FALSE) %+% ")"
+            format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
+                format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE) %+% ")"
         else if (type==3)
-            format(round(tmp[,1], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
-                format(round(tmp[,3], est.digits), nsmall=est.digits, scientific=FALSE) %+% ", " %+% 
-                    format(round(tmp[,4], est.digits), nsmall=est.digits, scientific=FALSE) %+% ")" 
+            format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
+                format(round(tmp[,3,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% ", " %+% 
+                    format(round(tmp[,4,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% ")" 
         else if (type==4)
             # a space is inserted between est and se, they could be post-processed in swp
-            format(round(tmp[,1], est.digits), nsmall=est.digits, scientific=FALSE) %+% " " %+% 
-                format(round(tmp[,2], est.digits), nsmall=se.digits, scientific=FALSE)
+            format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " " %+% 
+                format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE)
         else 
             stop ("getFormattedSummaries(). type not supported: "%+%type)
-    }))
+    })
+    
 }
 
 
@@ -37,10 +37,6 @@ getVarComponent <- function(object, ...) UseMethod("getVarComponent")
 
 getFixedEf.MIresult=function(object, ...) {
     cbind(coef(object), sqrt(diag(vcov(object))))
-}
-
-getFixedEf.stm=function (object, ...) {
-    object[-1,1:2]
 }
 
 #get estimates, variances, sd from lmer fit

@@ -4,6 +4,7 @@
 #include <float.h> //DBL_EPSILON
 #include <R_ext/Lapack.h>
 #include <R.h>
+#include <Rinternals.h>
 //#include <R_ext/Applic.h>
 //#include <R_ext/BLAS.h>
 //#include <R_ext/RS.h> //R definitions for 'extending' R, registering functions,...
@@ -49,14 +50,55 @@ void symprod(int* nrow,int* ncol,double* S,double* X,double* Y)
 	
 }
 
+SEXP symprod2(SEXP _S, SEXP _X){
+
+     int nrow=nrows(_X);
+     int ncol=ncols(_X);
+     SEXP _ans=PROTECT(allocMatrix(REALSXP, nrow, ncol));
+     double *S=REAL(_S), *X=REAL(_X), *ans=REAL(_ans);
+     
+	char*  	SIDE = "L";
+	char*  	UPLO = "U";
+	double alpha = 1.0;
+	double beta = 0.0;
+	
+	F77_CALL(dsymm)( 	
+		SIDE,UPLO,
+		&nrow,&ncol,
+		&alpha,
+		S,&nrow,
+		X,&nrow,
+		&beta,
+		ans,&nrow 
+	); 
+	
+	UNPROTECT(1);
+    return _ans;
+}
+
 
 void txSy(int* n,double* S,double* x,double* y,double* temp,double* out){
-
 	double alpha = 1.0;
 	double beta = 0.0;
 	int ione = 1;
 	F77_CALL(dsymv)("U",n,&alpha,S,n,y,&ione,&beta,temp,&ione); // temp = S %*% y
 	*out = F77_CALL(ddot)(n, x, &ione, temp, &ione); // out = x %*% temp
+}
+
+SEXP txSy2(SEXP _x, SEXP _S, SEXP _y){
+     int n=length(_x);
+     SEXP _ans=PROTECT(allocVector(REALSXP, 1));
+     double *S=REAL(_S), *x=REAL(_x), *y=REAL(_y), *ans=REAL(_ans);
+     
+	double alpha = 1.0;
+	double beta = 0.0;
+    double *temp = (double *) R_alloc(n, sizeof(double));
+	int ione = 1;
+	F77_CALL(dsymv)("U",&n,&alpha,S,&n,y,&ione,&beta,temp,&ione); // temp = S %*% y
+	*ans = F77_CALL(ddot)(&n, x, &ione, temp, &ione); // out = x %*% temp
+ 
+	UNPROTECT(1);
+    return _ans;
 }
 
 

@@ -250,6 +250,73 @@ void getKernel(int* nr1,int* nc1,double* x1,int* nr2,int* nc2,double* x2,
 	}
 }
 
+SEXP edist2new(SEXP _x1, SEXP _x2){
+
+     int nr1=nrows(_x1), nc1=ncols(_x1), nr2=nrows(_x2), nc2=ncols(_x2);
+     SEXP _ans=PROTECT(allocMatrix(REALSXP, nr1, nr2));
+     double *x1=REAL(_x1), *x2=REAL(_x2), *dist=REAL(_ans);
+
+	double s,ss;
+	int i1,i2,j;
+	int nc = MIN(nc1,nc2);
+	memset(dist,0,(size_t)(nr1 * nr2 * sizeof(double)));
+
+	// dist <- matrix(rowSums((X1[rep(1:nrow(X1),nrow(X2)),,drop=F] - X2[rep(1:nrow(X2),each=nrow(X1)),,drop=F])^2),nrow = nrow(X))
+	for(i2 = 0;i2 < nr2;i2++){
+		for(i1 = 0;i1 < nr1;i1++){
+			ss = 0.0;
+			for(j = 0;j < nc;j++){
+				s = x1[CX(i1,j,nr1)] - x2[CX(i2,j,nr2)];
+				s *=s;
+				ss += s;
+			}
+			dist[CX(i1,i2,nr1)] = ss;		
+		}
+	}	
+
+	UNPROTECT(1);
+    return _ans;
+}
+
+SEXP getKernel2(SEXP _x1, SEXP _x2, SEXP _kernel, SEXP _para) { 
+         
+     int nr1=nrows(_x1), nc1=ncols(_x1), nr2=nrows(_x2), nc2=ncols(_x2);
+     SEXP _ans=PROTECT(allocMatrix(REALSXP, nr1, nr2));
+     double *x1=REAL(_x1), *x2=REAL(_x2), *para=REAL(_para), *K=REAL(_ans);
+     
+	KERNEL_TYPE kernel = (KERNEL_TYPE)(*INTEGER(_kernel));
+	if(kernel == LINEAR){
+		tcrossprod(x1,&nr1,&nc1,x2,&nr2,&nc2,K);	
+	}else if(kernel == EUCLIDEAN){
+		edist2(&nr1,&nc1,x1,&nr2,&nc2,x2,K);
+	}else if(kernel == POLYNOMIAL){
+		tcrossprod(x1,&nr1,&nc1,x2,&nr2,&nc2,K);	
+		for(int i = 0;i < (nr1) * (nr2);i++) 
+			K[i] = pow(K[i] + 1.0,para[0]);
+	}else if(kernel == RBF){
+		edist2(&nr1,&nc1,x1,&nr2,&nc2,x2,K);
+		for(int i = 0;i < nr1*nr2;i++) 
+			K[i] = exp(-para[0] * K[i]);
+		for(int i = 0;i < (nr1) * (nr2);i++)
+			if(EQ(K[i],0.0,DBL_EPSILON))
+				K[i] = 0.0;			
+	}else if(kernel == IBS){
+		int order = 2;
+		if((nr2 == 0) || (nc2 == 0) || (!x2)){
+			ibsX_kernel(&nr1,&nc1,x1,para,&order,K);	
+		} else ibsXY_kernel(&nr1,&nc1,x1,&nr2,&nc2,x2,para,&order,K);	
+	}else if(kernel == HAMMING){
+		int order = 1;
+		if((nr2 == 0) || (nc2 == 0) || (!x2)){
+			ibsX_kernel(&nr1,&nc1,x1,para,&order,K);	
+		} else {
+               ibsXY_kernel(&nr1,&nc1,x1,&nr2,&nc2,x2,para,&order,K);	
+        }
+	}
+
+	UNPROTECT(1);
+    return _ans;
+}
 
 // for(i2 in 1:nrow(X2))
 	// for(i1 in 1:nrow(X))

@@ -30,6 +30,15 @@ remove.prefix=function(s,sep="_"){
 }
 
 
+remove.postfix=function(s,sep="_"){
+    tmp=strsplit(s,sep)    
+    sapply(tmp, function (x) {
+        if (length(x)==1) return (x)
+        concatList(x[-length(x)],sep)
+    })
+}
+
+
 
 #### misc
 

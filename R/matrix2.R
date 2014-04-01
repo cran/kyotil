@@ -16,13 +16,15 @@ DXD <- function(d1,X,d2){
     
     if((NROW(X) != n) || (NCOL(X) != n)) 
     if(!is.matrix(X)) X <- as.matrix(X)
-    
-    
+        
+    # these are needed b/c dxd2 expects input type of double (by using REAL) and do not perform type coersion
     d1 <- .as.double(d1) # critical to use .as.double here, otherwise it will try to copy
     d2 <- .as.double(d2)
     X  <- .as.double(X)
     
-    .C("dxd",n,d1,X,d2,dxd = X*0.0,DUP = FALSE,NAOK = FALSE)$dxd
+#    .C("dxd",n,d1,X,d2,dxd = X*0.0,DUP = FALSE,NAOK = FALSE)$dxd
+    
+    .Call("dxd2", d1, X, d2)
 }
 
 
@@ -31,38 +33,41 @@ symprod <- function(S,X){
     if(!is.matrix(S) || !is.matrix(X)) stop("Both 'S' and 'X' have to be matrices.")
     S <- .as.double(S)
     X <- .as.double(X)
-    Y <- X * 0.0
+    #Y <- X * 0.0
     if(
         (NCOL(S) != NROW(X)) || 
-        (NCOL(S) != NROW(S)) || 
-        !all(dim(X) == dim(Y))
+        (NCOL(S) != NROW(S))  
+        #|| !all(dim(X) == dim(Y))
     ) stop("Dimension mismatch")
     
-    res <- .C( 
-        "symprod",  
-        M = NROW(Y),
-        N = NCOL(Y),
-        A = .as.double(S),
-        B = as.double(X),
-        C = Y
-    ) 
+#    res <- .C( 
+#        "symprod",  
+#        M = NROW(Y),
+#        N = NCOL(Y),
+#        A = .as.double(S),
+#        B = as.double(X),
+#        C = Y
+#    ) 
+#
+#    # res <- .Fortran( 
+#        # "dsymm",  
+#        # SIDE = 'L',
+#        # UPLO = 'U',
+#        # M = NROW(Y),
+#        # N = NCOL(Y),
+#        # alpha = as.double(1),
+#        # A = .as.double(S),
+#        # LDA = NROW(S),
+#        # B = as.double(X),
+#        # LDB = NROW(X),
+#        # beta = as.double(0),
+#        # C = Y,
+#        # LDC = NROW(Y) 
+#    # )     
+#    res$C
+    
+    .Call("symprod2", S, X)
 
-    # res <- .Fortran( 
-        # "dsymm",  
-        # SIDE = 'L',
-        # UPLO = 'U',
-        # M = NROW(Y),
-        # N = NCOL(Y),
-        # alpha = as.double(1),
-        # A = .as.double(S),
-        # LDA = NROW(S),
-        # B = as.double(X),
-        # LDB = NROW(X),
-        # beta = as.double(0),
-        # C = Y,
-        # LDC = NROW(Y) 
-    # )     
-    res$C
 }
 
 
@@ -71,5 +76,11 @@ txSy <- function(x,S,y){
     
     if( (n != NROW(S)) || (n != NCOL(S)) || (n != length(y)) )stop("Dimension mismatch")
     
-    .C('txSy',length(x),.as.double(S),.as.double(x),.as.double(y),double(n),out=double(1))$out
+    S <- .as.double(S)
+    x <- .as.double(x)
+    y <- .as.double(y)
+
+
+    #.C('txSy',length(x),.as.double(S),.as.double(x),.as.double(y),double(n),out=double(1))$out
+    .Call('txSy2', x, S, y)
 }

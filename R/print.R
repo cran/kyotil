@@ -178,10 +178,10 @@ myprint.default = function (..., newline=TRUE, digits=3) {
         #str(x[[i]])
         #if (gsub("\\\\","\\",gsub("\"", "", tmpname))!=x[[i]]) {
         if (contain(tmpname, "\"") | contain(tmpname, "\\")) {
-            for (a in x[[i]]) cat(a," ")
+            for (a in x[[i]]) cat(a)
         } else {
             cat (tmpname %+% " = ")
-            for (a in x[[i]]) cat(a," ")
+            for (a in x[[i]]) cat(a)
             if (i!=length(x)) cat ("; ")
         }
     }

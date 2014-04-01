@@ -1,11 +1,3 @@
-# calculate entropy
-# p can be count vector or probability vector, but not a vector of membership indicator
-H=function (p) { 
-    if (sum(p)!=1) p=p/sum(p) # if p is count, transform to probability
-    p=p[p!=0] # remove zero entries
-    sum(-p*log2(p)) 
-}
-
 #binomial coefficient
 binom.coef=function(n,m) { prod((n-m+1):n)/prod(1:m) }
 

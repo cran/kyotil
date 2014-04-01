@@ -127,6 +127,7 @@ rep.matrix.block = function (x, times=2, ...) {
 
 #it does not work on data.frame
 rep.matrix = function (x, times=1, each=1, by.row=TRUE, ...) {
+    if (times==0) return(NULL)
     if (by.row) {
         colnames.=colnames(x)
         new.matrix=matrix(0, nrow(x)*each*times, ncol(x) )

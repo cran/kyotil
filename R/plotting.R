@@ -40,6 +40,7 @@ mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height
         } else if (nrow==7 & ncol==5) {width=18; height=19
         } else if (nrow==5 & ncol==4) {width=12; height=15
         } else if (nrow==2 & ncol==1) {width=6.7; height=9.7
+        } else if (nrow==3 & ncol==1) {width=10; height=9.7
         } else if (nrow==5 & ncol==1) {width=5; height=13
         } else if (nrow==3 & ncol==2) {width=6.7; height=10.3
         } else if (nrow==4 & ncol==3) {width=9; height=12
@@ -145,10 +146,8 @@ empty.plot=function () {
     plot(1,1,type="n",xlab="",ylab="",xaxt="n", yaxt="n", bty="n")
 }
 
-# make forest plot
-# dat should have three columns. first column should be point estimate, second and third lci and uci, fourth p value
-# col.1 is the color used for CIs that don't include null, col.2 is used for CIs that do include null
-my.forest.plot=function(dat, xlim=NULL, xlab="", main="", col.1="red", col.2="blue") { 
+myforestplot=function(dat, xlim=NULL, xlab="", main="", col.1="red", col.2="blue",plot.labels=TRUE,order=FALSE,decreasing=FALSE) {
+    if (order) dat=dat[order(dat[,1],decreasing=decreasing),] 
     p=nrow(dat)    
     # makes no plot, but helps set the x axis later
     plot(c(dat[,2], dat[,3]),rep(1:p,2), xlim=xlim, yaxt="n", xaxt="s", xlab=xlab, ylab="", main="", type="n", cex.main=1.4, axes=F)
@@ -159,6 +158,8 @@ my.forest.plot=function(dat, xlim=NULL, xlab="", main="", col.1="red", col.2="bl
     points(dat[,1], nrow(dat):1, pch=19, col=cols)
     segments(dat[,2], nrow(dat):1, dat[,3], nrow(dat):1, lwd=2, col=cols)
     axis(1, cex.axis=1.4)
+    # add labels
+    if (plot.labels) axis(4, at=p:1, rownames(dat), tick=F, las=2, col=1, cex.axis=1, xpd=NA, line=-.5)
 }
 
 
@@ -180,39 +181,70 @@ myboxplot <- function(object, ...) UseMethod("myboxplot")
 
 # myboxplot.formula and myboxplot.list make a boxplot with data points and do inferences for two group comparions. 
 # cex=.5; ylab=""; xlab=""; main=""; box=FALSE; highlight.list=NULL; at=NULL;pch=1;col=1;
-myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test=c("t","w"), ...){
+myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test=c("t","w","f","k"), reshape.formula=NULL, ...){
+    
+    save.seed <- try(get(".Random.seed", .GlobalEnv), silent=TRUE) 
+    if (class(save.seed)=="try-error") {        
+        set.seed(1)
+        save.seed <- get(".Random.seed", .GlobalEnv)
+    }                        
+    set.seed(1)
+    
     
     if (box) {
-        boxplot(formula, data, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL,...)
+        res=boxplot(formula, data, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL,...)
     } else {
-        boxplot(formula, data, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL, border="white", ...)
+        res=boxplot(formula, data, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL, border="white", ...)
     }
         
     dat.tmp=model.frame(formula, data)
     if(is.null(at)){
-        xx=jitter(as.numeric(as.factor(dat.tmp[,2])))
+        
+        xx=as.factor(dat.tmp[,2])
+        xx=as.numeric(xx)
+        xx=jitter(xx)
+    
     } else{
         xx=jitter(at[as.factor(dat.tmp[,2])])
     }    
     points(xx, dat.tmp[[1]], cex=cex,pch=pch,col=col)
     
+    # restore rng state 
+    assign(".Random.seed", save.seed, .GlobalEnv)     
+    
     # inference
     x.unique=unique(dat.tmp[[2]])
-    if (length(test)>0 & length(x.unique)==2) {
-        y.1=dat.tmp[[1]][dat.tmp[[2]]==x.unique[1]]
-        y.2=dat.tmp[[1]][dat.tmp[[2]]==x.unique[2]]
-        sub="p-value: "
-        if ("t" %in% test) sub=sub%+%signif(t.test(y.1, y.2)$p.value,2) 
-        if (length(test)==2) sub=sub%+%"|"
-        if ("w" %in% test) sub=sub%+%signif(wilcox.test(y.1, y.2)$p.value,2)
+    if (length(test)>0) {
+        sub=""
+        if ("t" %in% test) sub=sub%+%" Student's t "%+%signif(t.test(formula, data)$p.value,2) 
+        if ("w" %in% test) sub=sub%+%" Wilcoxon "%+%signif(wilcox.test(formula, data)$p.value,2)
+        if ("k" %in% test) sub=sub%+%" Kruskal "%+%signif(kruskal.test(formula, data)$p.value,2)
+        if ("f" %in% test) {
+            dat.wide=myreshapewide (reshape.formula, data, idvar = NULL)
+            ftest = friedman.test (as.matrix(dat.wide[,-1]))
+            sub=sub%+%" Friedman "%+%signif(ftest$p.value,2)
+        }
         title(sub=sub)
     }
     
+    res
+    
+}
+
+myboxplot.data.frame=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test=c("t","w"), ...){
+    myboxplot.list(as.list(object), cex=cex, ylab=ylab, xlab=xlab, main=main, box=box, at=at, pch=pch, col=col, test=test, ...)
 }
 
 myboxplot.list=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test=c("t","w"), ...){
     
-    if (box) {
+    save.seed <- try(get(".Random.seed", .GlobalEnv), silent=TRUE) 
+    if (class(save.seed)=="try-error") {        
+        set.seed(1)
+        save.seed <- get(".Random.seed", .GlobalEnv)
+    }                        
+    set.seed(1)
+    
+        if (box) {
         boxplot(object, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL,...)
     } else {
         boxplot(object, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL, border="white", ...)
@@ -236,6 +268,8 @@ myboxplot.list=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=
         title(sub=sub)
     }    
     
+    # restore rng state 
+    assign(".Random.seed", save.seed, .GlobalEnv)     
 }
 
 
@@ -265,25 +299,38 @@ corplot <- function(object, ...) UseMethod("corplot")
 
 corplot.default=function(object,y,...){
     dat=data.frame(object,y)
-    names(dat)=c(names(object), names(y))
-    corplot(as.formula(names(y)%+%"~"%+%names(object)), dat, ...)
+    names(dat)=c("x1", "x2")
+    corplot(x2~x1, dat, ...)
 }
 
 # col can be used to highlight some points
-corplot.formula=function(formula,data,main="",method=c("pearson","spearman"),col=1,cex=.5,plot.abline=TRUE,...){
+corplot.formula=function(formula,data,main="",method=c("pearson","spearman"),col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,add=FALSE,log="",same.xylim=FALSE,xlim=NULL,ylim=NULL, ...){
     vars=dimnames(attr(terms(formula),"factors"))[[1]]
-    cor.=sapply (method, function (method) {
-        cor(data[,vars[1]],data[,vars[2]],method=method,use="p")
-    })
-    main=main%+%ifelse(main=="","",", ")
-    main=main%+%"cor: "%+%concatList(round(cor.,2),"|")
-#    if (length(cor.)==1) {
-#        main=main%+%"cor: "%+%round(cor.,2) 
-#    } else {
-#        main=main%+%"cor: "%+%round(cor.,2) 
-#    }
-    plot(formula,data,main=main,col=col,cex=cex,...)
-    if(plot.abline) abline(0,1)
+    cor.=NULL
+    if (length(method)>0) {
+        cor.=sapply (method, function (method) {
+            cor(data[,vars[1]],data[,vars[2]],method=method,use="p")
+        })
+        main=main%+%ifelse(main=="","",", ")
+        main=main%+%"cor: "%+%concatList(round(cor.,2),"|")
+    }
+
+    if (!add) {
+        if (same.xylim) {
+            xlim=range(model.frame(formula, data))
+            ylim=range(model.frame(formula, data))
+        }
+        plot(formula,data,main=main,col=col,cex=cex,log=log,xlim=xlim,ylim=ylim,...)
+    } else {
+        points(formula,data,main=main,col=col,cex=cex,log=log,...)
+    }
+    
+    if(add.diagonal.line) abline(0,1)
+    if(add.lm.fit) {
+        fit=lm(formula, data)
+        abline(fit,untf=log=="xy")
+    }
+    
     cor.
 }
 
@@ -307,14 +354,26 @@ abline.pt.slope=function(pt1, slope,...){
     abline(intercept, slope,...)
 }
 #abline.pt.slope(c(1,1), 1)
-mymatplot=function(x, make.legend=TRUE, legend=NULL, legend.x=9, lty=1:5, pch=NULL, col=1:6, legend.title=NULL, legend.cex=1, xlab=NULL, ylab="", draw.x.axis=TRUE, bg=NA, ...) {
-    if (is.null(xlab)) xlab=names(dimnames(x))[1]
-    if (is.null(legend.title)) legend.title=names(dimnames(x))[2]
-    matplot(x=x, lty=lty, pch=pch, col=col, xlab=xlab, xaxt="n", ylab=ylab, bg=bg, ...)
-    if(draw.x.axis) axis(side=1, at=1:nrow(x), labels=rownames(x))
+mymatplot=function(x, y, make.legend=TRUE, legend=NULL, legend.x=9, lty=1:5, pch=NULL, col=1:6, legend.title=NULL, legend.cex=1, xlab=NULL, ylab="", 
+    draw.x.axis=TRUE, bg=NA, legend.inset=0, lwd=1, at=NULL, ...) {
+    
+    missing.y=FALSE
+    if (missing(y)) {
+        missing.y=TRUE
+        y=x
+        x=1:ncol(y)
+    } 
+    
+    if (is.null(xlab)) xlab=names(dimnames(y))[1]
+    if (is.null(legend.title)) legend.title=names(dimnames(y))[2]
+    matplot(x, y, lty=lty, pch=pch, col=col, xlab=xlab, xaxt=ifelse(missing.y,"n","s"), ylab=ylab, bg=bg, lwd=lwd, ...)
+    if(missing.y & draw.x.axis) axis(side=1, at=at, labels=rownames(y)) 
     if (make.legend) {
-        if (is.null(legend)) legend=colnames(x)
-        if (length(unique(pch))>1) mylegend(legend, x=legend.x, lty=lty, title=legend.title, pch=pch, col=col, pt.bg=bg, cex=legend.cex)
-        if (length(unique(pch))==1) mylegend(legend, x=legend.x, lty=lty, title=legend.title, col=col, pt.bg=bg, cex=legend.cex)
+        if (is.null(legend)) legend=colnames(y)
+        if (length(unique(pch))>1) {
+            mylegend(legend, x=legend.x, lty=lty, title=legend.title, col=col, pt.bg=bg, cex=legend.cex, lwd=lwd, inset=legend.inset, pch=pch)
+        } else {
+            mylegend(legend, x=legend.x, lty=lty, title=legend.title, col=col, pt.bg=bg, cex=legend.cex, lwd=lwd, inset=legend.inset)
+        }
     }
 }

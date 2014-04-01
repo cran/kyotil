@@ -156,23 +156,11 @@ mytapply = function (X, INDEX, FUN = NULL, ..., simplify = TRUE)
 }
 
 # category.var is 
-myreshapewide=function(dat, category.var, outcome.var, idvar=NULL){
-    if (is.null(idvar)) {
-        idvar=setdiff(names(dat), c(category.var,outcome.var))
-        # if any of idvar has NA then it is a problem if not treated, here we opt to remove such columns
-        idvar=idvar[sapply(idvar, function (idvar.) all(!is.na(dat[,idvar.])) )]
-    } else {
-        # remove those columns with changing values within an id
-        tmp=apply(aggregate (x=dat[,!names(dat) %in% idvar,drop=FALSE], by=dat[,names(dat) %in% idvar,drop=FALSE], function(y) length(rle(y)$values)==1), 2, all)
-        varying.var=names(tmp)[!tmp]
-        dat=dat[,!names(dat) %in% setdiff(varying.var, c(category.var,outcome.var)),drop=FALSE]
-    }
-    reshape(dat, direction="wide", v.names=outcome.var, timevar=category.var, idvar=idvar )
-}
-
-
-# category.var is 
-myreshapewide=function(dat, category.var, outcome.var, idvar=NULL){
+myreshapewide=function(formula, dat, idvar=NULL){
+    tmp = as.character(formula)
+    category.var=tmp[3]
+    outcome.var=tmp[2]
+    
     if (is.null(idvar)) {
         idvar=setdiff(names(dat), c(category.var,outcome.var))
         # if any of idvar has NA then it is a problem if not treated, here we opt to remove such columns
@@ -238,9 +226,9 @@ keepWarnings <- function(expr) {
 
 # make table that shows both counts/frequency and proportions
 # style 1: count only; 2: count + percentage; 3: percentage only
-table.prop=function (x,y,digit=1,style=2) {
+table.prop=function (x,y,digit=1,style=2,whole.table.add.to.1=FALSE) {
     tbl=table(x,y)
-    prop = apply (tbl, 2, prop.table)
+    if (whole.table.add.to.1) prop = tbl/sum(tbl) else prop = apply (tbl, 2, prop.table)
     if (style==2) {
         res = tbl %+% " (" %+% round(prop*100,1) %+% ")"
     } else if (style==3) {

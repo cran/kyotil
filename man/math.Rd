@@ -3,7 +3,6 @@
 \alias{as.binary}
 \alias{binom.coef}
 \alias{expit}
-\alias{H}
 \alias{logDiffExp}
 \alias{logit}
 \alias{logMeanExp}
@@ -24,8 +23,6 @@ as.binary(n, base = 2, r = FALSE)
 binom.coef(n, m)
 
 expit(x)
-
-H(p)
 
 logDiffExp(logx1, logx2)
 
@@ -62,9 +59,6 @@ Stirling2(n, m)
 %%     ~~Describe \code{x} here~~
 }
 
-  \item{p}{
-either a count vector or a probability vector, but can not be a vector of membership indicator
-}
 
   \item{logx1}{
 %%     ~~Describe \code{logx1} here~~

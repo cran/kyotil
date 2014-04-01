@@ -4,6 +4,7 @@
 #include <float.h> //DBL_EPSILON
 #include <R_ext/Lapack.h>
 #include <R.h>
+#include <Rinternals.h>
 //#include <R_ext/Applic.h>
 //#include <R_ext/BLAS.h>
 //#include <R_ext/RS.h> //R definitions for 'extending' R, registering functions,...
@@ -328,6 +329,23 @@ void dxd_(int* _n, double* d1,double* x,double* d2,double* result){
 			result[j*n + i] = d1[i] * x[j*n + i] * d2[j];
 }
 
+SEXP dxd2(SEXP _d1, SEXP _x, SEXP _d2){
+     int n=length(_d1);
+     SEXP _ans=PROTECT(allocMatrix(REALSXP, n, n));
+     double *d1=REAL(_d1), *d2=REAL(_d2), *x=REAL(_x), *ans=REAL(_ans);
+     
+	int i,j;
+	for(j = 0;j < n;j++){
+		for(i = 0;i < n;i++){
+			*ans = d1[i] * (*x) * d2[j];
+			ans++; x++;
+		}
+	}
+	
+	UNPROTECT(1);
+    return _ans;
+}
+
 void dxd(int* n, double* d1,double* _x,double* d2,double* _y){
 	int i,j;
 	double* x = _x;
@@ -339,6 +357,7 @@ void dxd(int* n, double* d1,double* _x,double* d2,double* _y){
 		}
 	}
 }
+
 // z = c1*x op c2*y, op = {+,-,*,/}<=>{0,1,2,3} 
 void vec_op(double* z,double c1,double* x,int op,double c2,double* y,int n){
 	int i;
