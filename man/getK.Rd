@@ -38,7 +38,7 @@ getK (X,kernel,para=NULL,X2=NULL,C = NULL)
 
 \author{
   Youyi Fong \email{youyifong@gmail.com}\cr
-  Krisztian Sebestyen \email{}\cr
+  Krisztian Sebestyen \email{ksebestyen@gmail.com}\cr
   Shuxin Yin \email{}\cr
 }
 
@@ -77,7 +77,5 @@ K = getK(X,kernel = 'ibs',para = w)
 # IBS kernel for binary data via option 'h' for 'hamming similarity measure'
 X <- as.matrix(expand.grid(0:1,0:1))
 K=getK(X,kernel = 'h')
-
-
 
 }

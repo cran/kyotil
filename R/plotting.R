@@ -90,11 +90,11 @@ mylegend=function(legend, x, lty=NULL,bty="n", ...) {
 # copied from pairs help page
 ## put (absolute) correlations on the upper panels,
 ## with size proportional to the correlations.
-panel.cor <- function(x, y, digits=2, prefix="", cex.cor, method="pearson", ...)
+panel.cor <- function(x, y, digits=2, prefix="", cex.cor,  ...)
 {
     usr <- par("usr"); on.exit(par(usr))
     par(usr = c(0, 1, 0, 1))
-    r <- abs(cor(x, y, method=method, use="pairwise.complete.obs"))
+    r <- abs(cor(x, y, method="pearson", use="pairwise.complete.obs"))
     txt <- format(c(r, 0.123456789), digits=digits)[1]
     txt <- paste(prefix, txt, sep="")
     if(missing(cex.cor)) cex.cor <- 0.8/strwidth(txt)
@@ -110,8 +110,8 @@ panel.hist <- function(x, ...)
     rect(breaks[-nB], 0, breaks[-1], y, col="cyan", ...)
 }
 panel.nothing=function(x, ...) {}
-mypairs=function(dat, method="pearson"){
-    pairs(dat, lower.panel=panel.smooth, upper.panel=panel.cor, method=method, diag.panel=panel.hist)
+mypairs=function(dat, ...){
+    pairs(dat, lower.panel=panel.smooth, upper.panel=panel.cor, diag.panel=panel.hist, ...)
 }
 
 
@@ -181,7 +181,7 @@ myboxplot <- function(object, ...) UseMethod("myboxplot")
 
 # myboxplot.formula and myboxplot.list make a boxplot with data points and do inferences for two group comparions. 
 # cex=.5; ylab=""; xlab=""; main=""; box=FALSE; highlight.list=NULL; at=NULL;pch=1;col=1;
-myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test=c("t","w","f","k"), reshape.formula=NULL, ...){
+myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test="", reshape.formula=NULL, ...){
     
     save.seed <- try(get(".Random.seed", .GlobalEnv), silent=TRUE) 
     if (class(save.seed)=="try-error") {        
@@ -198,16 +198,13 @@ myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box
     }
         
     dat.tmp=model.frame(formula, data)
-    if(is.null(at)){
-        
-        xx=as.factor(dat.tmp[,2])
+    xx=interaction(dat.tmp[,-1])
+    if(is.null(at)){        
         xx=as.numeric(xx)
-        xx=jitter(xx)
-    
     } else{
-        xx=jitter(at[as.factor(dat.tmp[,2])])
-    }    
-    points(xx, dat.tmp[[1]], cex=cex,pch=pch,col=col)
+        xx=at[xx]
+    }        
+    points(jitter(xx), dat.tmp[[1]], cex=cex,pch=pch,col=col)
     
     # restore rng state 
     assign(".Random.seed", save.seed, .GlobalEnv)     
@@ -217,11 +214,14 @@ myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box
     if (length(test)>0) {
         sub=""
         if ("t" %in% test) sub=sub%+%" Student's t "%+%signif(t.test(formula, data)$p.value,2) 
+        print(sub)
         if ("w" %in% test) sub=sub%+%" Wilcoxon "%+%signif(wilcox.test(formula, data)$p.value,2)
+        print(sub)
         if ("k" %in% test) sub=sub%+%" Kruskal "%+%signif(kruskal.test(formula, data)$p.value,2)
         if ("f" %in% test) {
             dat.wide=myreshapewide (reshape.formula, data, idvar = NULL)
-            ftest = friedman.test (as.matrix(dat.wide[,-1]))
+            str(dat.wide)# show this so that we know we are using the right data to do the test
+            ftest = friedman.test (as.matrix(dat.wide[,-(1)]))
             sub=sub%+%" Friedman "%+%signif(ftest$p.value,2)
         }
         title(sub=sub)
@@ -231,11 +231,11 @@ myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box
     
 }
 
-myboxplot.data.frame=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test=c("t","w"), ...){
+myboxplot.data.frame=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test="", ...){
     myboxplot.list(as.list(object), cex=cex, ylab=ylab, xlab=xlab, main=main, box=box, at=at, pch=pch, col=col, test=test, ...)
 }
 
-myboxplot.list=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test=c("t","w"), ...){
+myboxplot.list=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test="", ...){
     
     save.seed <- try(get(".Random.seed", .GlobalEnv), silent=TRUE) 
     if (class(save.seed)=="try-error") {        
@@ -244,7 +244,7 @@ myboxplot.list=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=
     }                        
     set.seed(1)
     
-        if (box) {
+    if (box) {
         boxplot(object, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL,...)
     } else {
         boxplot(object, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL, border="white", ...)
@@ -261,7 +261,7 @@ myboxplot.list=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=
     if (length(test)>0 & length(object)==2) {
         y.1=object[[1]]
         y.2=object[[2]]
-        sub="p-value: "
+        sub=""
         if ("t" %in% test) sub=sub%+%signif(t.test(y.1, y.2)$p.value,2) 
         if (length(test)==2) sub=sub%+%"|"
         if ("w" %in% test) sub=sub%+%signif(wilcox.test(y.1, y.2)$p.value,2)
@@ -304,7 +304,8 @@ corplot.default=function(object,y,...){
 }
 
 # col can be used to highlight some points
-corplot.formula=function(formula,data,main="",method=c("pearson","spearman"),col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,add=FALSE,log="",same.xylim=FALSE,xlim=NULL,ylim=NULL, ...){
+corplot.formula=function(formula,data,main="",method=c("pearson","spearman"),col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FALSE,col.deming=4,add=FALSE,
+    log="",same.xylim=FALSE,xlim=NULL,ylim=NULL, ...){
     vars=dimnames(attr(terms(formula),"factors"))[[1]]
     cor.=NULL
     if (length(method)>0) {
@@ -328,7 +329,15 @@ corplot.formula=function(formula,data,main="",method=c("pearson","spearman"),col
     if(add.diagonal.line) abline(0,1)
     if(add.lm.fit) {
         fit=lm(formula, data)
-        abline(fit,untf=log=="xy")
+        abline(fit,untf=log=="xy", col=col.lm)
+    }
+    if(add.deming.fit) {
+        # this implementation is faster than the one by Therneau, Terry M.
+        fit=MethComp::Deming(model.frame(formula, data)[[2]], model.frame(formula, data)[[1]])
+        abline(fit["Intercept"], fit["Slope"], untf=log=="xy", col=col.deming)   
+        # Therneau, Terry M.'s implementation in a loose R file that is in 3software folder, slower than Deming, but may be more generalized?
+        #fit <- deming(model.frame(formula, data)[[2]], model.frame(formula, data)[[1]], xstd=c(1,0), ystd=c(1,0))
+        #abline(fit, untf=log=="xy", col=col.deming)        
     }
     
     cor.
@@ -354,20 +363,20 @@ abline.pt.slope=function(pt1, slope,...){
     abline(intercept, slope,...)
 }
 #abline.pt.slope(c(1,1), 1)
-mymatplot=function(x, y, make.legend=TRUE, legend=NULL, legend.x=9, lty=1:5, pch=NULL, col=1:6, legend.title=NULL, legend.cex=1, xlab=NULL, ylab="", 
+mymatplot=function(x, y, make.legend=TRUE, legend=NULL, type="b", legend.x=9, lty=1:5, pch=NULL, col=1:6, legend.title=NULL, legend.cex=1, xlab=NULL, ylab="", 
     draw.x.axis=TRUE, bg=NA, legend.inset=0, lwd=1, at=NULL, ...) {
     
     missing.y=FALSE
     if (missing(y)) {
         missing.y=TRUE
         y=x
-        x=1:ncol(y)
+        x=1:nrow(y)
     } 
     
     if (is.null(xlab)) xlab=names(dimnames(y))[1]
     if (is.null(legend.title)) legend.title=names(dimnames(y))[2]
-    matplot(x, y, lty=lty, pch=pch, col=col, xlab=xlab, xaxt=ifelse(missing.y,"n","s"), ylab=ylab, bg=bg, lwd=lwd, ...)
-    if(missing.y & draw.x.axis) axis(side=1, at=at, labels=rownames(y)) 
+    matplot(x, y, lty=lty, pch=pch, col=col, xlab=xlab, xaxt="n", ylab=ylab, bg=bg, lwd=lwd, type=type, ...)
+    if(missing.y & draw.x.axis) axis(side=1, at=x, labels=rownames(y)) else if (draw.x.axis) axis(side=1, at=x, labels=x)
     if (make.legend) {
         if (is.null(legend)) legend=colnames(y)
         if (length(unique(pch))>1) {

@@ -1,3 +1,6 @@
+# matrix functions used to improve performance of krm.score.test
+# originally from Krisztian Sebestyen ksebestyen@gmail.com
+
 .as.double <- function(x, stripAttributes=FALSE){
     if(!stripAttributes){
         if(is.double(x)) return(x)   # no duplicate copy
@@ -24,7 +27,7 @@ DXD <- function(d1,X,d2){
     
 #    .C("dxd",n,d1,X,d2,dxd = X*0.0,DUP = FALSE,NAOK = FALSE)$dxd
     
-    .Call("dxd2", d1, X, d2)
+    .Call("Call_dxd", d1, X, d2)
 }
 
 
@@ -66,7 +69,7 @@ symprod <- function(S,X){
 #    # )     
 #    res$C
     
-    .Call("symprod2", S, X)
+    .Call("Call_symprod", S, X)
 
 }
 
@@ -82,5 +85,55 @@ txSy <- function(x,S,y){
 
 
     #.C('txSy',length(x),.as.double(S),.as.double(x),.as.double(y),double(n),out=double(1))$out
-    .Call('txSy2', x, S, y)
+    .Call('Call_txSy', x, S, y)
 }
+
+# rep matrix along rows in C
+# times is an integer >= 0
+# each is >= 0, an integer or a vector of length nrow(x)
+rrbind <- function(x,times = 1,each = 1){
+	if(!is.matrix(x)) stop("'x' must be a matrix")
+    vec.each <- NULL
+	if(!length(each)) each <- 0
+	each <- as.integer(each)
+	if(length(each) > 1) vec.each <- rep(each,length.out = nrow(x))	
+	if(!length(times)) times <- 0	
+	.Call('Call_rrbind',.as.double(x),as.integer(times),each,vec.each)	
+}
+
+# rep matrix along columns in C
+# times is an integer >= 0
+# each is >= 0, an integer or a vector of length ncol(x)
+rcbind <- function(x,times = 1,each = 1){
+	if(!is.matrix(x)) stop("'x' must be a matrix")
+    vec.each <- NULL
+	if(!length(each)) each <- 0
+	each <- as.integer(each)
+	if(length(each) > 1)vec.each <- rep(each,length.out = ncol(x))	
+	if(!length(times)) times <- 0	
+	.Call('Call_rcbind',.as.double(x),as.integer(times),each,vec.each)	
+}
+
+# x: {m x n} matrix
+# k: integer in {-m , .. , 0 , .. , n} determining position of diagonal 
+# k = 0   <-> x[1,1] = diag[1]
+# k = 1   <-> x[1,2] = diag[1]
+# k = -1  <-> x[2,1] = diag[1]
+# diag: what the 'diagonal' of 'x' should be set to, 0 if NULL
+
+lower.trap <- function(x,pos = 0,diag = NULL){
+	if(!is.matrix(x)) x <- as.matrix(x)
+	if(!is.null(diag))
+		diag <- rep(.as.double(diag),length.out = min(dim(x)))
+	.Call('Call_lower_trap',.as.double(x),diag,as.integer(pos))	
+}
+
+upper.trap <- function(x,pos = 0,diag = NULL){
+	if(!is.matrix(x)) x <- as.matrix(x)
+	if(!is.null(diag))
+		diag <- rep(.as.double(diag),length.out = min(dim(x)))
+	.Call('Call_upper_trap',.as.double(x),diag,as.integer(pos))	
+}
+
+
+

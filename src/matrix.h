@@ -1,7 +1,6 @@
 // Author: Krisztian Sebestyen <ksebestyen@gmail.com>
 
 #include <R.h>
-#include <Rinternals.h>
 
 
 #ifndef MATRIX_UTILS
@@ -34,7 +33,6 @@ void C_singval_dgesvd(int* nrx,int* ncx,double* _x,double* s,int* info);
 
 void dxd_(int* n, double* d1,double* _x,double* d2,double* _y);
 void dxd(int* n, double* d1,double* _x,double* d2,double* _y);
-SEXP dxd2(SEXP _d1, SEXP _x, SEXP _d2);
 
 void lower_trap(int nrx,int ncx,double* x,double* diag,int k,double* L);
 void upper_trap(int nrx,int ncx,double* x,double* diag,int k,double* U);
@@ -43,5 +41,8 @@ void rowperm_ipiv(int* _n,int* ipiv,int* perm);
 void invperm(int* n,int* p,int* ip);
 void row_PL(int* _n, int* rowperm,int* iP,double* dP);
 
-void rcbind(double* x,int nrx,int ncx,int times,int each,double* y);
-void rrbind(double* x,int nrx,int ncx,int times,int each,double* y);
+// void rcbind(double* x,int nrx,int ncx,int times,int each,double* y);
+// void rrbind(double* x,int nrx,int ncx,int times,int each,double* y);
+void rrbind(double* _x,int nrx,int ncx,int times,int each,int* vec_each,double* _y);
+void rcbind(double* _x,int nrx,int ncx,int times,int each,int* vec_each,double* _y);
+

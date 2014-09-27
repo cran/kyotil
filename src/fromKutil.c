@@ -1,4 +1,3 @@
-// Author: Krisztian Sebestyen ksebestyen@gmail.com
 
 //#include "matrix.h"
 #include <float.h> //DBL_EPSILON
@@ -50,7 +49,7 @@ void symprod(int* nrow,int* ncol,double* S,double* X,double* Y)
 	
 }
 
-SEXP symprod2(SEXP _S, SEXP _X){
+SEXP Call_symprod(SEXP _S, SEXP _X){
 
      int nrow=nrows(_X);
      int ncol=ncols(_X);
@@ -85,7 +84,7 @@ void txSy(int* n,double* S,double* x,double* y,double* temp,double* out){
 	*out = F77_CALL(ddot)(n, x, &ione, temp, &ione); // out = x %*% temp
 }
 
-SEXP txSy2(SEXP _x, SEXP _S, SEXP _y){
+SEXP Call_txSy(SEXP _x, SEXP _S, SEXP _y){
      int n=length(_x);
      SEXP _ans=PROTECT(allocVector(REALSXP, 1));
      double *S=REAL(_S), *x=REAL(_x), *y=REAL(_y), *ans=REAL(_ans);

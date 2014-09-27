@@ -171,7 +171,7 @@ myprint.default = function (..., newline=TRUE, digits=3) {
     object <- as.list(substitute(list(...)))[-1]
     x=list(...)
     for (i in 1:length(x)) {
-        if (is(x[[i]],"formula")) {cat(as.character(x[[i]])); next}
+        if (is(x[[i]],"formula")) {cat(as.character(x[[i]]), "; "); next}
         tmpname <- deparse(object[[i]])[1]
         #str(tmpname)
         #str(gsub("\\\\","\\",gsub("\"", "", tmpname)))
@@ -181,7 +181,7 @@ myprint.default = function (..., newline=TRUE, digits=3) {
             for (a in x[[i]]) cat(a)
         } else {
             cat (tmpname %+% " = ")
-            for (a in x[[i]]) cat(a)
+            for (a in x[[i]]) cat(a,"") # by putting "" there, a space is introduced b/c cat prints a sep
             if (i!=length(x)) cat ("; ")
         }
     }

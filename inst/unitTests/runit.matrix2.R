@@ -4,12 +4,7 @@ library("kyotil")
 test.matrix2 <- function() {
 
 tolerance=1e-3
-
-# more stringent tolerance for one system to ensure algorithm accuracy
-if (R.Version()$system %in% c("x86_64, mingw32")) {
-    tolerance=1e-6
-}
- 
+if(file.exists("D:/gDrive/3software/_checkReproducibility")) tolerance=1e-6
 RNGkind("Mersenne-Twister", "Inversion")
 
 d1=1:3

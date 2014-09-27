@@ -175,4 +175,10 @@ Boolean
 binary(5) ###  101
 binary2(5, 4)
 
+
+\dontrun{
+# the formula in myreshapewide can only have one variable in the right hand side
+    myreshapewide(fi~week, dat, c("ptid","stim"))
+}
+
 }

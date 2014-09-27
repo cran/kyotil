@@ -12,7 +12,7 @@ export(binary, binary2, f2c, ftoi, keepWarnings, meanmed, methods4, myaggregate,
     mysystem, mytapply, read.sv, read.tsv, table.prop, unix)
 
 export(abline.pt.slope, abline.pts, butterfly.plot, empty.plot, getMfrow, myforestplot, my.interaction.plot, 
-    myboxplot, myboxplot.formula, myboxplot.list, mylegend, mymatplot, mypairs, mypdf, mypostscript, panel.cor, 
+    myboxplot, myboxplot.formula, myboxplot.list, myboxplot.data.frame, mylegend, mymatplot, mypairs, mypdf, mypostscript, panel.cor, 
     panel.hist, panel.nothing, corplot, corplot.default, corplot.formula)
 
 export(format.int, make.latex.coef.table, mytex, mytex.begin, mytex.end, mywrite, mywrite.csv, roundup)
@@ -27,4 +27,10 @@ export(hosmerlem, quick.t.test, sign.test, tukey.mtest, vector.t.test)
 
 export(getK)
 
+export(pava)
+
 export(.as.double, DXD, symprod, txSy)
+
+# export(rrbind,rcbind,upper.trap,lower.trap)
+
+# export(getKernel,hamming.sim,R_hamming.sim,edist2,ibs2,R_ibs2,R_ibsX,R_ibs)

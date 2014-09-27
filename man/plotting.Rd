@@ -8,6 +8,7 @@
 \alias{my.interaction.plot}
 \alias{myboxplot}
 \alias{myboxplot.formula}
+\alias{myboxplot.data.frame}
 \alias{myboxplot.list}
 \alias{mylegend}
 \alias{mymatplot}
@@ -50,26 +51,31 @@ my.interaction.plot(dat, x.ori = 0, xaxislabels = rep("", 2), cex.axis = 1, add 
 myboxplot(object, ...)
 
 \method{myboxplot}{formula}(formula, data, cex = 0.5, ylab = "", xlab = "", main = "", 
-    box = TRUE, at = NULL, pch = 1, col = 1, test = c("t", "w","f","k"), 
+    box = TRUE, at = NULL, pch = 1, col = 1, test = "", 
     reshape.formula=NULL, ...)
 
+\method{myboxplot}{data.frame}(object, cex = 0.5, ylab = "", xlab = "", main = "", box = TRUE,
+    at = NULL, pch = 1, col = 1, test = "", ...)
+
 \method{myboxplot}{list}(object, cex = 0.5, ylab = "", xlab = "", main = "", box = TRUE,
-    at = NULL, pch = 1, col = 1, test = c("t", "w"), ...)
+    at = NULL, pch = 1, col = 1, test = "", ...)
 
 mylegend(legend, x, lty = NULL, bty = "n", ...)
 
-mymatplot(x, y, make.legend = TRUE, legend = NULL, legend.x = 9, lty = 1:5, pch = NULL, 
-    col = 1:6, legend.title = NULL, legend.cex = 1, xlab = NULL, ylab = "", 
-    draw.x.axis = TRUE, bg = NA, legend.inset=0, lwd=1, at=NULL, ...)
-
-mypairs(dat, method = "pearson")
+mymatplot(x, y, make.legend = TRUE, legend = NULL, type = "b",
+                 legend.x = 9, lty = 1:5, pch = NULL, col = 1:6,
+                 legend.title = NULL, legend.cex = 1, xlab = NULL, ylab
+                 = "", draw.x.axis = TRUE, bg = NA, legend.inset = 0,
+                 lwd = 1, at = NULL, ...)
+                 
+mypairs(dat, ...)
 
 mypdf(...)
 
 mypostscript(file = "temp", mfrow = c(1, 1), mfcol = NULL, width = NULL, height = NULL, 
     ext = "eps", oma = NULL, mar = NULL, main.outer = FALSE, save2file = TRUE, ...)
 
-panel.cor(x, y, digits = 2, prefix = "", cex.cor, method = "pearson", ...)
+panel.cor(x, y, digits = 2, prefix = "", cex.cor, ...)
 
 panel.hist(x, ...)
 
@@ -80,10 +86,11 @@ corplot(object, ...)
 \method{corplot}{default}(object, y, ...)
 
 \method{corplot}{formula}(formula, data, main = "", method = c("pearson", "spearman"), 
-    col = 1, cex = 0.5, add.diagonal.line = TRUE, add.lm.fit=FALSE,add=FALSE,log="", 
-    same.xylim=FALSE, xlim=NULL,ylim=NULL,...)
+col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FALSE,
+    col.deming=4,add=FALSE,log="",same.xylim=FALSE,xlim=NULL,ylim=NULL, ...)
+
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
 
 
@@ -119,6 +126,12 @@ legend inset
   \item{log}{
 }
   \item{add.lm.fit}{
+}
+  \item{add.deming.fit}{
+}
+  \item{col.lm}{
+}
+  \item{col.deming}{
 }
   \item{reshape.formula}{
 a formula object.
@@ -197,7 +210,7 @@ a formula object.
 %%     ~~Describe \code{col} here~~
 }
   \item{test}{
-%%     ~~Describe \code{test} here~~
+string. For example, "t","w","f","k", "tw"
 }
 
 
@@ -212,6 +225,10 @@ a formula object.
 }
   \item{bty}{
 %%     ~~Describe \code{bty} here~~
+}
+
+  \item{type}{
+%%     ~~Describe \code{type} here~~
 }
 
   \item{make.legend}{
@@ -294,12 +311,14 @@ a formula object.
 }
 
 \details{
-myboxplot shows data points along with boxes. The data poins are jittered and the pattern of jittering is made reproducible in repeated calls.
+myboxplot shows data points along with boxes. The data poins are jittered and the pattern of jittering is made reproducible in repeated calls. The test can only take one type of test currently.
 
 myforestplot is modified from code from Allan deCamp/SCHARP.
 dat should have three columns. first column should be point estimate, second and third lci and uci, fourth p value. 
 col.1 is the color used for CIs that do not include null, col.2 is used for CIs that do include null.
 If order is TRUE, the rows are ordered by the first column of dat. descreasing can be used to change the behavior of order.
+
+
 }
 \examples{
 mypdf(mfrow=c(1,2))

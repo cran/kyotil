@@ -1,16 +1,12 @@
 library("RUnit")
 library("kyotil")
 
+
 test.kernel <- function() {
 
-tolerance=1e-3
-
-# more stringent tolerance for one system to ensure algorithm accuracy
-if (R.Version()$system %in% c("x86_64, mingw32")) {
-    tolerance=1e-6
-}
- 
 RNGkind("Mersenne-Twister", "Inversion")
+tolerance=1e-3
+if(file.exists("C:/_checkReproducibility")) tolerance=1e-6
 
 
 set.seed(1)
@@ -39,6 +35,10 @@ checkTrue(all(K==t(K1)))
 
 
 # IBS kernel for ternary data 
+X <- as.matrix(expand.grid(0:3,0:2))
+checkException(getK(expand.grid(0:3,0:2),kernel = 'ibs'))
+checkException(getK(as.matrix(expand.grid(0:3,0:2)),kernel = 'ibs'))
+
 X <- as.matrix(expand.grid(0:2,0:2))
 K = getK(X,kernel = 'ibs')
 checkEqualsNumeric(mean(K), 0.5555556, tol=tolerance)
@@ -47,14 +47,17 @@ checkEqualsNumeric(mean(K), 0.5555556, tol=tolerance)
 set.seed(2)
 w = runif(ncol(X))
 K = getK(X,kernel = 'ibs',para = w) 
-checkEqualsNumeric(mean(K^3),  2.549042, tol=tolerance)
-
+checkEqualsNumeric(mean(K^3),  0.3186303, tol=tolerance)
+checkException(getK(X,kernel = 'ibs',para = -1))
 
 # IBS kernel for binary data via option 'h' for 'hamming similarity measure'
 X <- as.matrix(expand.grid(0:1,0:1))
 K=getK(X,kernel = 'h')
-checkEqualsNumeric(mean(K^3),  2.5, tol=tolerance)
+checkEqualsNumeric(mean(K^3),.3125, tol=tolerance)
+checkException(getK(X,kernel = 'h',para = -1))
 
+# add weight
+checkEqualsNumeric(mean(getK(X,kernel = 'h',para = w[]) ^3), 0.3762837, tol=tolerance)
 
 
 n = 200

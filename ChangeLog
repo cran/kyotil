@@ -1,2 +1,18 @@
-2013-12-5  create package
+2013-12-5 Youyi Fong and Krisz Sebestyen
+	* create package
 
+2014-4-1 Youyi Fong
+	* change .C to .Call
+	
+	
+2014-7-1 Krisztian Sebestyen
+    * fixed the weighted hamming and ibs kernel code both in R and C (typo in the paper) 
+	* separate .Call from native C code in kernels.c/h and matrix.c/h so that C code may be included in other packages without having to include
+	Rinternals.h library (i.e. SEXP stuff)
+	  - created files Call_kernels.c and Call_matrix.c
+	  - renamed all C functions called via .Call to 'Call_funcname'
+	* updated runit.kernel.R since ibs() has changed
+	* added rrbind(),rcbind(),upper.trap(),lower.trap() to matrix2.R
+	* with .Call I can pass a NULL pointer to C hence I can use more natural 'NULL' logic in C in many functions
+	
+	

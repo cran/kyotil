@@ -9,6 +9,7 @@
 //#include <R_ext/BLAS.h>
 //#include <R_ext/RS.h> //R definitions for 'extending' R, registering functions,...
 
+
 #define PRINTF Rprintf
 #define	MAX(A,B)	((A) > (B) ? (A) : (B))
 #define	MIN(A,B)	((A) < (B) ? (A) : (B))
@@ -111,7 +112,7 @@ void invperm(int* n,int* p,int* ip){ for(int i = 0;i < *n;i++)ip[p[i]-1] = i + 1
 // input:
 // x_{nrx x ncx} matrix in column-major order
 // k the position of the 'diagonal' of the trapezoid 
-// diag: values the diagonal should be set to, max length min(nrx,ncx). if NULL, diagonal is set to 0.
+// diag: values the diagonal should be set to, max length min(nrx,ncx). if NULL, diagonal = diag(x).
 // output:
 // L_{nrx x ncx} in column-major order
 
@@ -128,17 +129,17 @@ void lower_trap(int nrx,int ncx,double* x,double* diag,int k,double* L){
 	k = -k;//k > 0 <=> the diagonal lines move down
 	
 	// diagonal
-	if(diag){
-		d = k;
-		int dx = 0;
-		for(j = 0;j < ncx;j++){
-			i = j + d;
-			if((i < 0) || (nrx <= i)) continue;
-			L[i + j * nrx] = diag[dx++];//column major order
-			// Rprintf("L(%i,%i)=%f d=%f\n",i,j,L[i + j * nrx],diag);
-		}
-		// Rprintf("length of diagonal %i\n",dx);
+	d = k;
+	int dx = 0;
+	for(j = 0;j < ncx;j++){
+		i = j + d;
+		if((i < 0) || (nrx <= i)) continue;
+		L[i + j * nrx] = (diag == NULL) ? x[dx++] : diag[dx++];//column major order
+		
+		// Rprintf("L(%i,%i)=%f d=%f\n",i,j,L[i + j * nrx],diag);
 	}
+	// Rprintf("length of diagonal %i\n",dx);
+	
 	for(d = k + 1;d < K;d++){ // length of 'current' diagonal
 		for(j = 0;j < ncx;j++){ // move along diagonal 
 			i = j + d;// 'y-intercept' of diagonal
@@ -151,7 +152,7 @@ void lower_trap(int nrx,int ncx,double* x,double* diag,int k,double* L){
 // input:
 // x_{nrx x ncx} matrix in column-major order
 // k the position of the 'diagonal' of the trapezoid 
-// diag: values the diagonal should be set to, max length min(nrx,ncx). if NULL, diagonal is set to 0.
+// diag: values the diagonal should be set to, max length min(nrx,ncx). if NULL, diagonal  = diag(x)
 // output:
 // U_{nrx x ncx} in column-major order
 
@@ -165,15 +166,13 @@ void upper_trap(int nrx,int ncx,double* x,double* diag,int k,double* U){
 	int K = MAX(nrx,ncx);
 	memset(U,0,(size_t)(nrx * ncx * sizeof(double)));
 
-	// diagonal
-	if(diag){
-		d = k;
-		int dx = 0;
-		for(j = 0;j < ncx;j++){
-			i = j - d;
-			if((i < 0) || (nrx <= i)) continue;
-			U[i + j * nrx] = diag[dx++];//column major order
-		}
+	// set diagonal
+	d = k;
+	int dx = 0;
+	for(j = 0;j < ncx;j++){
+		i = j - d;
+		if((i < 0) || (nrx <= i)) continue;
+		U[i + j * nrx] = (diag == NULL) ? x[dx++] : diag[dx++];//column major order
 	}
 	for(d = k + 1;d < K;d++){ // length of 'current' diagonal
 		for(j = 0;j < ncx;j++){ // move along diagonal 
@@ -184,9 +183,7 @@ void upper_trap(int nrx,int ncx,double* x,double* diag,int k,double* U){
 	}
 }
 
-// R interface
-void trap_upper(int* nrx,int* ncx,double* x,double* diag,int* k,double* U){upper_trap(*nrx,*ncx,x,diag,*k,U);}
-void trap_lower(int* nrx,int* ncx,double* x,double* diag,int* k,double* L){lower_trap(*nrx,*ncx,x,diag,*k,L);}
+
 
 /////////////////////////// rep-rbind() and rep-cbind() //////////////////////////
 
@@ -209,66 +206,95 @@ void trap_lower(int* nrx,int* ncx,double* x,double* diag,int* k,double* L){lower
 // 2->4,5
 // i -> i*each,i*each+1
 
-// y = rep-rbind(x) where 'x' and 'y' are in column-major order
-void rrbind(double* x,int nrx,int ncx,int times,int each,double* y){
+// x = _{nrx,ncx} in column-major order
+// y = rep-cbind(x)
+// exactly one of times,each > 0, the other is 0
+// times is integer >= 0
+// each is integer >= 0
+// each takes precedence
+// vec_each is length nrx, takes precedence over each 
+// y = rep-rbind(x) 
+void rrbind(double* _x,int nrx,int ncx,int times,int _each,int* vec_each,double* _y){
 
-	if(times){
-		double* _x = x;
-		double* _y = y;
+	double* x = _x;
+	double* y = _y;
+	
+	if((_each > 0) || vec_each){
+		for(int j = 0;j < ncx;j++){
+			for(int i = 0;i < nrx;i++){
+				int each = vec_each ? vec_each[i] : _each;
+				int ix = CX(i,j,nrx);
+				for(int k = 0;k < each;k++){
+					*y = x[ix]; // with nesting order i(j(k)) we fill out y in column order automatically 
+					y++;
+				}
+			}
+		}
+		return;
+	}
+	
+	if(times > 0){
 		for(int j = 0;j < ncx;j++){
 			for(int k = 0;k < times;k++){
-				memcpy(_y,_x,nrx*sizeof(double));
-				_y+=nrx;
+				memcpy(y,x,nrx*sizeof(double));
+				y+=nrx;
 			}
-			_x += nrx;
-		}
-		return;	
-	}else{
-		double* _y = y;
-		for(int i = 0;i < (nrx * ncx);i++){
-			for(int k = 0;k < each;k++){
-				*_y = x[i];
-				_y++;
-			}
+			x += nrx;
 		}
 	}
+	return;		
 }
-void R_reprbind(double* x,int* nrx,int* ncx,int* times,int* each,double* y){
-	rrbind(x,*nrx,*ncx,*times,*each,y);
-}
+
 // example for 'x' above 
 // c(ccbind(x,times = 2))
 // 11 21 31 12 22 32 11 21 31 12 22 32
 // c(ccbind(x,each = 2))
 // 11 21 31 11 21 31 12 22 32 12 22 32
 
-// y = rep-cbind(x) where 'x' and 'y' are in column-major order
-void rcbind(double* x,int nrx,int ncx,int times,int each,double* y){
+// x = _{nrx,ncx} in column-major order
+// y = rep-cbind(x)
+// exactly one of times,each > 0, the other is 0
+// times is integer >= 0
+// each is integer >= 0
+// each takes precedence
+// vec_each is length ncx takes precedence over each
+void rcbind(double* _x,int nrx,int ncx,int times,int each,int* vec_each,double* _y){
 
-	if(times){
-		int size_x = nrx*ncx;
-		double* _y = y;
-		for(int k = 0;k < times;k++){
-			memcpy(_y,x,size_x*sizeof(double));
-			_y+=size_x;
+	double* x = _x;
+	double* y = _y;
+		
+	if(vec_each){
+		for(int j = 0;j < ncx;j++){
+			int each_j = vec_each[j];
+			for(int i = 0;i < nrx;i++){
+				for(int k = 0;k < each_j;k++){
+					*y = x[CX(i,j,nrx)];
+					y++;
+				}
+			}
 		}
-		return;	
-	}else{
-		double* _x = x;
-		double* _y = y;
+		return;
+	}else if(each > 0){
 		for(int j = 0;j < ncx;j++){
 			for(int k = 0;k < each;k++){
-				memcpy(_y,_x,nrx*sizeof(double));
-				_y+=nrx;
+				memcpy(y,x,nrx*sizeof(double));
+				y+=nrx;
 			}
-			_x += nrx;
+			x += nrx;
 		}
-		return;	
+		return;
 	}
+	if(times > 0){
+		int size_x = nrx * ncx;
+		for(int k = 0;k < times;k++){
+			memcpy(y,x,size_x*sizeof(double));
+			y+=size_x;
+		}
+	}
+	return;
 }
-void R_repcbind(double* x,int* nrx,int* ncx,int* times,int* each,double* y){
-	rcbind(x,*nrx,*ncx,*times,*each,y);
-}
+
+
 ///////////////////////////////////////////////////////////////////////////////////
 
 // functions crossprod() and tcrossprod() are directly from R
@@ -321,19 +347,18 @@ void tcrossprod(double *x, int* nrx, int* ncx,
 
 // matrix multiplication D %*% X %*% D2 for D,D2 diagonal matrices and X square matrix in column-major order
 // x,y are square matrices in column order, d1 and d2 represent the diagonals of diagonal matrices
-void dxd_(int* _n, double* d1,double* x,double* d2,double* result){
+void dxd_(int* _n, double* d1,double* x,double* d2,double* y){
 	int i,j;
 	int n = *_n;
 	for(j = 0;j < n;j++)
 		for(i = 0;i < n;i++)
-			result[j*n + i] = d1[i] * x[j*n + i] * d2[j];
+			y[j*n + i] = d1[i] * x[j*n + i] * d2[j];
 }
 
-SEXP dxd2(SEXP _d1, SEXP _x, SEXP _d2){
-     int n=length(_d1);
-     SEXP _ans=PROTECT(allocMatrix(REALSXP, n, n));
-     double *d1=REAL(_d1), *d2=REAL(_d2), *x=REAL(_x), *ans=REAL(_ans);
-     
+void dxd(int* _n, double* d1,double* x,double* d2,double* _ans){
+	int n = *_n;
+	double* ans = _ans;
+
 	int i,j;
 	for(j = 0;j < n;j++){
 		for(i = 0;i < n;i++){
@@ -341,22 +366,9 @@ SEXP dxd2(SEXP _d1, SEXP _x, SEXP _d2){
 			ans++; x++;
 		}
 	}
-	
-	UNPROTECT(1);
-    return _ans;
 }
 
-void dxd(int* n, double* d1,double* _x,double* d2,double* _y){
-	int i,j;
-	double* x = _x;
-	double* y = _y;
-	for(j = 0;j < *n;j++){
-		for(i = 0;i < *n;i++){
-			*y = d1[i] * (*x) * d2[j];
-			y++;x++;
-		}
-	}
-}
+
 
 // z = c1*x op c2*y, op = {+,-,*,/}<=>{0,1,2,3} 
 void vec_op(double* z,double c1,double* x,int op,double c2,double* y,int n){
@@ -510,16 +522,15 @@ int luinv0(int n,int* ipiv,double* work,double* x){
 }
 
 // invert matrix by LU-factorization
-void R_inv(int* _n,double* x,double* xinv,int* _info){
+void R_inv(int* _n,double* x,double* xinv,int* info){
     int n = *_n;
-    int info = *_info;
     int* ipiv = (int*) calloc(n, sizeof(int));if(!ipiv)return;
     double* work = (double*) calloc(n, sizeof(double));
 	if(!work){free(ipiv);return;}
     memcpy(xinv,x,n * n * sizeof(double)); //dgetrf changes 'x'
-    F77_CALL(dgetrf)(&n,&n,xinv,&n,ipiv,&info); 
-    if(!info)
-		F77_CALL(dgetri)(&n,xinv,&n,ipiv,work,&n,&info);  
+    F77_CALL(dgetrf)(&n,&n,xinv,&n,ipiv,info); 
+    if(!*info)
+		F77_CALL(dgetri)(&n,xinv,&n,ipiv,work,&n,info);  
 	free(ipiv);
 	free(work);
 }

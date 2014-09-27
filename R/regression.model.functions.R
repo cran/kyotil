@@ -1,6 +1,6 @@
-getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FALSE){
+getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FALSE, ...){
     
-    sapply(fits, simplify="array", function (fit) {
+    sapply(fits, function (fit) {
         if (random) {
             tmp = getVarComponent (fit)
             if (class(fit)=="mer" & type!=1) {
@@ -8,26 +8,31 @@ getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FAL
                 type=1
             }
         } else {
-            tmp = getFixedEf (fit)
+            tmp = getFixedEf (fit, ...)
         }
         
         if (type==1)
             # this is the best way to format: first round, then nsmall
-            format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) 
+            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) 
         else if (type==2)
-            format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
-                format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE) %+% ")"
+            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
+                format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE) %+% ")" %+%
+                ifelse (tmp[,"p-val"]<0.05,"*","")
         else if (type==3)
-            format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
+            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
                 format(round(tmp[,3,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% ", " %+% 
                     format(round(tmp[,4,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% ")" 
         else if (type==4)
             # a space is inserted between est and se, they could be post-processed in swp
-            format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " " %+% 
+            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " " %+% 
                 format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE)
         else 
             stop ("getFormattedSummaries(). type not supported: "%+%type)
+
+        names(out)=rownames(tmp)
+        out
     })
+    
     
 }
 
@@ -91,7 +96,9 @@ getFixedEf.gam = function (object, ...) {
 }
 
 getFixedEf.lm = function (object, ...) {
-    summary(object)$coef
+    out=summary(object)$coef
+    colnames(out)[4]="p-val"
+    out
 }
 
 getFixedEf.gee = function (object, ...) {
@@ -181,9 +188,23 @@ getVarComponent.hyperpar.inla = function (object, transformation=NULL, ...) {
 
 
 
-getFixedEf.coxph=function (object, ...){
+getFixedEf.coxph=function (object, exp=FALSE, ...){
     sum.fit<-summary(object)
-    sum.fit$coef[,c(1,3)]
+    if (!exp) {
+        cbind(HR=sum.fit$coef[,1], 
+            "se"=sum.fit$coef[,3],
+            "95% LL"=(sum.fit$coef[,1]-qnorm(0.975)*sum.fit$coef[,3]), 
+            "95% UL"=(sum.fit$coef[,1]+qnorm(0.975)*sum.fit$coef[,3]), 
+            "p-val"=sum.fit$coef[,5]
+        )
+    } else {
+        cbind(HR=sum.fit$coef[,2], 
+            "se"=sum.fit$coef[,3],
+            "95% LL"=exp(sum.fit$coef[,1]-qnorm(0.975)*sum.fit$coef[,3]), 
+            "95% UL"=exp(sum.fit$coef[,1]+qnorm(0.975)*sum.fit$coef[,3]), 
+            "p-val"=sum.fit$coef[,5]
+        )
+    }
 #    round(sqrt(diag(attr(object$var,"phases")$phase1)),3)
 #    round(sqrt(diag(attr(object$var,"phases")$phase2)),3)    
 }

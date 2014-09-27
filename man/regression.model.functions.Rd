@@ -32,13 +32,13 @@ getFormattedSummary prints a table of regression coefficient estimates and stand
 }
 \usage{
 
-getFormattedSummary(fits, type = 1, est.digits = 2, se.digits = 2, random = FALSE)
+getFormattedSummary(fits, type = 1, est.digits = 2, se.digits = 2, random = FALSE, ...)
 
 getVarComponent(object, ...)
 
 getFixedEf(object, ...)
 
-\method{getFixedEf}{coxph}(object, ...)
+\method{getFixedEf}{coxph}(object, exp=FALSE, ...)
 
 \method{getFixedEf}{gam}(object, ...)
 

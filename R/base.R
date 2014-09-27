@@ -167,7 +167,9 @@ myreshapewide=function(formula, dat, idvar=NULL){
         idvar=idvar[sapply(idvar, function (idvar.) all(!is.na(dat[,idvar.])) )]
     } else {
         # remove those columns with changing values within an id
-        tmp=apply(aggregate (x=dat[,!names(dat) %in% idvar,drop=FALSE], by=dat[,names(dat) %in% idvar,drop=FALSE], function(y) length(rle(y)$values)==1), 2, all)
+        # need [,-(1:length(idvar)),drop=FALSE] because the first columns are idvar
+        tmp=apply(aggregate (x=dat[,!names(dat) %in% idvar,drop=FALSE], by=dat[,names(dat) %in% idvar,drop=FALSE], function(y) length(rle(y)$values)==1)[,-(1:length(idvar)),drop=FALSE], 
+            2, all)
         varying.var=names(tmp)[!tmp]
         dat=dat[,!names(dat) %in% setdiff(varying.var, c(category.var,outcome.var)),drop=FALSE]
     }
@@ -230,9 +232,9 @@ table.prop=function (x,y,digit=1,style=2,whole.table.add.to.1=FALSE) {
     tbl=table(x,y)
     if (whole.table.add.to.1) prop = tbl/sum(tbl) else prop = apply (tbl, 2, prop.table)
     if (style==2) {
-        res = tbl %+% " (" %+% round(prop*100,1) %+% ")"
+        res = tbl %+% " (" %+% round(prop*100,digit) %+% ")"
     } else if (style==3) {
-        res = round(prop*100,digit)
+        res = prop*100 # no need to do formating here
     } else res=tbl
     res=matrix(res, nrow=2)    
     dimnames(res)=dimnames(tbl)
