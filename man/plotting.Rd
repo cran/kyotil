@@ -89,6 +89,8 @@ corplot(object, ...)
 col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FALSE,
     col.deming=4,add=FALSE,log="",same.xylim=FALSE,xlim=NULL,ylim=NULL, ...)
 
+
+
 }
 
 \arguments{
@@ -318,11 +320,19 @@ dat should have three columns. first column should be point estimate, second and
 col.1 is the color used for CIs that do not include null, col.2 is used for CIs that do include null.
 If order is TRUE, the rows are ordered by the first column of dat. descreasing can be used to change the behavior of order.
 
-
+corplot.formula uses MethComp::Deming by Bendix Carstensen to fit Deming regression.
 }
+
 \examples{
 mypdf(mfrow=c(1,2))
     plot(1:10)
     plot(1:10)
 dev.off()
+
+set.seed(1)
+x=1:50+rnorm(50,0,4)
+y=1:50+rnorm(50,0,4)
+dat=data.frame(x, y)
+corplot(y~x,dat,add.lm.fit=TRUE,add.deming.fit=TRUE,col.lm="red",col.deming="blue")
+
 }

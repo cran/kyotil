@@ -1,9 +1,10 @@
 roundup=function (value, digits) {
     format(round(value, digits), nsmall=digits, scientific=FALSE) 
 }
-format.int=function (x, digits, fill="0", ...) {
+formatInt=function (x, digits, fill="0", ...) {
     formatC(x, format="d", flag=fill, width=digits) 
 }
+formatDouble=roundup
 
 # don't have to transpose x
 mywrite=function(x, ...){
@@ -40,38 +41,91 @@ mytex.end=function(file.name){
     if (!endsWith(file.name,".tex")) file.name=file.name%+%".tex"
     cat ("\n\\end{document}", file=file.name, append=TRUE)
 }
-mytex=function(dat=NULL, file.name="temp", digits=NULL, display=NULL, align="r", append=FALSE, preamble="", include.rownames=TRUE, include.dup.rownames=FALSE, 
-    floating=FALSE, lines=TRUE, ...) {
-    
+
+# adapted from print.xtable.R
+sanitize.text <- function(str) {
+    result <- str
+    result <- gsub("\\\\", "SANITIZE.BACKSLASH", result)
+    result <- gsub("$", "\\$", result, fixed = TRUE)
+    result <- gsub(">", "$>$", result, fixed = TRUE)
+    result <- gsub("<", "$<$", result, fixed = TRUE)
+    result <- gsub("|", "$|$", result, fixed = TRUE)
+    result <- gsub("{", "\\{", result, fixed = TRUE)
+    result <- gsub("}", "\\}", result, fixed = TRUE)
+    result <- gsub("%", "\\%", result, fixed = TRUE)
+    result <- gsub("&", "\\&", result, fixed = TRUE)
+    result <- gsub("_", "\\_", result, fixed = TRUE)
+    result <- gsub("#", "\\#", result, fixed = TRUE)
+    result <- gsub("^", "\\verb|^|", result, fixed = TRUE)
+    result <- gsub("~", "$\\sim$", result, fixed = TRUE) # this is changed by Y.F. 
+    result <- gsub("SANITIZE.BACKSLASH", "$\\backslash$",
+                   result, fixed = TRUE)
+    return(result)
+}
+sanitize.numbers <- function(x) {
+    result <- x
+#    if ( math.style.negative ) {
+        ## Jake Bowers <jwbowers@illinois.edu> in e-mail
+        ## from 2008-08-20 suggested disabling this feature to avoid
+        ## problems with LaTeX's dcolumn package.
+        ## by Florian Wickelmaier <florian.wickelmaier@uni-tuebingen.de>
+        ## in e-mail from 2008-10-03 requested the ability to use the
+        ## old behavior.
+        for(i in 1:length(x)) {
+            result[i] <- gsub("-", "$-$", result[i], fixed = TRUE)
+#        }
+    }
+    return(result)
+}
+
+        
+mytex=function(dat=NULL, file.name="temp", 
+    digits=NULL, display=NULL, align="r", 
+    include.rownames=TRUE, include.dup.rownames=FALSE, include.colnames=TRUE,
+    col.headers=NULL,
+    comment=FALSE, floating=FALSE, 
+    lines=TRUE, hline.after=NULL, 
+    add.to.row=NULL, 
+    sanitize.text.function = NULL, #function(x) x,
+    append=FALSE, preamble="", stand.alone=TRUE,
+...) {
+        
 #    if(exists("tablePath") && file.exists(tablePath)) {
 #        file.name=tablePath%+%"/"%+%file.name
 #    } else {
 #        file.name=file.name
 #    }    
-
-    if (include.dup.rownames) include.rownames=F
     
-    if (!endsWith(file.name,".tex")) file.name=file.name%+%".tex"
+    if (endsWith(file.name,".tex")) file.name=substr(file.name, 1, nchar(file.name)-4)
+    if (stand.alone) {
+        # create two files, one stand alone and one not, to facilitate debugging latex code
+        file.name.2=file.name%+%".tex"
+        file.name=file.name%+%"_stdaln"
+    }
+    file.name=file.name%+%".tex"
+    
+    if (!is.null(col.headers)) {
+        add.to.row=list(list(0), col.headers) # insert at the beginning 
+        include.colnames=F # col names are part of add.to.row
+    }
+    
+    if (include.dup.rownames) include.rownames=F
     
     if(is.data.frame(dat)) dat=list(dat)
     if (!is.list(dat)) dat=list(dat)
-    if (!append) {
+    
+    if (!append) { #start a new file
+        #document tag, preamble etc
         mytex.begin(file.name, preamble)
+        if (stand.alone) {
+            #empty file
+            cat ("", file=file.name.2, append=FALSE)
+        }
     } 
-#    else {
-#        fil1 = file(file.name, "r")
-#        # copy content to a new file until hit \end{document}, assuming that is the last line
-#        n=as.numeric(strsplit(system ("wc -l "%+%file.name, intern=TRUE), " ")[[1]][1])
-#        print(n)
-#        tmp = readLines(fil1, n-1)
-#        close(fil1)
-#        cat (concatList(tmp, "\n"), file=file.name, append=FALSE)
-#    }
     
     if (length(dat)>0) {
         names(dat)=gsub("_"," ",names(dat))
         for (i in 1:length(dat)) {
-            cat ("\\leavevmode\\newline\\leavevmode\\newline\n", file=file.name, append=TRUE)
             dat1 = dat[[i]]        
             .ncol=ncol(dat1)
             if (is.null(.ncol)) {
@@ -79,37 +133,64 @@ mytex=function(dat=NULL, file.name="temp", digits=NULL, display=NULL, align="r",
                 else .ncol=nrow(dat1)
             }
             
+            if (include.colnames) {
+                add.to.row=list(list(0), "\\hline\n"%+%
+                    concatList("& \\multicolumn{1}{c}{"%+%sanitize.text(colnames(dat1))%+%"} ") %+% "\\\\ \n"%+% # center aligned column titles
+                    "\\hline\n") # insert at the beginning of table, "\n" is added so that there is no need to keep it in col.title
+                include.colnames=FALSE # col names are part of add.to.row
+                if (is.null(hline.after)) hline.after=c(nrow(dat1)) # cannot use default due to add.to.row
+            }
+    
+            if (!is.null(col.headers)) {
+                hline.after=c(nrow(dat1)) # cannot use default due to add.to.row
+            }
+            
             if (!is.matrix(dat1) & is.character(dat1)) {
                 cat (dat1%+%"\n\n\n", file=file.name, append=TRUE)
+                if(stand.alone) cat (dat1%+%"\n\n\n", file=file.name.2, append=TRUE)
             } else {        
                 if (is.vector(dat1)) dat1=as.matrix(dat1)
                 
-                cat (names(dat)[i]%+%"\n\n", file=file.name, append=TRUE)
+                if (stand.alone & length(dat)>1) cat (names(dat)[i]%+%"\n\n", file=file.name, append=TRUE)
                 if (!is.null(dat1)) {
                     if (!is.null(attr(dat1,"caption"))) caption=attr(dat1,"caption") else caption=NULL
                     
                     if (include.dup.rownames & !is.null(rownames(dat1))) {
                         tmp=data.frame(row = rownames(dat1),data.frame(dat1))
-                        colnames(tmp)[-1]=colnames(dat1)
+                        if (!is.null(colnames(dat1))) colnames(tmp)[-1]=colnames(dat1)
                         dat1=tmp
                         .ncol=.ncol+1
                     }
-                    if (lines) hline.after=c(-1,0,nrow(dat1)) else hline.after=c()
+                    if (is.null(hline.after)) {
+                        if (lines) hline.after=c(-1,0,nrow(dat1)) else hline.after=c(nrow(dat1))
+                    }
                     if (length(align)==1) align=rep(align,.ncol+1)
+                    if (include.dup.rownames) align[2]="l" else align[1]="l" # col names
                     print(..., xtable::xtable(dat1, 
-                        digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
-                        display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
-                        align=align, caption=caption, ...), 
-                        hline.after=hline.after,
-                            type = "latex", file = file.name, append = TRUE, floating = floating, include.rownames=include.rownames )
+                            digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
+                            display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
+                            align=align, caption=caption, ...), 
+                        hline.after=hline.after, type = "latex", file = file.name, append = TRUE, floating = floating, 
+                        include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
+                        add.to.row=add.to.row, sanitize.text.functio =sanitize.text.function )
+                    if (stand.alone) print(..., xtable::xtable(dat1, 
+                            digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
+                            display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
+                            align=align, caption=caption, ...), 
+                        hline.after=hline.after, type = "latex", file = file.name.2, append = TRUE, floating = floating, 
+                        include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
+                        add.to.row=add.to.row, sanitize.text.functio =sanitize.text.function )
                 }
                 cat ("\n", file=file.name, append=TRUE)
+                if(stand.alone) cat ("\n", file=file.name.2, append=TRUE)
             }
         
         }
     }
     
-    if(!append) mytex.end(file.name)
+    if(!append) {
+        mytex.end(file.name)
+    }
     cat ("Saving data to "%+%getwd()%+%"/"%+%file.name%+%"\n")
 }
 #x=matrix(0,2,2)

@@ -38,7 +38,7 @@ getVarComponent(object, ...)
 
 getFixedEf(object, ...)
 
-\method{getFixedEf}{coxph}(object, exp=FALSE, ...)
+\method{getFixedEf}{coxph}(object, exp=FALSE,robust=FALSE, ...)
 
 \method{getFixedEf}{gam}(object, ...)
 
@@ -90,6 +90,8 @@ interaction.table(fit, v1, v2, v1.type = "continuous", v2.type = "continuous",
 
   \item{fit}{
 %%     ~~Describe \code{fit} here~~
+}
+  \item{robust}{Boolean, whether to return robust variance estimate
 }
 
 

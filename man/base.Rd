@@ -1,4 +1,5 @@
 \name{base.functions}
+\alias{cbind.uneven}
 \alias{binary}
 \alias{binary2}
 \alias{f2c}
@@ -20,6 +21,7 @@
 Some Base Functions
 }
 \description{
+cbind.uneven binds together a list of matrixes/dataframes of different lengths, rows are matched by names
 binary returns binary representation of an integer. 
 binary2 returns binary representatin of an integer with leading 0, the length of string is n.
 mysystem can call any exe file that is in the PATH
@@ -30,6 +32,7 @@ f2c convert temperature from f to c/
 }
 \usage{
 
+cbind.uneven(li)
 binary(i)
 
 binary2(i, n)
@@ -67,6 +70,7 @@ unix()
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 
+  \item{li}{a list}  
   \item{i}{
 %%     ~~Describe \code{i} here~~
 }

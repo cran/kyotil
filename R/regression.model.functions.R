@@ -1,6 +1,6 @@
 getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FALSE, ...){
     
-    sapply(fits, function (fit) {
+    res = sapply(fits, simplify="array", function (fit) {
         if (random) {
             tmp = getVarComponent (fit)
             if (class(fit)=="mer" & type!=1) {
@@ -17,7 +17,7 @@ getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FAL
         else if (type==2)
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
                 format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE) %+% ")" %+%
-                ifelse (tmp[,"p-val"]<0.05,"*","")
+                ifelse (tmp[,"p-val"]<0.05,ifelse (tmp[,"p-val"]<0.01,"**","*"),"")
         else if (type==3)
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
                 format(round(tmp[,3,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% ", " %+% 
@@ -26,6 +26,9 @@ getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FAL
             # a space is inserted between est and se, they could be post-processed in swp
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " " %+% 
                 format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE)
+        else if (type==5)
+            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+%
+                ifelse (tmp[,"p-val"]<0.05,ifelse (tmp[,"p-val"]<0.01,"**","*"),"")
         else 
             stop ("getFormattedSummaries(). type not supported: "%+%type)
 
@@ -33,7 +36,12 @@ getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FAL
         out
     })
     
-    
+    # if there is only one coefficient, we need this
+    if (!is.matrix(res)) {
+        res=matrix(res, nrow=1)
+        rownames(res)=names(fits)
+    }
+    res
 }
 
 
@@ -188,21 +196,22 @@ getVarComponent.hyperpar.inla = function (object, transformation=NULL, ...) {
 
 
 
-getFixedEf.coxph=function (object, exp=FALSE, ...){
+getFixedEf.coxph=function (object, exp=FALSE, robust=FALSE, ...){
     sum.fit<-summary(object)
+    se.idx=ifelse(!robust,"se(coef)","robust se")
     if (!exp) {
         cbind(HR=sum.fit$coef[,1], 
-            "se"=sum.fit$coef[,3],
-            "95% LL"=(sum.fit$coef[,1]-qnorm(0.975)*sum.fit$coef[,3]), 
-            "95% UL"=(sum.fit$coef[,1]+qnorm(0.975)*sum.fit$coef[,3]), 
-            "p-val"=sum.fit$coef[,5]
+            "se"=sum.fit$coef[,se.idx],
+            "95% LL"=(sum.fit$coef[,1]-qnorm(0.975)*sum.fit$coef[,se.idx]), 
+            "95% UL"=(sum.fit$coef[,1]+qnorm(0.975)*sum.fit$coef[,se.idx]), 
+            "p-val"=sum.fit$coef[,"Pr(>|z|)"]
         )
     } else {
         cbind(HR=sum.fit$coef[,2], 
-            "se"=sum.fit$coef[,3],
-            "95% LL"=exp(sum.fit$coef[,1]-qnorm(0.975)*sum.fit$coef[,3]), 
-            "95% UL"=exp(sum.fit$coef[,1]+qnorm(0.975)*sum.fit$coef[,3]), 
-            "p-val"=sum.fit$coef[,5]
+            "se"=sum.fit$coef[,se.idx],
+            "95% LL"=exp(sum.fit$coef[,1]-qnorm(0.975)*sum.fit$coef[,se.idx]), 
+            "95% UL"=exp(sum.fit$coef[,1]+qnorm(0.975)*sum.fit$coef[,se.idx]), 
+            "p-val"=sum.fit$coef[,"Pr(>|z|)"]
         )
     }
 #    round(sqrt(diag(attr(object$var,"phases")$phase1)),3)

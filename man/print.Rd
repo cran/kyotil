@@ -1,5 +1,6 @@
 \name{print.functions}
-\alias{format.int}
+\alias{formatInt}
+\alias{formatDouble}
 \alias{make.latex.coef.table}
 \alias{mytex}
 \alias{mytex.begin}
@@ -13,18 +14,25 @@ Print Functions
 }
 \description{
 roundup prints a specified number of digits after decimal point even if 0s are needed at the end. 
-format.int prints a specified number of digits before decimal point even if 0s are needed at the beginning.
+formatInt prints a specified number of digits before decimal point even if 0s are needed at the beginning.
 }
 \usage{
 
-\method{format}{int}(x, digits, fill = "0", ...)
+formatInt(x, digits, fill = "0", ...)
 
 make.latex.coef.table(models, model.names = NULL, row.major = FALSE, round.digits = NULL)
 
-mytex(dat = NULL, file.name = "temp", digits = NULL, display = NULL, align = "r", 
-    append = FALSE, preamble = "", include.rownames = TRUE, include.dup.rownames = FALSE,
-    floating = FALSE, lines = TRUE, ...)
-
+mytex (dat=NULL, file.name="temp", 
+    digits=NULL, display=NULL, align="r", 
+    include.rownames=TRUE, include.dup.rownames=FALSE, include.colnames=TRUE,
+    col.headers=NULL,
+    comment=FALSE, floating=FALSE, 
+    lines=TRUE, hline.after=NULL, 
+    add.to.row=NULL, 
+    sanitize.text.function = NULL, #function(x) x,
+    append=FALSE, preamble="", stand.alone=TRUE,
+...) 
+       
 mytex.begin(file.name, preamble = "")
 
 mytex.end(file.name)
@@ -34,9 +42,19 @@ mywrite(x, ...)
 mywrite.csv(x, file = "tmp", row.names = FALSE, digits = NULL, ...)
 
 roundup(value, digits)
+
+formatDouble(value, digits)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+
+  \item{include.colnames}{Boolean}
+  \item{col.headers}{string. Column headers}
+  \item{comment}{Boolean, whether to include the version and timestamp comment}
+  \item{hline.after}{vector}
+  \item{add.to.row}{a list}
+  \item{sanitize.text.function}{a function}
+  \item{stand.alone}{Boolean. If true, only one latex file that is stand alone file is made; otherwise both a file that is to be inputted and a standalone version are made}
 
   \item{value}{
 %%     ~~Describe \code{value} here~~
@@ -113,6 +131,8 @@ roundup(value, digits)
 
 roundup (3.1, 2) # 3.10
 
-format.int(3, 2) # 03
+formatInt(3, 2) # 03
+
+
 
 }

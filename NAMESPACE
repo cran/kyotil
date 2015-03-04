@@ -1,12 +1,12 @@
 useDynLib(kyotil)
 
-export(as.binary, binom.coef, expit, H, mutual.info, info.cor, l.measure, logDiffExp, logit, logMeanExp, logSumExp, logSumExpFor2, permn, Stirling2) 
+export(cbind.uneven, as.binary, binom.coef, expit, H, mutual.info, info.cor, l.measure, logDiffExp, logit, logMeanExp, logSumExp, logSumExpFor2, permn, Stirling2) 
 
 export(concatList, AR1, EXCH, fill.jagged.array, getMidPoints, getUpperRight, last, mix, rep.data.frame, rep.matrix, 
     rep.matrix.block, shift.left, shift.right, thin.rows, ThinRows, tr)
 
 export("%+%", concatList, contain, endsWith, escapeUnderline, fileStem, firstIndex, getExt, getFileStem, getStem, 
-    lastIndex, myprint, myprint.default, remove.prefix, startsWith)
+    lastIndex, myprint, myprint.default, remove.prefix, startsWith, VEplot, VEplot.cox.zph, myplot.cox.zph)
 
 export(binary, binary2, f2c, ftoi, keepWarnings, meanmed, methods4, myaggregate, myreshapewide, mysapply, myscale, 
     mysystem, mytapply, read.sv, read.tsv, table.prop, unix)
@@ -15,7 +15,7 @@ export(abline.pt.slope, abline.pts, butterfly.plot, empty.plot, getMfrow, myfore
     myboxplot, myboxplot.formula, myboxplot.list, myboxplot.data.frame, mylegend, mymatplot, mypairs, mypdf, mypostscript, panel.cor, 
     panel.hist, panel.nothing, corplot, corplot.default, corplot.formula)
 
-export(format.int, make.latex.coef.table, mytex, mytex.begin, mytex.end, mywrite, mywrite.csv, roundup)
+export(formatInt, formatDouble, make.latex.coef.table, mytex, mytex.begin, mytex.end, mywrite, mywrite.csv, roundup)
 
 export(dbern, dcorbern, dmixnorm, dnorm.norm.gamma, rbern, rejective.sampling, rnorm.cor, rnorm.norm.gamma)
 
@@ -31,6 +31,35 @@ export(pava)
 
 export(.as.double, DXD, symprod, txSy)
 
-# export(rrbind,rcbind,upper.trap,lower.trap)
+S3method(VEplot,cox.zph) 
+S3method(coef,geese )
+S3method(corplot,default )
+S3method(corplot,formula)
+S3method(myboxplot,data.frame )
+S3method(myboxplot,formula )
+S3method(myboxplot,list )
+S3method(myprint,default)
+S3method(predict,geese )
+S3method(residuals,geese )
+S3method(sign,test )
+S3method(vcov,geese )
+S3method(vcov,logistf)
+S3method(rep,matrix)
+S3method(rep,data.frame)
+S3method(rep,matrix.block)
 
-# export(getKernel,hamming.sim,R_hamming.sim,edist2,ibs2,R_ibs2,R_ibsX,R_ibs)
+S3method(getVarComponent, hyperpar.inla)
+S3method(getVarComponent, matrix)
+
+
+S3method(getFixedEf, MIresult)
+S3method(getFixedEf, coxph)
+S3method(getFixedEf, gam)
+S3method(getFixedEf, gee)
+S3method(getFixedEf, geese)
+S3method(getFixedEf, glm)
+S3method(getFixedEf, inla)
+S3method(getFixedEf, lm)
+S3method(getFixedEf, lme)
+S3method(getFixedEf, logistf)
+S3method(getFixedEf, matrix)

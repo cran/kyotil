@@ -1,3 +1,22 @@
+cbind.uneven=function(li) {
+    # bind a list of data frame or named vector that are not of the same length
+    allnames=lapply(li, rownames)
+    alllen=lapply(allnames, length)
+    nams = allnames[[which.max(alllen)]]
+    nams= c(nams, setdiff(unique(unlist(allnames)), nams)) # append additional names
+    
+    res=NULL
+    for (a in li){
+        p=ncol(a)
+        toadd = matrix(NA, nrow=length(nams), ncol=p, dimnames=list(nams,NULL))
+        toadd[rownames(a),]=as.matrix(a)
+        res=as.data.frame(cbind(res,toadd))
+    }
+    res
+}
+
+
+
 # returns binary representation of an integer
 binary<-function(i) if (i) paste(binary(i %/% 2), i %% 2, sep="") else "" 
 
@@ -228,17 +247,25 @@ keepWarnings <- function(expr) {
 
 # make table that shows both counts/frequency and proportions
 # style 1: count only; 2: count + percentage; 3: percentage only
-table.prop=function (x,y,digit=1,style=2,whole.table.add.to.1=FALSE) {
-    tbl=table(x,y)
+table.prop=function (x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE) {
+    if (is.null(y)) {
+        tbl=table(x)
+        whole.table.add.to.1=TRUE  # to trick the computation of prop
+    } else {
+        tbl=table(x,y)
+    }
     if (whole.table.add.to.1) prop = tbl/sum(tbl) else prop = apply (tbl, 2, prop.table)
     if (style==2) {
         res = tbl %+% " (" %+% round(prop*100,digit) %+% ")"
     } else if (style==3) {
         res = prop*100 # no need to do formating here
     } else res=tbl
-    res=matrix(res, nrow=2)    
+    res=matrix(res, nrow=nrow(tbl))    
     dimnames(res)=dimnames(tbl)
     names(dimnames(res))=NULL
+    
+    if (is.null(y)) res=res[,1]
+    
     res
 }
 

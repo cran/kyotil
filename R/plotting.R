@@ -333,7 +333,7 @@ corplot.formula=function(formula,data,main="",method=c("pearson","spearman"),col
     }
     if(add.deming.fit) {
         # this implementation is faster than the one by Therneau, Terry M.
-        fit=MethComp::Deming(model.frame(formula, data)[[2]], model.frame(formula, data)[[1]])
+        fit=Deming(model.frame(formula, data)[[2]], model.frame(formula, data)[[1]]) # this function is in Deming.R copied from MethComp package by Bendix Carstensen
         abline(fit["Intercept"], fit["Slope"], untf=log=="xy", col=col.deming)   
         # Therneau, Terry M.'s implementation in a loose R file that is in 3software folder, slower than Deming, but may be more generalized?
         #fit <- deming(model.frame(formula, data)[[2]], model.frame(formula, data)[[1]], xstd=c(1,0), ystd=c(1,0))
