@@ -101,13 +101,13 @@ endsWith=function(s1, s2){
 contain =function (s1, s2) {
     sapply (s1, function (s) {
         k=nchar (s2)
-        matched=FALSE
+        matched=0
         for (i in 1:(nchar(s)-k+1) ) {
             if (substr(s, i, i+k-1)==s2) {
                 matched=i
                 break
             }
         }
-        matched
+        matched!=0
     })
 }

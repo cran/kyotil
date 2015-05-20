@@ -1,4 +1,5 @@
-getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FALSE, ...){
+# best way to format is: first round, then nsmall
+getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FALSE, VE=FALSE, ...){
     
     res = sapply(fits, simplify="array", function (fit) {
         if (random) {
@@ -11,14 +12,22 @@ getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FAL
             tmp = getFixedEf (fit, ...)
         }
         
+        if (VE) {
+            tmp[,1]=1-tmp[,1]
+            tmp[,3]=1-tmp[,3]
+            tmp[,4]=1-tmp[,4]
+        }
+        
         if (type==1)
-            # this is the best way to format: first round, then nsmall
+            # est only
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) 
         else if (type==2)
+            # est (se)
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
                 format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE) %+% ")" %+%
                 ifelse (tmp[,"p-val"]<0.05,ifelse (tmp[,"p-val"]<0.01,"**","*"),"")
         else if (type==3)
+            # est (lb, up)
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
                 format(round(tmp[,3,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% ", " %+% 
                     format(round(tmp[,4,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% ")" 
@@ -27,6 +36,7 @@ getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FAL
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " " %+% 
                 format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE)
         else if (type==5)
+            # est **
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+%
                 ifelse (tmp[,"p-val"]<0.05,ifelse (tmp[,"p-val"]<0.01,"**","*"),"")
         else 

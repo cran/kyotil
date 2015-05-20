@@ -32,7 +32,8 @@ getFormattedSummary prints a table of regression coefficient estimates and stand
 }
 \usage{
 
-getFormattedSummary(fits, type = 1, est.digits = 2, se.digits = 2, random = FALSE, ...)
+getFormattedSummary(fits, type = 1, est.digits = 2, se.digits = 2, random = FALSE, 
+    VE=FALSE, ...)
 
 getVarComponent(object, ...)
 
@@ -118,6 +119,9 @@ interaction.table(fit, v1, v2, v1.type = "continuous", v2.type = "continuous",
 %%     ~~Describe \code{se.digits} here~~
 }
   \item{random}{
+%%     ~~Describe \code{random} here~~
+}
+  \item{VE}{
 %%     ~~Describe \code{random} here~~
 }
 

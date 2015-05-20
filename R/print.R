@@ -100,7 +100,11 @@ mytex=function(dat=NULL, file.name="temp",
     if (stand.alone) {
         # create two files, one stand alone and one not, to facilitate debugging latex code
         file.name.2=file.name%+%".tex"
-        file.name=file.name%+%"_stdaln"
+        tmp=strsplit(file.name, split="/")[[1]]
+        if (length(tmp)==1) path="./" else path=concatList(tmp[-length(tmp)], "/")
+        foldername=path%+%"/stdaln"; 
+        if(!file.exists(foldername)) dir.create(foldername) 
+        file.name=foldername%+%"/"%+%tmp[length(tmp)]%+%"_stdaln"
     }
     file.name=file.name%+%".tex"
     
@@ -141,7 +145,7 @@ mytex=function(dat=NULL, file.name="temp",
                 if (is.null(hline.after)) hline.after=c(nrow(dat1)) # cannot use default due to add.to.row
             }
     
-            if (!is.null(col.headers)) {
+            if (!is.null(col.headers) & is.null(hline.after)) {
                 hline.after=c(nrow(dat1)) # cannot use default due to add.to.row
             }
             
@@ -164,8 +168,12 @@ mytex=function(dat=NULL, file.name="temp",
                     if (is.null(hline.after)) {
                         if (lines) hline.after=c(-1,0,nrow(dat1)) else hline.after=c(nrow(dat1))
                     }
-                    if (length(align)==1) align=rep(align,.ncol+1)
-                    if (include.dup.rownames) align[2]="l" else align[1]="l" # col names
+                    if (length(align)==.ncol+1) {
+                        # no need to do anything
+                    } else {
+                        if (length(align)==1) align=rep(align,.ncol+1)
+                        if (include.dup.rownames) align[2]="l" else align[1]="l" # col names
+                    }
                     print(..., xtable::xtable(dat1, 
                             digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
                             display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here

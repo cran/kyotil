@@ -6,7 +6,7 @@ export(concatList, AR1, EXCH, fill.jagged.array, getMidPoints, getUpperRight, la
     rep.matrix.block, shift.left, shift.right, thin.rows, ThinRows, tr)
 
 export("%+%", concatList, contain, endsWith, escapeUnderline, fileStem, firstIndex, getExt, getFileStem, getStem, 
-    lastIndex, myprint, myprint.default, remove.prefix, startsWith, VEplot, VEplot.cox.zph, myplot.cox.zph)
+    lastIndex, myprint, myprint.default, remove.prefix, startsWith, VEplot, VEplot.cox.zph, myplot.cox.zph, age_calc)
 
 export(binary, binary2, f2c, ftoi, keepWarnings, meanmed, methods4, myaggregate, myreshapewide, mysapply, myscale, 
     mysystem, mytapply, read.sv, read.tsv, table.prop, unix)
@@ -30,6 +30,10 @@ export(getK)
 export(pava)
 
 export(.as.double, DXD, symprod, txSy)
+
+export(make.timedep.dataset, sim.dat.tvarying.two, sim.dat.tvarying.three)
+
+export(cox.zph.2)
 
 S3method(VEplot,cox.zph) 
 S3method(coef,geese )
@@ -63,3 +67,4 @@ S3method(getFixedEf, lm)
 S3method(getFixedEf, lme)
 S3method(getFixedEf, logistf)
 S3method(getFixedEf, matrix)
+
