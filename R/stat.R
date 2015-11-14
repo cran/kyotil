@@ -20,7 +20,7 @@ mutual.info=function(two.way.table, logbase=c("e","2")){
 
 cor.mixed <- function(x, ...) UseMethod("cor.mixed") 
 
-cor.mixed.default=function(x, na.fun, method=c("pearson","spearman")) {
+cor.mixed.default=function(x, na.fun, method=c("pearson","spearman"), ...) {
     p=ncol(x)
     res=matrix(1,p,p, dimnames=list(colnames(x), colnames(x)))
     for (i in 2:p) {
@@ -31,14 +31,14 @@ cor.mixed.default=function(x, na.fun, method=c("pearson","spearman")) {
     res
 }
 
-cor.mixed.vector=function(x, y, na.fun, method=c("pearson","spearman")) {
+cor.mixed.vector=function(x, y, na.fun, method=c("pearson","spearman"), ...) {
     method=match.arg(method)
     x=ifelse(na.fun(x), NA, x)
     y=ifelse(na.fun(y), NA, y)
     mean(is.na(x) & is.na(y)) + mean(!is.na(x) & !is.na(y)) * cor(x,y,method=method,use="p")
 }
 
-cor.mixed.formula=function(formula, data, na.fun, method=c("pearson","spearman")) {
+cor.mixed.formula=function(formula, data, na.fun, method=c("pearson","spearman"), ...) {
     vars=dimnames(attr(terms(formula),"factors"))[[1]]
     x=data[,vars[1]]; 
     y=data[,vars[2]]; 

@@ -18,6 +18,8 @@ getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FAL
             tmp[,4]=1-tmp[,4]
         }
         
+        p.val.col=which(startsWith(tolower(colnames(tmp)),"p"))
+        
         if (type==1)
             # est only
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) 
@@ -25,7 +27,7 @@ getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FAL
             # est (se)
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
                 format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE) %+% ")" %+%
-                ifelse (tmp[,"p-val"]<0.05,ifelse (tmp[,"p-val"]<0.01,"**","*"),"")
+                ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==3)
             # est (lb, up)
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
@@ -38,10 +40,14 @@ getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FAL
         else if (type==5)
             # est **
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+%
-                ifelse (tmp[,"p-val"]<0.05,ifelse (tmp[,"p-val"]<0.01,"**","*"),"")
+                ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
+        else if (type==6)
+            # est (pval)
+            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
+                format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %+% ")" 
         else 
             stop ("getFormattedSummaries(). type not supported: "%+%type)
-
+    
         names(out)=rownames(tmp)
         out
     })
@@ -88,12 +94,29 @@ getVarComponent.lme = function (object, ...) {
     nlme::VarCorr(object)
 }
 
+getFixedEf.lmerMod = function (object, ...) {
+    betas <- nlme::fixef(object)
+    se <- sqrt (diag (getVarComponent(object)))
+    zval <- betas / se 
+    pval <- 2 * pnorm(abs(zval), lower.tail = FALSE) 
+    cbind(betas, se, zval, pval) 
+}
+getVarComponent.lmerMod = function (object, ...) {
+    as.matrix(vcov(object)) # otherwise will complain about S4 class convertibility problem
+}
+
 getFixedEf.geese = function (object, ...) {
     summary(object)$mean
 }
     
-getFixedEf.glm = function (object, exp=FALSE, ...) {
+getFixedEf.glm = function (object, exp=FALSE, robust=TRUE, ...) {
     out=summary(object)$coef
+    if (robust) {
+        V=infjack.glm(object, 1:nrow(object$data))
+        out[,2]=sqrt(diag(V))
+        out[,3]=out[,1]/out[,2]
+        out[,4]=2 * pnorm(-abs(out[,3]))
+    }
     if(exp) out[,1]=exp(out[,1])
     out
 }
@@ -207,7 +230,7 @@ getVarComponent.hyperpar.inla = function (object, transformation=NULL, ...) {
 
 
 getFixedEf.coxph=function (object, exp=FALSE, robust=FALSE, ...){
-    sum.fit<-summary(object)
+    capture.output(sum.fit<-summary(object))# summary.svycoxph prints some stuff, capture.output absorbs it
     se.idx=ifelse(!robust,"se(coef)","robust se")
     if (!exp) {
         cbind(HR=sum.fit$coef[,1], 

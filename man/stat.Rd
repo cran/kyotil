@@ -24,11 +24,10 @@ mutual.info(two.way.table, logbase = c("e", "2"))
 
 cor.mixed(x, ...)
 
-cor.mixed.default(x, na.fun, method = c("pearson", "spearman"))
+\method{cor.mixed}{default} (x, na.fun, method=c("pearson","spearman"), ...)
+\method{cor.mixed}{vector} (x, y, na.fun, method=c("pearson","spearman"), ...) 
+\method{cor.mixed}{formula} (formula, data, na.fun, method=c("pearson","spearman"), ...) 
 
-cor.mixed.vector(x, y, na.fun, method = c("pearson", "spearman"))
-
-cor.mixed.formula(formula, data, na.fun, method = c("pearson", "spearman"))
 
 info.cor(two.way.table)
 

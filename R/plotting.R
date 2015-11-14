@@ -69,7 +69,7 @@ mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height
     }
     
 }
-mypdf=function (...) {mypostscript(ext="pdf",...)}
+mypdf=function (...) {mypostscript(ext="pdf",...)} # cannot print both to screen and pdf
 ##test
 #mypdf(mfrow=c(1,1),file="test1x1");plot(1:10,main="LUMX",xlab="t",ylab="y");dev.off()
 #mypdf(mfrow=c(1,2),file="test1x2");plot(1:10,main="LUMX",xlab="t",ylab="y");plot(1:10);dev.off()
@@ -163,6 +163,7 @@ myforestplot=function(dat, xlim=NULL, xlab="", main="", col.1="red", col.2="blue
 }
 
 
+# can use after myboxplot
 # both dat must have two columns, each row is dat from one subject
 # x.ori=0; xaxislabels=rep("",2); cex.axis=1; add=FALSE; xlab=""; ylab=""; pcol=NULL; lcol=NULL
 my.interaction.plot=function(dat, x.ori=0, xaxislabels=rep("",2), cex.axis=1, add=FALSE, xlab="", ylab="", pcol=NULL, lcol=NULL, ...){
@@ -181,7 +182,8 @@ myboxplot <- function(object, ...) UseMethod("myboxplot")
 
 # myboxplot.formula and myboxplot.list make a boxplot with data points and do inferences for two group comparions. 
 # cex=.5; ylab=""; xlab=""; main=""; box=FALSE; highlight.list=NULL; at=NULL;pch=1;col=1;
-myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test="", reshape.formula=NULL, ...){
+myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL,
+    pch=1, col=1, test="", reshape.formula=NULL, jitter=TRUE, add.interaction=FALSE, ...){
     
     save.seed <- try(get(".Random.seed", .GlobalEnv), silent=TRUE) 
     if (class(save.seed)=="try-error") {        
@@ -192,9 +194,9 @@ myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box
     
     
     if (box) {
-        res=boxplot(formula, data, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL,...)
+        res=boxplot(formula, data, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL, cex=cex, ...)
     } else {
-        res=boxplot(formula, data, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL, border="white", ...)
+        res=boxplot(formula, data, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL, cex=cex, border="white", ...)
     }
         
     dat.tmp=model.frame(formula, data)
@@ -203,8 +205,10 @@ myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box
         xx=as.numeric(xx)
     } else{
         xx=at[xx]
-    }        
-    points(jitter(xx), dat.tmp[[1]], cex=cex,pch=pch,col=col)
+    }      
+    if (add.interaction) jitter=FALSE
+    if (jitter) xx=jitter(xx)  
+    points(xx, dat.tmp[[1]], cex=cex,pch=pch,col=col)
     
     # restore rng state 
     assign(".Random.seed", save.seed, .GlobalEnv)     
@@ -214,14 +218,13 @@ myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box
     if (length(test)>0) {
         sub=""
         if ("t" %in% test) sub=sub%+%" Student's t "%+%signif(t.test(formula, data)$p.value,2) 
-        print(sub)
         if ("w" %in% test) sub=sub%+%" Wilcoxon "%+%signif(wilcox.test(formula, data)$p.value,2)
-        print(sub)
         if ("k" %in% test) sub=sub%+%" Kruskal "%+%signif(kruskal.test(formula, data)$p.value,2)
         if ("f" %in% test) {
             dat.wide=myreshapewide (reshape.formula, data, idvar = NULL)
-            str(dat.wide)# show this so that we know we are using the right data to do the test
+            #str(dat.wide)# show this so that we know we are using the right data to do the test
             ftest = friedman.test (as.matrix(dat.wide[,-(1)]))
+            if (add.interaction) my.interaction.plot(as.matrix(dat.wide[,-1]), add=T)
             sub=sub%+%" Friedman "%+%signif(ftest$p.value,2)
         }
         title(sub=sub)
@@ -234,42 +237,20 @@ myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box
 myboxplot.data.frame=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test="", ...){
     myboxplot.list(as.list(object), cex=cex, ylab=ylab, xlab=xlab, main=main, box=box, at=at, pch=pch, col=col, test=test, ...)
 }
+myboxplot.matrix=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test="", ...){
+    myboxplot.list(as.list(as.data.frame(object)), cex=cex, ylab=ylab, xlab=xlab, main=main, box=box, at=at, pch=pch, col=col, test=test, ...)
+}
 
-myboxplot.list=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test="", ...){
-    
-    save.seed <- try(get(".Random.seed", .GlobalEnv), silent=TRUE) 
-    if (class(save.seed)=="try-error") {        
-        set.seed(1)
-        save.seed <- get(".Random.seed", .GlobalEnv)
-    }                        
-    set.seed(1)
-    
-    if (box) {
-        boxplot(object, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL,...)
-    } else {
-        boxplot(object, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL, border="white", ...)
+myboxplot.list=function(object, ...){
+
+    # make a dataframe out of list object
+    dat=NULL
+    if(is.null(names(object))) names(object)=1:length(object)
+    for (i in 1:length(object)) {
+        dat=rbind(dat,data.frame(y=object[[i]], x=names(object)[i]))
     }
-        
-    if(is.null(at)){
-        xx=jitter(rep.int(1:length(object), times=sapply(object, length)))
-    } else{
-        xx=jitter(at[rep.int(1:length(object), times=sapply(object, length))])
-    }    
-    points(xx, unlist(object), cex=cex,pch=pch,col=col)
+    myboxplot(y~x, dat, ...)
     
-    # inference
-    if (length(test)>0 & length(object)==2) {
-        y.1=object[[1]]
-        y.2=object[[2]]
-        sub=""
-        if ("t" %in% test) sub=sub%+%signif(t.test(y.1, y.2)$p.value,2) 
-        if (length(test)==2) sub=sub%+%"|"
-        if ("w" %in% test) sub=sub%+%signif(wilcox.test(y.1, y.2)$p.value,2)
-        title(sub=sub)
-    }    
-    
-    # restore rng state 
-    assign(".Random.seed", save.seed, .GlobalEnv)     
 }
 
 
@@ -363,8 +344,9 @@ abline.pt.slope=function(pt1, slope,...){
     abline(intercept, slope,...)
 }
 #abline.pt.slope(c(1,1), 1)
-mymatplot=function(x, y, make.legend=TRUE, legend=NULL, type="b", legend.x=9, lty=1:5, pch=NULL, col=1:6, legend.title=NULL, legend.cex=1, xlab=NULL, ylab="", 
-    draw.x.axis=TRUE, bg=NA, legend.inset=0, lwd=1, at=NULL, ...) {
+mymatplot=function(x, y, type="b", lty=1:5, pch=NULL, col=1:6, xlab=NULL, ylab="", 
+    draw.x.axis=TRUE, bg=NA, lwd=1, at=NULL, make.legend=TRUE, legend=NULL, 
+    legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, ...) {
     
     missing.y=FALSE
     if (missing(y)) {

@@ -7,6 +7,10 @@ tolerance=1e-3
 if(file.exists("D:/gDrive/3software/_checkReproducibility")) tolerance=1e-6
 RNGkind("Mersenne-Twister", "Inversion")
 
+d=1:4
+X=matrix(1:12,4,3)
+checkTrue(all(tXDX(X, d) == t(X) %*% diag(d) %*% X))
+
 d1=1:3
 d2=4:6
 X=matrix(1:9,3,3)

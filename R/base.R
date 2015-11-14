@@ -10,7 +10,11 @@ cbind.uneven=function(li) {
         p=ncol(a)
         toadd = matrix(NA, nrow=length(nams), ncol=p, dimnames=list(nams,NULL))
         toadd[rownames(a),]=as.matrix(a)
-        res=as.data.frame(cbind(res,toadd))
+        if (is.null(res)) {
+            res=as.data.frame(toadd, stringsAsFactors=FALSE) # if stringsAsFactors is here in cbind, it won't work, that is why we have to do a if on is.null(res)
+        } else {
+            res=as.data.frame(cbind(res,toadd, stringsAsFactors=FALSE))
+        }
     }
     res
 }
@@ -187,7 +191,7 @@ myreshapewide=function(formula, dat, idvar=NULL){
     } else {
         # remove those columns with changing values within an id
         # need [,-(1:length(idvar)),drop=FALSE] because the first columns are idvar
-        tmp=apply(aggregate (x=dat[,!names(dat) %in% idvar,drop=FALSE], by=dat[,names(dat) %in% idvar,drop=FALSE], function(y) length(rle(y)$values)==1)[,-(1:length(idvar)),drop=FALSE], 
+        tmp=apply(aggregate (x=dat[,!names(dat) %in% c(idvar,category.var,outcome.var),drop=FALSE], by=dat[,names(dat) %in% idvar,drop=FALSE], function(y) length(rle(y)$values)==1)[,-(1:length(idvar)),drop=FALSE], 
             2, all)
         varying.var=names(tmp)[!tmp]
         dat=dat[,!names(dat) %in% setdiff(varying.var, c(category.var,outcome.var)),drop=FALSE]
@@ -281,3 +285,10 @@ methods4<-function(classes, super=FALSE, ANY=FALSE){
     sigs[sapply(sigs,length)>0] 
 } 
  
+
+# p1 and p2 are two points. return y that corresponds to x on the line between p1 and p2
+interpolate=function(pt1, pt2, x){
+    slope=(pt2-pt1)[2]/(pt2-pt1)[1]
+    intercept = pt1[2]-slope*pt1[1]
+    intercept + slope * x    
+}

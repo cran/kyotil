@@ -163,3 +163,27 @@ SEXP Call_dxd(SEXP _d1, SEXP _x, SEXP _d2){
     return _ans;
 }
 
+
+SEXP xdx(SEXP _x, SEXP _d){
+	int n = length(_d);
+	int p = ncols(_x); // _x is n by p in R
+	SEXP _ans=PROTECT(allocMatrix(REALSXP, p, p));
+	double *d=REAL(_d), *x=REAL(_x), *ans=REAL(_ans);
+
+	int i,j,k;
+	for(j = 0;j < p;j++)
+		for(i = 0;i < p;i++)
+			ans[j+i*p]=0;
+			
+	for(k=0; k<n; k++)
+    	for(j = 0;j < p;j++){
+    		for(i = 0;i < p;i++){
+                // row k col j of x in R is row j col k of x in C
+    			ans[j+i*p] += d[k] * x[j*n+k] * x[i*n+k];
+    		}
+    	}
+	
+	UNPROTECT(1);
+    return _ans;
+}
+

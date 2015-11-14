@@ -1,7 +1,7 @@
 \name{testing.functions}
 \alias{hosmerlem}
 \alias{quick.t.test}
-\alias{sign.test}
+\alias{signtest}
 \alias{tukey.mtest}
 \alias{vector.t.test}
 %- Also NEED an '\alias' for EACH other topic documented here.
@@ -17,7 +17,7 @@ hosmerlem(y, yhat, g = 10)
 
 quick.t.test(x, y, var.equal = FALSE)
 
-\method{sign}{test}(x)
+signtest(x)
 
 tukey.mtest(mu, ms, n)
 
@@ -69,5 +69,5 @@ vector.t.test(mean.x, mean.y, var.x, var.y, n)
 }
 \examples{
 
-sign.test(runif(10))
+signtest(runif(10))
 }

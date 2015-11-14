@@ -9,6 +9,7 @@
 \alias{getFixedEf.inla}
 \alias{getFixedEf.lm}
 \alias{getFixedEf.lme}
+\alias{getFixedEf.lmerMod}
 \alias{getFixedEf.logistf}
 \alias{getFixedEf.matrix}
 \alias{getFixedEf.mer}
@@ -18,6 +19,7 @@
 \alias{getVarComponent}
 \alias{getVarComponent.hyperpar.inla}
 \alias{getVarComponent.matrix}
+\alias{getVarComponent.lmerMod}
 \alias{interaction.table}
 \alias{predict.geese}
 \alias{residuals.geese}
@@ -47,7 +49,8 @@ getFixedEf(object, ...)
 
 \method{getFixedEf}{geese}(object, ...)
 
-\method{getFixedEf}{glm}(object, exp = FALSE, ...)
+\method{getFixedEf}{glm} (object, exp=FALSE, robust=TRUE, ...) 
+
 
 \method{getFixedEf}{inla}(object, ...)
 
@@ -182,6 +185,6 @@ group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
 weight <- c(ctl, trt)
 lm.D9 <- lm(weight ~ group)
 glm.D9 <- glm(weight ~ group)
-getFormattedSummary (list(lm.D9, glm.D9))
+getFormattedSummary (list(lm.D9, glm.D9), robust=FALSE)
 
 }

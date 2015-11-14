@@ -1,5 +1,6 @@
 \name{matrix2}
 \alias{DXD}
+\alias{tXDX}
 \alias{symprod}
 \alias{txSy}
 \alias{.as.double}
@@ -7,11 +8,13 @@
 Matrix Functions that May Be Faster than %*%
 }
 \description{
-DXD computes D \%*\% X  \%*\% D, where D is a diagonal matrix. symprod computes S \%*\% X for symmetric S. txSy computes t(x) \%*\% S \%*\% y for symmetric S.
+DXD computes D \%*\% X  \%*\% D, where D is a diagonal matrix. tXDX computes t(X) \%*\% D  \%*\% X. symprod computes S \%*\% X for symmetric S. txSy computes t(x) \%*\% S \%*\% y for symmetric S.
 }
 \usage{
 
 DXD(d1, X, d2)
+
+tXDX(X,D)
 
 symprod(S, X)
 
@@ -28,6 +31,7 @@ txSy(x, S, y)
   \item{y}{array}
   \item{S}{symmetric matrix}
   \item{X}{matix}
+  \item{D}{matix}
   \item{stripAttributes}{boolean}
 }
 \details{

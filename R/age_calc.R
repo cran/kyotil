@@ -1,7 +1,8 @@
 # by Jason P Becker
 age_calc <- function(dob, enddate=Sys.Date(), units=c("days","months","years"), precise=TRUE){
     
-  if (!(inherits(dob, "POSIXlt") | inherits(dob, "Date")) | !(inherits(enddate, "POSIXlt") | inherits(enddate, "Date"))){
+  if (!(inherits(dob, "POSIXlt") | inherits(dob, "POSIXct") | inherits(dob, "Date"))   | 
+      !(inherits(enddate, "POSIXlt") | inherits(enddate, "POSIXct") | inherits(enddate, "Date"))){
     stop("Both dob and enddate must be either POSIXlt or Date class objects")
   }
   

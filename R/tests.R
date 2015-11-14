@@ -1,4 +1,4 @@
-sign.test = function (x) {
+signtest = function (x) {
     binom.test( sum( x > 0 , na.rm=TRUE) , sum( x != 0 , na.rm=TRUE), p = 0.5,
            alternative = c("two.sided", "less", "greater"),
            conf.level = 0.95)   

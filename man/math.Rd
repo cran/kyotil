@@ -10,6 +10,7 @@
 \alias{logSumExpFor2}
 \alias{permn}
 \alias{Stirling2}
+\alias{interpolate}
 \title{
 Math Functions
 }
@@ -37,6 +38,8 @@ logSumExpFor2(logx, logy)
 permn(x, fun = NULL, ...)
 
 Stirling2(n, m)
+
+interpolate(pt1, pt2, x)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -55,6 +58,8 @@ Stirling2(n, m)
 %%     ~~Describe \code{m} here~~
 }
 
+  \item{pt1}{a vector of length 2}
+  \item{pt2}{a vector of length 2}
   \item{x}{
 %%     ~~Describe \code{x} here~~
 }

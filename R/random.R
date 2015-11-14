@@ -17,7 +17,7 @@ rbern=function(n, prob, generalized=FALSE) {
             rbinom(n,1,prob)
         } else {
             prob=cbind(1:n,prob)[,2]
-            rbinom(n,prob,size=1)
+            rbinom(n,1,prob)
 #            sapply(prob, function(p) rbinom(1,1,p))
         }
     } else {
@@ -91,4 +91,12 @@ dmixnorm=function (x, mix.p, sd1, sd2, log=FALSE){
     out=mix.p*dnorm (x,0,sd1) + (1-mix.p)*dnorm (x,0,sd2)
     if(log) out=log(out)
     out
+}
+
+#mix.p=.5; mu1=0; mu2=2; sd1=1; sd2=1
+rmixnorm=function (n, mix.p, mu1, mu2, sd1, sd2){
+    r=rbern(n, mix.p)
+    x.1=rnorm(n, mu1, sd1)
+    x.2=rnorm(n, mu2, sd2)
+    ifelse(r, x.1, x.2)
 }

@@ -6,6 +6,7 @@
 \alias{rbern}
 \alias{rejective.sampling}
 \alias{rnorm.cor}
+\alias{rmixnorm}
 \alias{rnorm.norm.gamma}
 \title{
 Random Functions
@@ -30,6 +31,8 @@ rejective.sampling(N, n, pik)
 rnorm.cor(n, mu, sd, alpha)
 
 rnorm.norm.gamma(n, mu.0, lambda, alpha, beta)
+
+rmixnorm (n, mix.p, mu1, mu2, sd1, sd2)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -80,6 +83,12 @@ rnorm.norm.gamma(n, mu.0, lambda, alpha, beta)
 }
 
   \item{mu}{
+%%     ~~Describe \code{mu} here~~
+}
+  \item{mu1}{
+%%     ~~Describe \code{mu} here~~
+}
+  \item{mu2}{
 %%     ~~Describe \code{mu} here~~
 }
   \item{sd}{

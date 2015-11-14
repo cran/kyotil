@@ -17,23 +17,32 @@ export(abline.pt.slope, abline.pts, butterfly.plot, empty.plot, getMfrow, myfore
 
 export(formatInt, formatDouble, make.latex.coef.table, mytex, mytex.begin, mytex.end, mywrite, mywrite.csv, roundup)
 
-export(dbern, dcorbern, dmixnorm, dnorm.norm.gamma, rbern, rejective.sampling, rnorm.cor, rnorm.norm.gamma)
+export(dbern, dcorbern, dmixnorm, dnorm.norm.gamma, rbern, rejective.sampling, rnorm.cor, rnorm.norm.gamma, rmixnorm)
 
 export(coef.geese, getFixedEf, getFixedEf.coxph, getFixedEf.gam, getFixedEf.gee, getFixedEf.geese, getFixedEf.glm, getFixedEf.inla, 
     getFixedEf.lm, getFixedEf.lme, getFixedEf.logistf, getFixedEf.matrix, getFixedEf.MIresult, getFormattedSummary, 
     getVarComponent, getVarComponent.hyperpar.inla, getVarComponent.matrix, interaction.table, predict.geese, residuals.geese, vcov.geese, vcov.logistf)
 
-export(hosmerlem, quick.t.test, sign.test, tukey.mtest, vector.t.test)
+export(hosmerlem, quick.t.test, signtest, tukey.mtest, vector.t.test, summ, multi.outer)
 
 export(getK)
 
-export(pava)
+export(pava, get.sim.res)
 
-export(.as.double, DXD, symprod, txSy)
+export(.as.double, DXD, symprod, txSy, tXDX, interpolate)
 
 export(make.timedep.dataset, sim.dat.tvarying.two, sim.dat.tvarying.three)
 
 export(cox.zph.2)
+
+export(cor.mixed, cor.mixed.vector, cor.mixed.formula, cor.mixed.default)
+
+
+S3method(cor.mixed,vector)
+S3method(cor.mixed,formula)
+S3method(cor.mixed,default)
+
+
 
 S3method(VEplot,cox.zph) 
 S3method(coef,geese )
@@ -45,7 +54,6 @@ S3method(myboxplot,list )
 S3method(myprint,default)
 S3method(predict,geese )
 S3method(residuals,geese )
-S3method(sign,test )
 S3method(vcov,geese )
 S3method(vcov,logistf)
 S3method(rep,matrix)
@@ -54,6 +62,7 @@ S3method(rep,matrix.block)
 
 S3method(getVarComponent, hyperpar.inla)
 S3method(getVarComponent, matrix)
+S3method(getVarComponent, lmerMod)
 
 
 S3method(getFixedEf, MIresult)
@@ -65,6 +74,17 @@ S3method(getFixedEf, glm)
 S3method(getFixedEf, inla)
 S3method(getFixedEf, lm)
 S3method(getFixedEf, lme)
+S3method(getFixedEf, lmerMod)
 S3method(getFixedEf, logistf)
 S3method(getFixedEf, matrix)
+
+import(stats)
+import(graphics)
+
+
+  importFrom("grDevices", "pdf", "postscript")
+  importFrom("methods", "getAllSuperClasses", "getClass", "getGenerics",
+             "getMethods", "is", "linearizeMlist")
+  importFrom("utils", "capture.output", "read.csv", "tail", "write.csv", "str")
+
 

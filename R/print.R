@@ -108,11 +108,6 @@ mytex=function(dat=NULL, file.name="temp",
     }
     file.name=file.name%+%".tex"
     
-    if (!is.null(col.headers)) {
-        add.to.row=list(list(0), col.headers) # insert at the beginning 
-        include.colnames=F # col names are part of add.to.row
-    }
-    
     if (include.dup.rownames) include.rownames=F
     
     if(is.data.frame(dat)) dat=list(dat)
@@ -137,18 +132,21 @@ mytex=function(dat=NULL, file.name="temp",
                 else .ncol=nrow(dat1)
             }
             
-            if (include.colnames) {
-                add.to.row=list(list(0), "\\hline\n"%+%
-                    concatList("& \\multicolumn{1}{c}{"%+%sanitize.text(colnames(dat1))%+%"} ") %+% "\\\\ \n"%+% # center aligned column titles
-                    "\\hline\n") # insert at the beginning of table, "\n" is added so that there is no need to keep it in col.title
-                include.colnames=FALSE # col names are part of add.to.row
-                if (is.null(hline.after)) hline.after=c(nrow(dat1)) # cannot use default due to add.to.row
-            }
-    
-            if (!is.null(col.headers) & is.null(hline.after)) {
-                hline.after=c(nrow(dat1)) # cannot use default due to add.to.row
-            }
+            top.1=concatList("& \\multicolumn{1}{c}{"%+%sanitize.text(colnames(dat1))%+%"} ") %+% "\\\\ \n"%+% # center aligned column titles
+                "\\hline\n" # insert at the beginning of table, "\n" is added so that there is no need to keep it in col.title
+            if(!include.rownames) top.1=substr(top.1, 2,10000)
+            top=if(!include.colnames)  "" else top.1
+                
+            if (include.colnames & is.null(hline.after)) hline.after=c(nrow(dat1)) # cannot use default due to add.to.row    
+            include.colnames=FALSE
+            if (!is.null(col.headers)) top=col.headers%+%top else top="\\hline  "%+%top
             
+            if (is.null(add.to.row)) {
+                add.to.row=list(list(0), top)
+            } else {
+                add.to.row=list(c(list(0), add.to.row[[1]]), c(top, add.to.row[[1]]))
+            }
+        
             if (!is.matrix(dat1) & is.character(dat1)) {
                 cat (dat1%+%"\n\n\n", file=file.name, append=TRUE)
                 if(stand.alone) cat (dat1%+%"\n\n\n", file=file.name.2, append=TRUE)
@@ -160,7 +158,7 @@ mytex=function(dat=NULL, file.name="temp",
                     if (!is.null(attr(dat1,"caption"))) caption=attr(dat1,"caption") else caption=NULL
                     
                     if (include.dup.rownames & !is.null(rownames(dat1))) {
-                        tmp=data.frame(row = rownames(dat1),data.frame(dat1))
+                        tmp=suppressWarnings(data.frame(rownames(dat1),data.frame(dat1))) # warnings about duplicate row names
                         if (!is.null(colnames(dat1))) colnames(tmp)[-1]=colnames(dat1)
                         dat1=tmp
                         .ncol=.ncol+1

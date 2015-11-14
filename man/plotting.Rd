@@ -50,23 +50,20 @@ my.interaction.plot(dat, x.ori = 0, xaxislabels = rep("", 2), cex.axis = 1, add 
 
 myboxplot(object, ...)
 
-\method{myboxplot}{formula}(formula, data, cex = 0.5, ylab = "", xlab = "", main = "", 
-    box = TRUE, at = NULL, pch = 1, col = 1, test = "", 
-    reshape.formula=NULL, ...)
+\method{myboxplot}{formula}(formula, data, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL,
+    pch=1, col=1, test="", reshape.formula=NULL, jitter=TRUE, add.interaction=FALSE, ...)
+    
 
 \method{myboxplot}{data.frame}(object, cex = 0.5, ylab = "", xlab = "", main = "", box = TRUE,
     at = NULL, pch = 1, col = 1, test = "", ...)
 
-\method{myboxplot}{list}(object, cex = 0.5, ylab = "", xlab = "", main = "", box = TRUE,
-    at = NULL, pch = 1, col = 1, test = "", ...)
+\method{myboxplot}{list}(object, ...)
 
 mylegend(legend, x, lty = NULL, bty = "n", ...)
 
-mymatplot(x, y, make.legend = TRUE, legend = NULL, type = "b",
-                 legend.x = 9, lty = 1:5, pch = NULL, col = 1:6,
-                 legend.title = NULL, legend.cex = 1, xlab = NULL, ylab
-                 = "", draw.x.axis = TRUE, bg = NA, legend.inset = 0,
-                 lwd = 1, at = NULL, ...)
+mymatplot (x, y, type="b", lty=1:5, pch=NULL, col=1:6, xlab=NULL, ylab="", 
+    draw.x.axis=TRUE, bg=NA, lwd=1, at=NULL, make.legend=TRUE, legend=NULL, 
+    legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, ...) 
                  
 mypairs(dat, ...)
 
@@ -102,6 +99,8 @@ col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FAL
   \item{slope}{
 %%     ~~Describe \code{slope} here~~
 }
+  \item{jitter}{Boolean}
+  \item{add.interaction}{Boolean}
   \item{\dots}{
 %%     ~~Describe \code{\dots} here~~
 }

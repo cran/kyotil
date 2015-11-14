@@ -17,6 +17,8 @@
 \alias{read.tsv}
 \alias{table.prop}
 \alias{unix}
+\alias{multi.outer}
+
 \title{
 Some Base Functions
 }
@@ -34,6 +36,9 @@ f2c convert temperature from f to c/
 
 cbind.uneven(li)
 binary(i)
+
+multi.outer (f, ... ) 
+
 
 binary2(i, n)
 
@@ -80,8 +85,7 @@ unix()
 }
 
   \item{f}{
-%%     ~~Describe \code{f} here~~
-}
+In multi.out, f is a function.}
   \item{formula}{
 a formula object.}
 

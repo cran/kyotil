@@ -150,21 +150,15 @@ infjack.glm<-function(glm.obj,groups){
     modelv<-summary(glm.obj)$cov.unscaled
     modelv%*%(t(usum)%*%usum)%*%modelv
 }
-
-# from Thomas Lumley
 jack.glm<-function(glm.obj,groups){
     umat<-jackvalues(glm.obj)
     usum<-rowsum(umat,groups,reorder=FALSE)
     t(usum)%*%usum*(nrow(umat)-1)/nrow(umat)
 }
-
-# from Thomas Lumley
 jackvalues<-function(glm.obj){
     db<-lm.influence(glm.obj)$coef
     t(t(db)-apply(db,2,mean))
 }   
-
-# from Thomas Lumley
 estfun.glm<-function(glm.obj){
     if (is.matrix(glm.obj$x)) 
         xmat<-glm.obj$x
@@ -173,4 +167,47 @@ estfun.glm<-function(glm.obj){
         xmat<-model.matrix(terms(glm.obj),mf)       
     }
     residuals(glm.obj,"working")*glm.obj$weights*xmat
+}
+
+
+#iterated sum, like diff
+summ=function(x) {
+    x[-1]+x[-length(x)]
+}
+
+list_args <- Vectorize( function(a,b) c( as.list(a), as.list(b) ), SIMPLIFY = FALSE)
+make_args_mtx <- function( alist ) Reduce(function(x, y) outer(x, y, list_args), alist)
+multi.outer <- function(f, ... ) {
+  args <- make_args_mtx(list(...))
+  apply(args, 1:length(dim(args)), function(a) do.call(f, a[[1]] ) )
+}
+
+
+get.sim.res = function(foldername, verbose=FALSE) {
+    
+    if (!requireNamespace("abind")) {print("abind does not load successfully"); return (NULL) }
+    
+    ## get file names
+    tmp=list.files(path=foldername, pattern="batch[0-9]+.*.Rdata")
+    if (length(tmp)==0) {
+        # no files yet
+        stop ("no files\n")
+    } else {
+        fileNames = foldername %+%"/"%+%tmp
+    }
+    cat("number of files: "%+%length(fileNames),"\n")
+    
+    ## read files
+    res=lapply(fileNames, function(x) {load(file=x); res})
+    res.all = do.call(abind::abind, res)
+    names(dimnames(res.all))=names(dimnames(res[[1]]))
+    
+    if(verbose) {
+        cat("res.all:\n")
+        print(str(res.all))        
+        cat("\nFirst dimension col names: \n")
+        print(dimnames(res.all)[[1]])
+    }
+    
+    res.all    
 }
