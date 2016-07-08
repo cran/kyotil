@@ -1,6 +1,7 @@
 \name{plotting}
 \alias{abline.pt.slope}
 \alias{abline.pts}
+\alias{abline.shade}
 \alias{butterfly.plot}
 \alias{empty.plot}
 \alias{getMfrow}
@@ -13,6 +14,7 @@
 \alias{mylegend}
 \alias{mymatplot}
 \alias{mypairs}
+\alias{myhist}
 \alias{mypdf}
 \alias{mypostscript}
 \alias{panel.cor}
@@ -31,7 +33,7 @@ mypostscript and mypdf sets the width and height based on mfrow input.
 
 %+%(a, b)
 
-abline.pt.slope(pt1, slope, ...)
+abline.pt.slope(pt1, slope, x2=NULL, ...)
 
 abline.pts(pt1, pt2 = NULL)
 
@@ -42,16 +44,22 @@ empty.plot()
 
 getMfrow(len)
 
-myforestplot(dat, xlim = NULL, xlab = "", main = "", col.1 = "red", col.2 = "blue",
-    plot.labels=TRUE,order=FALSE,decreasing=FALSE)
+myhist (x, add.norm=TRUE, col.norm="blue", ...)
+
+myforestplot(dat, xlim=NULL, xlab="", main="", col.1="red", col.2="blue",
+ plot.labels=TRUE,order=FALSE,decreasing=FALSE, vline=TRUE,cols=NULL,log="")
 
 my.interaction.plot(dat, x.ori = 0, xaxislabels = rep("", 2), cex.axis = 1, add = FALSE,
     xlab = "", ylab = "", pcol = NULL, lcol = NULL, ...)
 
 myboxplot(object, ...)
 
-\method{myboxplot}{formula}(formula, data, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL,
-    pch=1, col=1, test="", reshape.formula=NULL, jitter=TRUE, add.interaction=FALSE, ...)
+abline.shade(x, col=c(0,1,0))
+
+
+\method{myboxplot}{formula}(formula, data, cex=.5, xlab="", ylab="", main="", box=TRUE, 
+at=NULL, na.action=NULL, pch=1, col=1, test="", reshape.formula=NULL, jitter=TRUE, 
+add.interaction=FALSE,  drop.unused.levels = TRUE, ...)
     
 
 \method{myboxplot}{data.frame}(object, cex = 0.5, ylab = "", xlab = "", main = "", box = TRUE,
@@ -93,6 +101,8 @@ col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FAL
 \arguments{
 
 
+  \item{add.norm}{Boolean, whether to add normal approximation density line}
+  \item{col.norm}{string, color of added normal density line}
   \item{pt1}{
 %%     ~~Describe \code{pt1} here~~
 }
@@ -301,12 +311,22 @@ string. For example, "t","w","f","k", "tw"
   \item{plot.labels}{Boolean}
   \item{order}{Boolean}
   \item{decreasing}{Boolean}
-
-
-
-
-
   \item{add.diagonal.line}{
+%%     ~~Describe \code{add.diagonal.line} here~~
+}
+  \item{x2}{
+%%     ~~Describe \code{add.diagonal.line} here~~
+}
+  \item{vline}{
+%%     ~~Describe \code{add.diagonal.line} here~~
+}
+  \item{cols}{
+%%     ~~Describe \code{add.diagonal.line} here~~
+}
+  \item{na.action}{
+%%     ~~Describe \code{add.diagonal.line} here~~
+}
+  \item{drop.unused.levels}{
 %%     ~~Describe \code{add.diagonal.line} here~~
 }
 }

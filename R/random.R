@@ -100,3 +100,34 @@ rmixnorm=function (n, mix.p, mu1, mu2, sd1, sd2){
     x.2=rnorm(n, mu2, sd2)
     ifelse(r, x.1, x.2)
 }
+
+
+#n=1000; loc.1<-loc.2<-0; scale.1<-scale.2<-1
+rbilogistic=function(n, loc.1, loc.2, scale.1, scale.2, rho) {
+    if(rho==0.5) {
+        dat=VGAM::rbilogis(n=n, loc1 = loc.1, scale1 = scale.1, loc2 = loc.2, scale2 = scale.2)
+    } else if (rho<0.478 & rho> -0.271) {
+        if(rho==0) {
+            theta=0
+        } else{
+            rho.f=function(t) (12*(1+t)*dilog(1-t) -24*(1-t)*log(1-t) )/t^2 - 3*(t+12)/t - rho
+            theta = uniroot(rho.f, interval=c(-1+1e-3,1-1e-3))$root
+        }
+        suppressMessages({ myCop <- copula::amhCopula(param=theta) }) # suppress msg: parameter at boundary ==> returning indepCopula()
+        myMvd <- copula::mvdc(copula=myCop, margins=c("logis", "logis"), paramMargins=list(list(location=loc.1, scale=scale.1), list(location=loc.2, scale=scale.2)))
+        dat <- suppressWarnings(copula::rmvdc(myMvd, n))        
+    } else {
+        stop("cannot simulate a bivariate logistic distribution with this correlation value")
+    }
+}
+
+rbigamma=function(n, shape.1, shape.2, rate.1, rate.2, rho) {
+    myCop <- copula::normalCopula(param=rho)
+    myMvd <- copula::mvdc(copula=myCop, margins=c("gamma", "gamma"), paramMargins=list(list(shape=shape.1, rate=rate.1), list(shape=shape.2, rate=rate.2)))
+    dat <- suppressWarnings(copula::rmvdc(myMvd, n))        
+}
+
+dilog <- function(x) {
+    flog  <- function(t) log(t) / (1-t)  # singularity at t=1, almost at t=0
+    pracma::simpadpt(flog, 1, x, tol = 1e-12)
+}

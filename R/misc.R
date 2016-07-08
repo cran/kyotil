@@ -142,34 +142,6 @@ get.st.mean=function(st.fit) {
 }
 
 
-# returns sandwich estimator of variance matrix
-# from Thomas Lumley
-infjack.glm<-function(glm.obj,groups){
-    umat<-estfun.glm(glm.obj)
-    usum<-rowsum(umat,groups,reorder=FALSE)
-    modelv<-summary(glm.obj)$cov.unscaled
-    modelv%*%(t(usum)%*%usum)%*%modelv
-}
-jack.glm<-function(glm.obj,groups){
-    umat<-jackvalues(glm.obj)
-    usum<-rowsum(umat,groups,reorder=FALSE)
-    t(usum)%*%usum*(nrow(umat)-1)/nrow(umat)
-}
-jackvalues<-function(glm.obj){
-    db<-lm.influence(glm.obj)$coef
-    t(t(db)-apply(db,2,mean))
-}   
-estfun.glm<-function(glm.obj){
-    if (is.matrix(glm.obj$x)) 
-        xmat<-glm.obj$x
-    else {
-        mf<-model.frame(glm.obj)
-        xmat<-model.matrix(terms(glm.obj),mf)       
-    }
-    residuals(glm.obj,"working")*glm.obj$weights*xmat
-}
-
-
 #iterated sum, like diff
 summ=function(x) {
     x[-1]+x[-length(x)]
@@ -183,7 +155,7 @@ multi.outer <- function(f, ... ) {
 }
 
 
-get.sim.res = function(foldername, verbose=FALSE) {
+get.sim.res = function(foldername, verbose=TRUE) {
     
     if (!requireNamespace("abind")) {print("abind does not load successfully"); return (NULL) }
     
@@ -195,19 +167,27 @@ get.sim.res = function(foldername, verbose=FALSE) {
     } else {
         fileNames = foldername %+%"/"%+%tmp
     }
-    cat("number of files: "%+%length(fileNames),"\n")
     
     ## read files
     res=lapply(fileNames, function(x) {load(file=x); res})
     res.all = do.call(abind::abind, res)
     names(dimnames(res.all))=names(dimnames(res[[1]]))
     
-    if(verbose) {
-        cat("res.all:\n")
-        print(str(res.all))        
-        cat("\nFirst dimension col names: \n")
+    if(verbose) str(res.all)
+
+    if(verbose>=2) {
+        cat("number of files: "%+%length(fileNames),"\n")
         print(dimnames(res.all)[[1]])
     }
     
     res.all    
+}
+
+last = function (x, n=1, ...) {
+    if (length(x)==1 & is.character(x)) tail (readLines(x), n=n, ...) # read file, length(x)==1 is needed b/c otherwise last(c("a","b")) won't behave properly
+    else if (is.vector(x)) x[length(x)]
+    else if (is.matrix(x)) x[nrow(x),]
+    else if (is.array(x)) x[length(x)]
+    else if (is.list(x)) x[[length(x)]]
+    else stop ("last(): x not supported")
 }

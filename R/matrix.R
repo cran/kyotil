@@ -26,14 +26,6 @@ fill.jagged.array=function(a) {
 }
 
 
-last = function (x, n=1, ...) {
-    if (length(x)==1 & is.character(x)) tail (readLines(x), n=n, ...) # read file, length(x)==1 is needed b/c otherwise last(c("a","b")) won't behave properly
-    else if (is.vector(x)) x[length(x)]
-    else if (is.array(x)) x[length(x)]
-    else if (is.list(x)) x[[length(x)]]
-    else stop ("last(): x not supported")
-}
-
 # return a subset of data that is 1 row every thin.factor rows
 ThinRows = function (dat, thin.factor=10) {
     NumRows = nrow(dat)

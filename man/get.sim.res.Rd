@@ -7,7 +7,7 @@ Read simulation results
 Go through a folder and read all files and combine the results into a multidimensional array.
 }
 \usage{
-get.sim.res(foldername, verbose = FALSE)
+get.sim.res(foldername, verbose = TRUE)
 }
 \arguments{
   \item{foldername}{string

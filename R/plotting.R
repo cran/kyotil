@@ -1,7 +1,5 @@
 mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height=NULL, ext="eps", oma=NULL, mar=NULL,main.outer=FALSE, save2file=TRUE, ...) {    
     
-    print(paste(getwd(),"/",file,sep=""))
-    
     if (!is.null(mfcol)) {
         nrow=mfcol[1]; ncol=mfcol[2]        
     } else {
@@ -20,7 +18,9 @@ mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height
         } else if (nrow==4 & ncol==6) {width=15; height=10
         } else if (nrow==2 & ncol==4) {width=13; height=6.7
         } else if (nrow==3 & ncol==6) {width=17.5; height=9
+        } else if (nrow==3 & ncol==7) {width=17.5; height=7
         } else if (nrow==4 & ncol==8) {width=17.5; height=9
+        } else if (nrow==4 & ncol==7) {width=17.5; height=9
         } else if (nrow==4 & ncol==9) {width=20; height=9
         } else if (nrow==3 & ncol==5) {width=15; height=9.6
         } else if (nrow==3 & ncol==4) {width=12; height=9.6
@@ -50,6 +50,7 @@ mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height
     if(save2file){      
         if (ext=="pdf") pdf (paper="special", file=file%+%"."%+%ext, width=width, height=height, ...)
         else postscript (paper="special", horizontal=FALSE, file=file%+%"."%+%ext, width=width, height=height, ...)
+        cat("Saving figure to "%+%paste(getwd(),"/",file,sep="")%+%"\n")        
     } else {
         print("not saving to file")
     }
@@ -146,15 +147,16 @@ empty.plot=function () {
     plot(1,1,type="n",xlab="",ylab="",xaxt="n", yaxt="n", bty="n")
 }
 
-myforestplot=function(dat, xlim=NULL, xlab="", main="", col.1="red", col.2="blue",plot.labels=TRUE,order=FALSE,decreasing=FALSE) {
+# dat
+myforestplot=function(dat, xlim=NULL, xlab="", main="", col.1="red", col.2="blue",plot.labels=TRUE,order=FALSE,decreasing=FALSE, vline=TRUE,cols=NULL,log="") {
     if (order) dat=dat[order(dat[,1],decreasing=decreasing),] 
     p=nrow(dat)    
     # makes no plot, but helps set the x axis later
-    plot(c(dat[,2], dat[,3]),rep(1:p,2), xlim=xlim, yaxt="n", xaxt="s", xlab=xlab, ylab="", main="", type="n", cex.main=1.4, axes=F)
+    plot(c(dat[,2], dat[,3]),rep(1:p,2), xlim=xlim, yaxt="n", xaxt="s", xlab=xlab, ylab="", main="", type="n", cex.main=1.4, axes=F, log=log)
     mtext(side=3, line=3, adj=0, text=main, cex=1.4, font=2, xpd=NA)
     if (range(dat[,2:3])[1]>0) null.val=1 else null.val=0 # if all values are greater than 0, 1 is probably the null, otherwise, 0 is probably the null
-    abline(v=null.val, col="gray")
-    cols=ifelse(dat[,4]<0.05, col.1, col.2)
+    if(vline) abline(v=null.val, col="gray")
+    if(is.null(cols)) cols=ifelse(dat[,4]<0.05, col.1, col.2)
     points(dat[,1], nrow(dat):1, pch=19, col=cols)
     segments(dat[,2], nrow(dat):1, dat[,3], nrow(dat):1, lwd=2, col=cols)
     axis(1, cex.axis=1.4)
@@ -163,27 +165,14 @@ myforestplot=function(dat, xlim=NULL, xlab="", main="", col.1="red", col.2="blue
 }
 
 
-# can use after myboxplot
-# both dat must have two columns, each row is dat from one subject
-# x.ori=0; xaxislabels=rep("",2); cex.axis=1; add=FALSE; xlab=""; ylab=""; pcol=NULL; lcol=NULL
-my.interaction.plot=function(dat, x.ori=0, xaxislabels=rep("",2), cex.axis=1, add=FALSE, xlab="", ylab="", pcol=NULL, lcol=NULL, ...){
-    if (!add) plot(0,0,type="n",xlim=c(1,2),ylim=range(dat), ylab=ylab, xlab=xlab, xaxt="n", ...)
-    cex=.25; pch=19
-    if (is.null(lcol)) lcol=ifelse(dat[,1]>dat[,2],"red","black")
-    for (i in 1:nrow(dat)) {
-        points (1+x.ori, dat[i,1], cex=cex, pch=pch, col=ifelse(is.null(pcol), 1, pcol[i,1]))
-        points (2+x.ori, dat[i,2], cex=cex, pch=pch, col=ifelse(is.null(pcol), 1, pcol[i,2]))
-        lines (1:2+x.ori, dat[i,], lwd=.25, col=lcol[i])
-    }
-    axis(side=1, at=1:2+x.ori, labels=xaxislabels, cex.axis=cex.axis)
-}
-
 myboxplot <- function(object, ...) UseMethod("myboxplot") 
 
+
+# this function may fail sometimes, most likely at eval
 # myboxplot.formula and myboxplot.list make a boxplot with data points and do inferences for two group comparions. 
 # cex=.5; ylab=""; xlab=""; main=""; box=FALSE; highlight.list=NULL; at=NULL;pch=1;col=1;
-myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL,
-    pch=1, col=1, test="", reshape.formula=NULL, jitter=TRUE, add.interaction=FALSE, ...){
+myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box=TRUE, at=NULL, na.action=NULL,
+    pch=1, col=1, test="", reshape.formula=NULL, jitter=TRUE, add.interaction=FALSE,  drop.unused.levels = TRUE, ...){
     
     save.seed <- try(get(".Random.seed", .GlobalEnv), silent=TRUE) 
     if (class(save.seed)=="try-error") {        
@@ -192,15 +181,19 @@ myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box
     }                        
     set.seed(1)
     
+     # removes empty groups formed through model.frame
+     mf=model.frame(formula, data)
+     response <- attr(attr(mf, "terms"), "response") 
+     tmp.dat=split(mf[[response]], mf[-response])
+     if(drop.unused.levels) {
+         len.n=sapply(tmp.dat, length)
+         tmp.dat=tmp.dat[len.n!=0]
+     }
+     res=boxplot(tmp.dat, range=0, xlab=xlab, at=at, col=NULL, cex=cex, pars = list(boxwex = if(box) 0.8 else 0), main=main, ylab=ylab, ...)
     
-    if (box) {
-        res=boxplot(formula, data, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL, cex=cex, ...)
-    } else {
-        res=boxplot(formula, data, range=0, ylab=ylab, xlab=xlab, at=at, main=main, col=NULL, cex=cex, border="white", ...)
-    }
-        
     dat.tmp=model.frame(formula, data)
     xx=interaction(dat.tmp[,-1])
+    if(drop.unused.levels) xx=droplevels(xx)
     if(is.null(at)){        
         xx=as.numeric(xx)
     } else{
@@ -217,20 +210,36 @@ myboxplot.formula=function(formula, data, cex=.5, ylab="", xlab="", main="", box
     x.unique=unique(dat.tmp[[2]])
     if (length(test)>0) {
         sub=""
-        if ("t" %in% test) sub=sub%+%" Student's t "%+%signif(t.test(formula, data)$p.value,2) 
-        if ("w" %in% test) sub=sub%+%" Wilcoxon "%+%signif(wilcox.test(formula, data)$p.value,2)
-        if ("k" %in% test) sub=sub%+%" Kruskal "%+%signif(kruskal.test(formula, data)$p.value,2)
+        pvals=NULL
+        if ("t" %in% test) {
+            p.val=t.test(formula, data)$p.value
+            pvals=c(pvals, Student=p.val)
+            sub=sub%+%" Student's t "%+%ifelse(length(test)==1,"p-val ","")%+%signif(p.val,2) 
+        }
+        if ("w" %in% test) {
+            p.val=suppressWarnings(wilcox.test(formula, data)$p.value)
+            pvals=c(pvals, Wilcoxon=p.val)
+            sub=sub%+%" Wilcoxon "%+%ifelse(length(test)==1,"p-val ","")%+%signif(p.val,2)
+        }
+        if ("k" %in% test) {
+            p.val=kruskal.test(formula, data)$p.value
+            pvals=c(pvals, Kruskal=p.val)
+            sub=sub%+%" Kruskal "%+%ifelse(length(test)==1,"p-val ","")%+%signif(p.val,2)
+        }
         if ("f" %in% test) {
             dat.wide=myreshapewide (reshape.formula, data, idvar = NULL)
             #str(dat.wide)# show this so that we know we are using the right data to do the test
             ftest = friedman.test (as.matrix(dat.wide[,-(1)]))
+            p.val=ftest$p.value
+            pvals=c(pvals, Friedman=p.val)
             if (add.interaction) my.interaction.plot(as.matrix(dat.wide[,-1]), add=T)
-            sub=sub%+%" Friedman "%+%signif(ftest$p.value,2)
+            sub=sub%+%" Friedman "%+%ifelse(length(test)==1,"p-val ","")%+%signif(p.val,2)
         }
         title(sub=sub)
+        res$pvals=pvals
     }
     
-    res
+    invisible(res)
     
 }
 
@@ -253,6 +262,21 @@ myboxplot.list=function(object, ...){
     
 }
 
+
+# can use after myboxplot
+# both dat must have two columns, each row is dat from one subject
+# x.ori=0; xaxislabels=rep("",2); cex.axis=1; add=FALSE; xlab=""; ylab=""; pcol=NULL; lcol=NULL
+my.interaction.plot=function(dat, x.ori=0, xaxislabels=rep("",2), cex.axis=1, add=FALSE, xlab="", ylab="", pcol=NULL, lcol=NULL, ...){
+    if (!add) plot(0,0,type="n",xlim=c(1,2),ylim=range(dat), ylab=ylab, xlab=xlab, xaxt="n", ...)
+    cex=.25; pch=19
+    if (is.null(lcol)) lcol=ifelse(dat[,1]>dat[,2],"red","black")
+    for (i in 1:nrow(dat)) {
+        points (1+x.ori, dat[i,1], cex=cex, pch=pch, col=ifelse(is.null(pcol), 1, pcol[i,1]))
+        points (2+x.ori, dat[i,2], cex=cex, pch=pch, col=ifelse(is.null(pcol), 1, pcol[i,2]))
+        lines (1:2+x.ori, dat[i,], lwd=.25, col=lcol[i])
+    }
+    axis(side=1, at=1:2+x.ori, labels=xaxislabels, cex.axis=cex.axis)
+}
 
 # called butterfly.plot, because it is meant to plot two treatment arms at two time points, the two arms are plotted in a mirror fashion, see "by analyte.pdf" for an example
 # if dat2 is null: dat is matrix with four columns. each row is one subject, the columns will be plotted side by side, with lines connecting values from one ptid
@@ -321,7 +345,7 @@ corplot.formula=function(formula,data,main="",method=c("pearson","spearman"),col
         #abline(fit, untf=log=="xy", col=col.deming)        
     }
     
-    cor.
+    invisible(cor.)
 }
 
 abline.pts=function(pt1, pt2=NULL){
@@ -339,10 +363,25 @@ abline.pts=function(pt1, pt2=NULL){
 }
 #abline.pts(c(1,1), c(2,2))
 
-abline.pt.slope=function(pt1, slope,...){
+abline.pt.slope=function(pt1, slope, x2=NULL, ...){
     intercept = pt1[2]-slope*pt1[1]
-    abline(intercept, slope,...)
+    if (is.null(x2)) {
+        abline(intercept, slope, ...)
+    } else {
+        pt2=c(x2, intercept+slope*x2)
+        lines(c(pt1[1],pt2[1]), c(pt1[2],pt2[2]), ...)
+    }
+    
 }
+
+# put a shade between two lines
+# x is a vector of two values
+# col is red blue gree
+abline.shade=function(x, col=c(0,1,0)){
+    usr <- par('usr') 
+    rect(x[1], usr[3], x[2], usr[4], col=rgb(red=col[1], blue=col[2], green=col[3], alpha=.5), border=NA) 
+}
+
 #abline.pt.slope(c(1,1), 1)
 mymatplot=function(x, y, type="b", lty=1:5, pch=NULL, col=1:6, xlab=NULL, ylab="", 
     draw.x.axis=TRUE, bg=NA, lwd=1, at=NULL, make.legend=TRUE, legend=NULL, 
@@ -367,4 +406,27 @@ mymatplot=function(x, y, type="b", lty=1:5, pch=NULL, col=1:6, xlab=NULL, ylab="
             mylegend(legend, x=legend.x, lty=lty, title=legend.title, col=col, pt.bg=bg, cex=legend.cex, lwd=lwd, inset=legend.inset)
         }
     }
+}
+
+
+myhist=function(x, add.norm=TRUE, col.norm="blue", ...){
+    if (!add.norm) hist(x, ...) else {
+        hist=hist(x,breaks=30, plot=F)
+        dnorm=dnorm(seq(range(x)[1],range(x)[2], length=100),mean(x),sd(x))
+        hist(x, freq=F, ylim=range(hist$density, dnorm), ...)
+        lines(seq(range(x)[1],range(x)[2], length=100), dnorm, col=col.norm)
+    }    
+}
+
+
+# eclipse
+plot.ellipse=function(x0,y0,a=1,b=1,theta=0,alpha=0,add=TRUE,...) {
+    theta <- seq(0, 2 * pi, length=500)
+#    x <- x0 + a * cos(theta)
+#    y <- y0 + b * sin(theta)    
+    x <- x0 + a * cos(theta) * cos(alpha) - b * sin(theta) * sin(alpha)
+    y <- y0 + a * cos(theta) * sin(alpha) + b * sin(theta) * cos(alpha)
+    if(add) {
+        lines(x,y,...)
+    } else plot(x, y, type = "l",...)
 }

@@ -17,6 +17,8 @@
 \alias{read.tsv}
 \alias{table.prop}
 \alias{unix}
+\alias{table.cases}
+\alias{table.cases.3}
 \alias{multi.outer}
 
 \title{
@@ -54,7 +56,7 @@ methods4(classes, super = FALSE, ANY = FALSE)
 
 myaggregate(x, by, FUN, new.col.name = "aggregate.value", ...)
 
-myreshapewide(formula, dat, idvar = NULL)
+myreshapewide(formula, dat, idvar, keep.extra.col=FALSE)
 
 mysapply(X, FUN, ..., simplify = TRUE, USE.NAMES = TRUE, ret.mat = TRUE)
 
@@ -68,7 +70,10 @@ read.sv(file, header = TRUE, ...)
 
 read.tsv(file, header = TRUE, sep = "\t", ...)
 
-table.prop(x, y, digit = 1, style = 2,whole.table.add.to.1=FALSE)
+table.prop(x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE,useNA="ifany") 
+
+table.cases  (case,group,include.all=TRUE)
+table.cases.3(case,group1,group2)
 
 unix()
 }
@@ -84,8 +89,9 @@ unix()
 %%     ~~Describe \code{n} here~~
 }
 
-  \item{f}{
-In multi.out, f is a function.}
+  \item{f}{In multi.out, f is a function.}
+  \item{case}{vector of 0/1}
+  \item{group}{vector of multi-group indicators}
   \item{formula}{
 a formula object.}
 
@@ -177,6 +183,22 @@ Boolean
   \item{FUN}{
 %%     ~~Describe \code{FUN} here~~
 }
+  \item{keep.extra.col}{
+%%     ~~Describe \code{FUN} here~~
+}
+  \item{useNA}{
+%%     ~~Describe \code{FUN} here~~
+}
+  \item{include.all}{
+%%     ~~Describe \code{FUN} here~~
+}
+  \item{group1}{
+%%     ~~Describe \code{FUN} here~~
+}
+  \item{group2}{
+%%     ~~Describe \code{FUN} here~~
+}
+
 }
 \examples{
 

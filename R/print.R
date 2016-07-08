@@ -99,14 +99,13 @@ mytex=function(dat=NULL, file.name="temp",
     if (endsWith(file.name,".tex")) file.name=substr(file.name, 1, nchar(file.name)-4)
     if (stand.alone) {
         # create two files, one stand alone and one not, to facilitate debugging latex code
-        file.name.2=file.name%+%".tex"
         tmp=strsplit(file.name, split="/")[[1]]
         if (length(tmp)==1) path="./" else path=concatList(tmp[-length(tmp)], "/")
-        foldername=path%+%"/stdaln"; 
+        foldername=path%+%"/input"
         if(!file.exists(foldername)) dir.create(foldername) 
-        file.name=foldername%+%"/"%+%tmp[length(tmp)]%+%"_stdaln"
+        file.name.2=foldername%+%"/"%+%tmp[length(tmp)]%+%".tex"
+        file.name=file.name%+%".tex"
     }
-    file.name=file.name%+%".tex"
     
     if (include.dup.rownames) include.rownames=F
     
@@ -126,26 +125,44 @@ mytex=function(dat=NULL, file.name="temp",
         names(dat)=gsub("_"," ",names(dat))
         for (i in 1:length(dat)) {
             dat1 = dat[[i]]        
+            if (length(dim(dat1))==1) {
+                # convert vector to matrix
+                dat1=matrix(c(dat1),nrow=1, dimnames=list(NULL,names(dat1)))
+            }
             .ncol=ncol(dat1)
             if (is.null(.ncol)) {
                 if (is.null(nrow(dat1))) .ncol=1
                 else .ncol=nrow(dat1)
             }
             
-            top.1=concatList("& \\multicolumn{1}{c}{"%+%sanitize.text(colnames(dat1))%+%"} ") %+% "\\\\ \n"%+% # center aligned column titles
+            if (is.null(digits)) {
+                if (is.integer(dat1)) digits=0
+            }
+            
+            tmp=if(!is.null(sanitize.text.function)) sanitize.text.function(colnames(dat1)) else sanitize.text(sanitize.numbers(colnames(dat1)))
+            top.1=concatList("& \\multicolumn{1}{c}{"%+%tmp%+%"} ") %+% "\\\\ \n"%+% # center aligned column titles
                 "\\hline\n" # insert at the beginning of table, "\n" is added so that there is no need to keep it in col.title
             if(!include.rownames) top.1=substr(top.1, 2,10000)
             top=if(!include.colnames)  "" else top.1
+            if(include.dup.rownames) top="&"%+%top
                 
             if (include.colnames & is.null(hline.after)) hline.after=c(nrow(dat1)) # cannot use default due to add.to.row    
             include.colnames=FALSE
+            
+            tmp=names(dimnames(dat1))
+            if(!is.null(tmp) & is.null(col.headers)) {
+                if(trim(tmp[2])!="")
+                    col.headers="\\hline\n  "%+%tmp[1]%+%"&  \\multicolumn{"%+% ncol(dat1)%+%"}{c}{"%+%tmp[2]%+%"}   \\\\  \n"
+            }
             if (!is.null(col.headers)) top=col.headers%+%top else top="\\hline  "%+%top
             
             if (is.null(add.to.row)) {
                 add.to.row=list(list(0), top)
             } else {
-                add.to.row=list(c(list(0), add.to.row[[1]]), c(top, add.to.row[[1]]))
+                add.to.row=list(c(list(0), add.to.row[[1]]), c(top, add.to.row[[2]]))
             }
+            #print(add.to.row)
+            
         
             if (!is.matrix(dat1) & is.character(dat1)) {
                 cat (dat1%+%"\n\n\n", file=file.name, append=TRUE)
@@ -159,7 +176,7 @@ mytex=function(dat=NULL, file.name="temp",
                     
                     if (include.dup.rownames & !is.null(rownames(dat1))) {
                         tmp=suppressWarnings(data.frame(rownames(dat1),data.frame(dat1))) # warnings about duplicate row names
-                        if (!is.null(colnames(dat1))) colnames(tmp)[-1]=colnames(dat1)
+                        if (!is.null(colnames(dat1))) colnames(tmp)[2:ncol(tmp)]=colnames(dat1)
                         dat1=tmp
                         .ncol=.ncol+1
                     }
@@ -172,20 +189,23 @@ mytex=function(dat=NULL, file.name="temp",
                         if (length(align)==1) align=rep(align,.ncol+1)
                         if (include.dup.rownames) align[2]="l" else align[1]="l" # col names
                     }
+                    
+                    if(!include.rownames) rownames(dat1)=1:nrow(dat1)# otherwise there will be a warning from xtable
+                    
                     print(..., xtable::xtable(dat1, 
                             digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
                             display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
                             align=align, caption=caption, ...), 
                         hline.after=hline.after, type = "latex", file = file.name, append = TRUE, floating = floating, 
                         include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
-                        add.to.row=add.to.row, sanitize.text.functio =sanitize.text.function )
+                        add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
                     if (stand.alone) print(..., xtable::xtable(dat1, 
                             digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
                             display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
                             align=align, caption=caption, ...), 
                         hline.after=hline.after, type = "latex", file = file.name.2, append = TRUE, floating = floating, 
                         include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
-                        add.to.row=add.to.row, sanitize.text.functio =sanitize.text.function )
+                        add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
                 }
                 cat ("\n", file=file.name, append=TRUE)
                 if(stand.alone) cat ("\n", file=file.name.2, append=TRUE)
@@ -197,7 +217,7 @@ mytex=function(dat=NULL, file.name="temp",
     if(!append) {
         mytex.end(file.name)
     }
-    cat ("Saving data to "%+%getwd()%+%"/"%+%file.name%+%"\n")
+    cat ("Writing table to "%+%getwd()%+%"/"%+%file.name%+%"\n")
 }
 #x=matrix(0,2,2)
 #attr(x,"caption")="cap"
@@ -244,7 +264,7 @@ mywrite.csv = function(x, file="tmp", row.names=FALSE, digits=NULL, ...) {
             }                
         }
     }
-    print("Writing csv file to "%+%getwd()%+%"/"%+%file%+%".csv", quote=FALSE)
+    cat("Writing table to "%+%getwd()%+%"/"%+%file%+%".csv\n")
     write.csv(x, file=file%+%".csv", row.names=row.names, ...)
 }
 

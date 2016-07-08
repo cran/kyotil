@@ -4,11 +4,12 @@ cbind.uneven=function(li) {
     alllen=lapply(allnames, length)
     nams = allnames[[which.max(alllen)]]
     nams= c(nams, setdiff(unique(unlist(allnames)), nams)) # append additional names
+    myprint(nams)
     
     res=NULL
     for (a in li){
         p=ncol(a)
-        toadd = matrix(NA, nrow=length(nams), ncol=p, dimnames=list(nams,NULL))
+        toadd = matrix(NA, nrow=length(nams), ncol=p, dimnames=list(nams,colnames(a)))
         toadd[rownames(a),]=as.matrix(a)
         if (is.null(res)) {
             res=as.data.frame(toadd, stringsAsFactors=FALSE) # if stringsAsFactors is here in cbind, it won't work, that is why we have to do a if on is.null(res)
@@ -123,8 +124,8 @@ myaggregate = function (x, by, FUN, new.col.name="aggregate.value", ...)
     #original
     #y <- data.frame(w, lapply(y, unlist, use.names = FALSE))
     #modified
-    if(nrow(w)!=nrow(matrix(unlist(z), nrow=nrow(w), byrow=TRUE))) stop("SOMETHING WRONG IN myaggregate")
-    y <- data.frame(w, matrix(unlist(z), nrow=nrow(w), byrow=TRUE))
+    stopifnot(length(unlist(z))%%nrow(w)==0)
+    y <- data.frame(w, matrix(unlist(z), nrow=nrow(w), byrow=TRUE), stringsAsFactors=FALSE) # note stringsAsFactors option is hard coded here
     #original
     #names(y) <- c(names(by), names(x))
     #modified
@@ -179,23 +180,33 @@ mytapply = function (X, INDEX, FUN = NULL, ..., simplify = TRUE)
 }
 
 # category.var is 
-myreshapewide=function(formula, dat, idvar=NULL){
+myreshapewide=function(formula, dat, idvar, keep.extra.col=FALSE){
     tmp = as.character(formula)
-    category.var=tmp[3]
     outcome.var=tmp[2]
+    category.var=tmp[3]
+    stopifnot(category.var %in% names(dat))
     
-    if (is.null(idvar)) {
-        idvar=setdiff(names(dat), c(category.var,outcome.var))
-        # if any of idvar has NA then it is a problem if not treated, here we opt to remove such columns
-        idvar=idvar[sapply(idvar, function (idvar.) all(!is.na(dat[,idvar.])) )]
-    } else {
-        # remove those columns with changing values within an id
-        # need [,-(1:length(idvar)),drop=FALSE] because the first columns are idvar
-        tmp=apply(aggregate (x=dat[,!names(dat) %in% c(idvar,category.var,outcome.var),drop=FALSE], by=dat[,names(dat) %in% idvar,drop=FALSE], function(y) length(rle(y)$values)==1)[,-(1:length(idvar)),drop=FALSE], 
+#    if (is.null(idvar)) {
+#        idvar=setdiff(names(dat), c(category.var,outcome.var))
+#        # if any of idvar has NA then it is a problem if not treated, here we opt to remove such columns
+#        idvar=idvar[sapply(idvar, function (idvar.) all(!is.na(dat[,idvar.])) )]
+#    } else {
+    
+    # remove those columns with changing values within an id
+    # need [,-(1:length(idvar)),drop=FALSE] because the first columns are idvar
+    if(keep.extra.col) {
+        tmp=apply(aggregate (x=dat[,!names(dat) %in% c(idvar,category.var,outcome.var),drop=FALSE], by=dat[,names(dat) %in% idvar,drop=FALSE], function(y) {
+            if(is.factor(y)) y=as.character(y)
+            length(rle(y)$values)==1
+        })[,-(1:length(idvar)),drop=FALSE], 
             2, all)
         varying.var=names(tmp)[!tmp]
         dat=dat[,!names(dat) %in% setdiff(varying.var, c(category.var,outcome.var)),drop=FALSE]
+    } else {
+        dat=dat[,names(dat) %in% c(category.var,outcome.var,idvar)]
     }
+    
+#    }
     reshape(dat, direction="wide", v.names=outcome.var, timevar=category.var, idvar=idvar )
 }
 
@@ -251,18 +262,22 @@ keepWarnings <- function(expr) {
 
 # make table that shows both counts/frequency and proportions
 # style 1: count only; 2: count + percentage; 3: percentage only
-table.prop=function (x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE) {
+table.prop=function (x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE,useNA="ifany") {
     if (is.null(y)) {
-        tbl=table(x)
+        tbl=table(x,useNA=useNA)
         whole.table.add.to.1=TRUE  # to trick the computation of prop
     } else {
-        tbl=table(x,y)
+        tbl=table(x,y,useNA=useNA)
     }
     if (whole.table.add.to.1) prop = tbl/sum(tbl) else prop = apply (tbl, 2, prop.table)
     if (style==2) {
         res = tbl %+% " (" %+% round(prop*100,digit) %+% ")"
     } else if (style==3) {
         res = prop*100 # no need to do formating here
+    } else if (style==4) {
+        res = tbl %+% " (" %+% round(prop*100,digit) %+% "%)"
+    } else if (style==5) {
+        res = round(prop*100,digit)%+%"%" # no need to do formating here
     } else res=tbl
     res=matrix(res, nrow=nrow(tbl))    
     dimnames(res)=dimnames(tbl)
@@ -273,6 +288,34 @@ table.prop=function (x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE) {
     res
 }
 
+# case is vector of 0/1 and group is vector of multi-group indicators
+# the second row is taken in the computation, so be careful about NA's
+table.cases=function (case,group,include.all=TRUE) {
+    tbl=table(case, group)
+#    tab=binom::binom.confint(x=c(tbl[2,],if(include.all) sum(tbl[2,])), n=c(colSums(tbl),if(include.all) sum(tbl)), alpha=0.05, method=c("wilson"))[,-1] # remove method column
+    tab=Hmisc::binconf(x=c(tbl[2,],if(include.all) sum(tbl[2,])), n=c(colSums(tbl),if(include.all) sum(tbl)), alpha=0.05, method=c("wilson"), include.x=TRUE, include.n=TRUE)
+    tab[,3:5]=tab[,3:5]*100 # get percentage
+    colnames(tab)=c("# cases","# total","% cases","lb","ub")
+    rownames(tab)=c(colnames(tbl),if(include.all) "all")
+    tab
+}
+
+# case is vector of 0/1, group1 and group2 are vectors of multi-group indicators
+# output:
+#             low medium  high
+#low 48% (12/25) 5% (1/19)   0% (0/6)
+#medium  20% (3/15)  21% (4/19)  0% (0/16)
+#high    20% (2/10)  25% (3/12)  0% (0/28)
+# e.g. table.cases.3(HIVwk28preunbl, cut2(dat.merge[[a]],g=3), cut2(dat.merge[["cd8.env.poly"]],g=3))
+table.cases.3=function(case,group1,group2){
+    n.x=length(table(group1))
+    n.y=length(table(group2))
+    tab=table(group1, group2, case)
+    res=matrix(round(100*tab[,,2]/(tab[,,1]+tab[,,2])) %+%  "% (" %+% tab[,,2] %+% "/" %+%(tab[,,1]+tab[,,2])%+% ")",nrow=n.x)
+    rownames(res)= if(n.x==2) c("low","high") else c("low","medium","high")
+    colnames(res)= if(n.y==2) c("low","high") else c("low","medium","high")
+    res
+}
 
 # from Thomas, found on R user group
 methods4<-function(classes, super=FALSE, ANY=FALSE){ 

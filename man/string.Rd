@@ -1,4 +1,18 @@
 \name{string.functions}
+\alias{string.functions}
+\alias{\%+\%}
+\alias{contain}
+\alias{escapeUnderline}
+\alias{fileStem}
+\alias{firstIndex}
+\alias{getExt}
+\alias{getFileStem}
+\alias{getStem}
+\alias{lastIndex}
+\alias{myprint}
+\alias{myprint.default}
+\alias{remove.prefix}
+\alias{trim}
 \title{String Functions}
 \description{ \%+\% concatenates its arguments and returns a string.}
 \usage{
@@ -6,8 +20,7 @@
 a \%+\% b
 
 contain(s1, s2)
-
-endsWith(s1, s2)
+trim (x, trim.trailing=TRUE, trim.leading=TRUE)  
 
 escapeUnderline(name)
 
@@ -29,24 +42,8 @@ myprint(object, ...)
 
 remove.prefix(s, sep = "_")
 
-startsWith(s1, s2)
 }
 
-\alias{string.functions}
-\alias{\%+\%}
-\alias{contain}
-\alias{endsWith}
-\alias{escapeUnderline}
-\alias{fileStem}
-\alias{firstIndex}
-\alias{getExt}
-\alias{getFileStem}
-\alias{getStem}
-\alias{lastIndex}
-\alias{myprint}
-\alias{myprint.default}
-\alias{remove.prefix}
-\alias{startsWith}
 
 
 \arguments{
@@ -97,6 +94,15 @@ startsWith(s1, s2)
 %%     ~~Describe \code{s} here~~
 }
   \item{sep}{
+%%     ~~Describe \code{sep} here~~
+}
+  \item{x}{
+%%     ~~Describe \code{sep} here~~
+}
+  \item{trim.leading}{
+%%     ~~Describe \code{sep} here~~
+}
+  \item{trim.trailing}{
 %%     ~~Describe \code{sep} here~~
 }
 

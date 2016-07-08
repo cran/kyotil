@@ -1,5 +1,7 @@
 \name{random.functions}
 \alias{dbern}
+\alias{rbigamma}
+\alias{rbilogistic}
 \alias{dcorbern}
 \alias{dmixnorm}
 \alias{dnorm.norm.gamma}
@@ -25,6 +27,10 @@ dmixnorm(x, mix.p, sd1, sd2, log = FALSE)
 dnorm.norm.gamma(x, p, same.distr = FALSE, log = FALSE)
 
 rbern(n, prob, generalized = FALSE)
+
+rbigamma(n, shape.1, shape.2, rate.1, rate.2, rho)
+rbilogistic(n, loc.1, loc.2, scale.1, scale.2, rho) 
+
 
 rejective.sampling(N, n, pik)
 
@@ -105,6 +111,33 @@ rmixnorm (n, mix.p, mu1, mu2, sd1, sd2)
 %%     ~~Describe \code{lambda} here~~
 }
   \item{beta}{
+%%     ~~Describe \code{beta} here~~
+}
+  \item{loc.1}{
+%%     ~~Describe \code{beta} here~~
+}
+  \item{loc.2}{
+%%     ~~Describe \code{beta} here~~
+}
+  \item{scale.1}{
+%%     ~~Describe \code{beta} here~~
+}
+  \item{scale.2}{
+%%     ~~Describe \code{beta} here~~
+}
+  \item{rate.1}{
+%%     ~~Describe \code{beta} here~~
+}
+  \item{rate.2}{
+%%     ~~Describe \code{beta} here~~
+}
+  \item{shape.1}{
+%%     ~~Describe \code{beta} here~~
+}
+  \item{shape.2}{
+%%     ~~Describe \code{beta} here~~
+}
+  \item{rho}{
 %%     ~~Describe \code{beta} here~~
 }
 }

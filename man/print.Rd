@@ -134,5 +134,14 @@ roundup (3.1, 2) # 3.10
 formatInt(3, 2) # 03
 
 
+\dontrun{ 
+mytex (tab, file="tables/"%+%label%+%"/interaction_bstiter_type1_4",  include.dup.rownames = T, 
+    include.colnames = TRUE, col.headers = 
+  "\\\\hline\n  &  \\\\multicolumn{2}{c}{Vaccine}  &  \\\\multicolumn{2}{c}{Control} \\\\\\\\  \n",
+    comment = FALSE, 
+    floating = FALSE, lines = TRUE, hline.after = c(10,20,30,40), add.to.row = NULL, 
+    align=c("c","|c","c","c","c"), # vertical lines in the table
+    sanitize.text.function = NULL) 
+}
 
 }

@@ -122,3 +122,5 @@ permn=function (x, fun = NULL, ...)
     }
     out
 }
+
+

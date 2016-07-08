@@ -1,8 +1,10 @@
 \name{regression.model.functions}
 \alias{coef.geese}
+\alias{coef.tps}
 \alias{getFixedEf}
 \alias{getFixedEf.coxph}
 \alias{getFixedEf.gam}
+\alias{getFixedEf.tps}
 \alias{getFixedEf.gee}
 \alias{getFixedEf.geese}
 \alias{getFixedEf.glm}
@@ -22,9 +24,12 @@
 \alias{getVarComponent.lmerMod}
 \alias{interaction.table}
 \alias{predict.geese}
+\alias{predict.tps}
 \alias{residuals.geese}
 \alias{vcov.geese}
+\alias{vcov.tps}
 \alias{vcov.logistf}
+\alias{risk.cal}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Regression Model Functions
@@ -34,12 +39,18 @@ getFormattedSummary prints a table of regression coefficient estimates and stand
 }
 \usage{
 
-getFormattedSummary(fits, type = 1, est.digits = 2, se.digits = 2, random = FALSE, 
-    VE=FALSE, ...)
+getFormattedSummary(fits, type=2, est.digits=2, se.digits=2, robust, random=FALSE, 
+VE=FALSE, to.trim=FALSE, rows=NULL, ...)
 
 getVarComponent(object, ...)
 
 getFixedEf(object, ...)
+
+risk.cal(risk, binary.outcome, weights=NULL, ngroups=10, main="", add=FALSE, 
+show.emp.risk=TRUE, lcol=2, ylim=NULL, scale=c("logit","risk"))
+interaction.table(fit, v1, v2, v1.type = "continuous", v2.type = "continuous",
+logistic.regression = TRUE)
+
 
 \method{getFixedEf}{coxph}(object, exp=FALSE,robust=FALSE, ...)
 
@@ -48,6 +59,7 @@ getFixedEf(object, ...)
 \method{getFixedEf}{gee}(object, ...)
 
 \method{getFixedEf}{geese}(object, ...)
+\method{getFixedEf}{tps}(object, exp=FALSE, robust=TRUE, ...)
 
 \method{getFixedEf}{glm} (object, exp=FALSE, robust=TRUE, ...) 
 
@@ -68,16 +80,16 @@ getFixedEf(object, ...)
 
 \method{getVarComponent}{matrix}(object, ...)
 
-interaction.table(fit, v1, v2, v1.type = "continuous", v2.type = "continuous", 
-    logistic.regression = TRUE)
-
 \method{coef}{geese}(object, ...)
+\method{coef}{tps}(object, ...)
 
 \method{predict}{geese}(object, x, ...)
+\method{predict}{tps}(object, newdata = NULL, type = c("link", "response"), ...)
 
 \method{residuals}{geese}(object, y, x,...)
 
 \method{vcov}{geese}(object, ...)
+\method{vcov}{tps}(object, robust, ...)
 
 \method{vcov}{logistf}(object, ...)
 }
@@ -134,6 +146,9 @@ interaction.table(fit, v1, v2, v1.type = "continuous", v2.type = "continuous",
 }
 
 
+  \item{weights}{
+%%     ~~Describe \code{v1} here~~
+}
   \item{v1}{
 %%     ~~Describe \code{v1} here~~
 }
@@ -150,6 +165,9 @@ interaction.table(fit, v1, v2, v1.type = "continuous", v2.type = "continuous",
 %%     ~~Describe \code{logistic.regression} here~~
 }
 
+  \item{newdata}{
+%%     ~~Describe \code{x} here~~
+}
   \item{x}{
 %%     ~~Describe \code{x} here~~
 }
@@ -157,6 +175,40 @@ interaction.table(fit, v1, v2, v1.type = "continuous", v2.type = "continuous",
   \item{y}{
 %%     ~~Describe \code{y} here~~
 }
+  \item{to.trim}{
+%%     ~~Describe \code{y} here~~
+}
+  \item{rows}{
+%%     ~~Describe \code{y} here~~
+}
+  \item{risk}{
+%%     ~~Describe \code{fit} here~~
+}
+  \item{binary.outcome}{
+%%     ~~Describe \code{fit} here~~
+}
+  \item{ngroups}{
+%%     ~~Describe \code{fit} here~~
+}
+  \item{main}{
+%%     ~~Describe \code{fit} here~~
+}
+  \item{add}{
+%%     ~~Describe \code{fit} here~~
+}
+  \item{show.emp.risk}{
+%%     ~~Describe \code{fit} here~~
+}
+  \item{lcol}{
+%%     ~~Describe \code{fit} here~~
+}
+  \item{ylim}{
+%%     ~~Describe \code{fit} here~~
+}
+  \item{scale}{
+%%     ~~Describe \code{fit} here~~
+}
+
 
 
 }
@@ -168,12 +220,11 @@ getFormattedSummary: from a list of fits, say lmer, inla fits, return formatted 
  type=3: est (2.5 percent, 97.5 percent)
  type=4: est   se
 
-
 getFixedEf returns a matrix, first column coef, second column se, 
-
 
 getFixedEf.matrix used to get mean and sd from a jags or winbugs sample, getVarComponent.matrix and getFixedEf.matrix do the same thing. Each column of samples is a variable
 
+interaction.table expects coef and vcov to work with fit.
 }
 \examples{
 

@@ -1,5 +1,7 @@
-# best way to format is: first round, then nsmall
-getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FALSE, VE=FALSE, ...){
+# type 3 and 7 do not give the right output for glm fits
+# robust can be passed as part of .... Sometimes robust=T generates errors
+# trim: get rid of white space in confidence intervals for alignment
+getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, random=FALSE, VE=FALSE, to.trim=FALSE, rows=NULL, ...){
     
     res = sapply(fits, simplify="array", function (fit) {
         if (random) {
@@ -9,16 +11,23 @@ getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FAL
                 type=1
             }
         } else {
-            tmp = getFixedEf (fit, ...)
+            tmp = getFixedEf (fit, robust=robust, ...)
         }
+        # the expectation is that est, pvalue, lb, ub
+        # or                      est, sth,    lb, ub, pvalue 
         
         if (VE) {
             tmp[,1]=1-tmp[,1]
             tmp[,3]=1-tmp[,3]
             tmp[,4]=1-tmp[,4]
         }
-        
         p.val.col=which(startsWith(tolower(colnames(tmp)),"p"))
+        lb=formatDouble(tmp[,3,drop=FALSE], est.digits) 
+        if(to.trim) lb=trim(lb)
+        ub=formatDouble(tmp[,4,drop=FALSE], est.digits) 
+        if(to.trim) ub=trim(ub)
+        
+        if (!is.null(rows)) tmp=tmp[intersect(rows,1:nrow(tmp)),]# take only some rows
         
         if (type==1)
             # est only
@@ -31,8 +40,7 @@ getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FAL
         else if (type==3)
             # est (lb, up)
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
-                format(round(tmp[,3,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% ", " %+% 
-                    format(round(tmp[,4,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% ")" 
+                lb %+% ", " %+% ub %+% ")" 
         else if (type==4)
             # a space is inserted between est and se, they could be post-processed in swp
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " " %+% 
@@ -42,8 +50,16 @@ getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FAL
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+%
                 ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==6)
-            # est (pval)
+            # est (pval)*
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
+                format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %+% ")" %+%
+                ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
+        else if (type==7)
+            # (lb, up)
+            out=" (" %+% lb %+% ", " %+% ub %+% ")" 
+        else if (type==8)
+            # est (p value #)
+            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (p value " %+% 
                 format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %+% ")" 
         else 
             stop ("getFormattedSummaries(). type not supported: "%+%type)
@@ -51,18 +67,46 @@ getFormattedSummary=function(fits, type=1, est.digits=2, se.digits=2, random=FAL
         names(out)=rownames(tmp)
         out
     })
-    
+    #str(res)
+        
+    if (is.list(res)) {
+    # if the fits have different number of parameters, we need this
+        res=cbind.uneven(lapply(res, function (x) as.matrix(x, ncol=1)))
+        colnames(res)=names(fits)
+    } else if (!is.matrix(res)) {
     # if there is only one coefficient, we need this
-    if (!is.matrix(res)) {
         res=matrix(res, nrow=1)
-        rownames(res)=names(fits)
+        colnames(res)=names(fits)
     }
+            
     res
 }
 
 
+# return a matrix, columns are: est, p value, low bound, upper bound
 getFixedEf <- function(object, ...) UseMethod("getFixedEf") 
+# variance component
 getVarComponent <- function(object, ...) UseMethod("getVarComponent")
+
+
+# if there is missing data and robust=T, some errors will happen. it is a useful error to have.
+getFixedEf.glm = function (object, exp=FALSE, robust=TRUE, ...) {
+    out=summary(object)$coef
+    if (robust) {
+        V=infjack.glm(object, 1:nrow(object$data))
+        out[,2]=sqrt(diag(V))
+        out[,3]=out[,1]/out[,2]
+        out[,4]=2 * pnorm(-abs(out[,3]))
+    }
+    # to get est, p value, low bound, upper bound
+    out=cbind(out[,1],out[,4],out[,1]-1.96*out[,2],out[,1]+1.96*out[,2])
+    colnames(out)=c("est","p.value","(lower","upper)")
+    if(exp) {
+        out[,c(1,3,4)]=exp(out[,c(1,3,4)])
+        colnames(out)[1]="OR"
+    }
+    out
+}
 
 getFixedEf.MIresult=function(object, ...) {
     cbind(coef(object), sqrt(diag(vcov(object))))
@@ -109,18 +153,6 @@ getFixedEf.geese = function (object, ...) {
     summary(object)$mean
 }
     
-getFixedEf.glm = function (object, exp=FALSE, robust=TRUE, ...) {
-    out=summary(object)$coef
-    if (robust) {
-        V=infjack.glm(object, 1:nrow(object$data))
-        out[,2]=sqrt(diag(V))
-        out[,3]=out[,1]/out[,2]
-        out[,4]=2 * pnorm(-abs(out[,3]))
-    }
-    if(exp) out[,1]=exp(out[,1])
-    out
-}
-
 getFixedEf.logistf = function (object, exp=FALSE, ...) {
     temp = summary(object)
     out = cbind (coef=temp$coef, se=NA, p.value=temp$prob)
@@ -280,10 +312,36 @@ predict.geese = function (object, x, ...) {
 
 
 
+#################################################################################################
+
+coef.tps = function  (object, ...) {
+    object$coef
+}
+vcov.tps = function  (object, robust, ...) {
+    if(robust) object$cove else object$covm
+}
+getFixedEf.tps = function (object, exp=FALSE, robust=TRUE, ...) {
+    res = summary(object)$coef
+    idx=ifelse(robust,"Emp ","Mod ")
+    res = cbind(res[,c("Value",idx%+%"SE")], "lower bound"=res[,"Value"]-1.96*res[,idx%+%"SE"], "upper bound"=res[,1]+1.96*res[,idx%+%"SE"], "p value"=res[,idx%+%"p"])
+    if (exp) res[,c(1,3,4)] = exp(res[,c(1,3,4)])
+    colnames(res)=c(ifelse(exp,"OR","est"), "se(est)", "(lower", "upper)", "p.value")
+    res
+}
+predict.tps = function (object, newdata = NULL, type = c("link", "response"), ...) {
+    type=match.arg(type)
+    out=as.matrix(newdata) %*% coef.tps(object) 
+    if(type=="response") out=expit(out)
+    out
+}
+
+
+
+
 
 # make two tables, rotating v1 and v2
 # fit is an object that needs to have coef and vcov
-# list the effect of one variable at -1, 0, 1 of another variable
+# list the effect of one variable at three levels of another variable, if data is in fit, use quantiles, otherwise -1,0,1
 # v1.type and v2.type: continuous, binary, etc
 interaction.table=function(fit, v1, v2, v1.type="continuous", v2.type="continuous", logistic.regression=TRUE){
     
@@ -309,12 +367,26 @@ interaction.table=function(fit, v1, v2, v1.type="continuous", v2.type="continuou
             ind.2=v1.ind; type.2=v1.type
         }
         
-        lin.combs=NULL
-        if(type.2!="binary") {
-            lin.comb.1=rep(0, length(coef.)); lin.comb.1[ind.1]=1; lin.comb.1[itxn.ind]=-1; lin.combs=rbind(lin.combs, "-1"=lin.comb.1)
+        # three levels of v.2
+        if(is.null(fit$data)) {
+            lev=c(-1,0,1)
+            names(lev)=lev
+        } else {
+            # get quantiles
+            lev=quantile(fit$data[[var.names[ind.2]]], c(.25,.5,.75), na.rm=TRUE)
         }
-        lin.comb.1=rep(0, length(coef.)); lin.comb.1[ind.1]=1; lin.comb.1[itxn.ind]=0;  lin.combs=rbind(lin.combs, "0"=lin.comb.1)
-        lin.comb.1=rep(0, length(coef.)); lin.comb.1[ind.1]=1; lin.comb.1[itxn.ind]=1;  lin.combs=rbind(lin.combs, "1"=lin.comb.1)
+        
+        # increase ind.1 by 1 at lev
+        lin.combs=NULL
+        if(type.2=="binary") {
+            lin.comb.1=rep(0, length(coef.)); lin.comb.1[ind.1]=1; lin.comb.1[itxn.ind]=0;  lin.combs=rbind(lin.combs, "0"=lin.comb.1)
+            lin.comb.1=rep(0, length(coef.)); lin.comb.1[ind.1]=1; lin.comb.1[itxn.ind]=1;  lin.combs=rbind(lin.combs, "1"=lin.comb.1)
+        } else {
+            lin.comb.1=rep(0, length(coef.)); lin.comb.1[ind.1]=1; lin.comb.1[itxn.ind]=lev[1]; lin.combs=rbind(lin.combs, lin.comb.1)
+            lin.comb.1=rep(0, length(coef.)); lin.comb.1[ind.1]=1; lin.comb.1[itxn.ind]=lev[2]; lin.combs=rbind(lin.combs, lin.comb.1)
+            lin.comb.1=rep(0, length(coef.)); lin.comb.1[ind.1]=1; lin.comb.1[itxn.ind]=lev[3]; lin.combs=rbind(lin.combs, lin.comb.1)             
+            rownames(lin.combs)=names(lev)         
+        }
     
         effect = lin.combs%*%coef.
         sd. = sqrt(diag(lin.combs%*%cov.%*%t(lin.combs)))
@@ -335,4 +407,72 @@ interaction.table=function(fit, v1, v2, v1.type="continuous", v2.type="continuou
     names(ret) = "Effect of increasing "%+%c(v1,v2) %+% " by 1 at selected values of " %+% c(v2,v1)
     ret
        
+}
+
+# these functions are needed by some of the functions in this file
+# returns sandwich estimator of variance matrix
+# from Thomas Lumley
+infjack.glm<-function(glm.obj,groups){
+    umat<-estfun.glm(glm.obj)
+    usum<-rowsum(umat,groups,reorder=FALSE)
+    modelv<-summary(glm.obj)$cov.unscaled
+    modelv%*%(t(usum)%*%usum)%*%modelv
+}
+jack.glm<-function(glm.obj,groups){
+    umat<-jackvalues(glm.obj)
+    usum<-rowsum(umat,groups,reorder=FALSE)
+    t(usum)%*%usum*(nrow(umat)-1)/nrow(umat)
+}
+jackvalues<-function(glm.obj){
+    db<-lm.influence(glm.obj)$coef
+    t(t(db)-apply(db,2,mean))
+}   
+estfun.glm<-function(glm.obj){
+    if (is.matrix(glm.obj$x)) 
+        xmat<-glm.obj$x
+    else {
+        mf<-model.frame(glm.obj)
+        xmat<-model.matrix(terms(glm.obj),mf)       
+    }
+    residuals(glm.obj,"working")*glm.obj$weights*xmat
+}
+
+
+# goodness of fit
+#  ngroups=10; main=""; add=FALSE; show.emp.risk=TRUE; lcol=1; ylim=NULL; weights=NULL
+risk.cal=function(risk, binary.outcome, weights=NULL, ngroups=10, main="", add=FALSE, show.emp.risk=TRUE, lcol=2, ylim=NULL, scale=c("logit","risk")){
+    
+    scale=match.arg(scale)
+    
+    stopifnot(length(risk)==length(binary.outcome))
+    if(!is.null(weights)) stopifnot(length(risk)==length(weights)) else weights=rep(1,length(risk))
+    
+    if(length(table(risk))<ngroups) ngroups=length(table(risk))    
+    risk.cat=as.numeric(Hmisc::cut2(risk,g=ngroups))
+    
+    emp.risk=numeric(ngroups)
+    for(i in 1:ngroups){
+        emp.risk[i]=sum(binary.outcome[risk.cat==i])/sum(weights[risk.cat==i])
+    }
+    
+    xx=cbind(risk, "emp.risk"=emp.risk[risk.cat])
+    xx=xx[order(xx[,"risk"]),]
+    
+    if (is.null(ylim)) {
+        if(show.emp.risk) all.=c(emp.risk,risk) else all.=risk
+        if(scale=="logit") all.=setdiff(all.,0)
+        ylim=range(all.,na.rm=T) 
+    }
+    ylab="risk"
+    if (scale=="logit") {
+        ylim=logit(ylim)
+        xx=logit(xx)
+        ylab="log odd"
+    }
+
+    plot(xx[,"risk"], type="l", xlab="", xaxt="n", main=main, col=1, ylim=ylim, ylab=ylab)
+    if(show.emp.risk) lines(xx[,"emp.risk"], col=lcol, lty=2)
+        
+    mylegend(col=1:lcol, lty=1:2, x=1, legend=c("model fit","empirical"))
+    
 }

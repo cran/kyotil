@@ -73,30 +73,30 @@ lastIndex =function (s1, s2) {
     ret
 }
 
-# return TRUE if s1 starts with s2? 
-startsWith=function(s1, s2){
-    sapply (s1, function (s) {
-        if ( substring (s, 1, nchar(s2)) == s2 ) {
-            return (TRUE);
-        } else {
-            return (FALSE);
-        }
-    })
-}
-
-# return TRUE if s1 ends with s2, s1 can be a vector
-endsWith=function(s1, s2){
-    sapply (s1, function (s) {
-        if ( substring (s, nchar(s)-nchar(s2)+1, nchar(s)) == s2 ) {
-            return (TRUE);
-        } else {
-            return (FALSE);
-        }
-    })
-}
-
-
-
+# now part of base package
+## return TRUE if s1 starts with s2? 
+#startsWith=function(s1, s2){
+#    sapply (s1, function (s) {
+#        if ( substring (s, 1, nchar(s2)) == s2 ) {
+#            return (TRUE);
+#        } else {
+#            return (FALSE);
+#        }
+#    })
+#}
+## return TRUE if s1 ends with s2, s1 can be a vector
+#endsWith=function(s1, s2){
+#    sapply (s1, function (s) {
+#        if ( substring (s, nchar(s)-nchar(s2)+1, nchar(s)) == s2 ) {
+#            return (TRUE);
+#        } else {
+#            return (FALSE);
+#        }
+#    })
+#}
+#
+#
+#
 # return TRUE if s1 contains s2
 contain =function (s1, s2) {
     sapply (s1, function (s) {
@@ -110,4 +110,11 @@ contain =function (s1, s2) {
         }
         matched!=0
     })
+}
+
+# copied from http://stackoverflow.com/questions/2261079/how-to-trim-leading-and-trailing-whitespace-in-r
+trim.leading <- function (x)  sub("^\\s+", "", x)
+trim.trailing <- function (x) sub("\\s+$", "", x)
+trim <- function (x, trim.trailing=TRUE, trim.leading=TRUE)  {
+    if(trim.trailing & trim.trailing) gsub("^\\s+|\\s+$", "", x) else if (trim.trailing) trim.trailing(x) else if (trim.trailing) trim.leading(x) else x
 }
