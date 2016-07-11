@@ -1,18 +1,149 @@
-roundup=function (value, digits) {
-    format(round(value, digits), nsmall=digits, scientific=FALSE) 
-}
-formatInt=function (x, digits, fill="0", ...) {
-    formatC(x, format="d", flag=fill, width=digits) 
-}
-formatDouble=roundup
+mytex=function(dat=NULL, file.name="temp", 
+    digits=NULL, display=NULL, align="r", 
+    include.rownames=TRUE, include.dup.rownames=FALSE, include.colnames=TRUE,
+    col.headers=NULL,
+    comment=FALSE, floating=FALSE, 
+    lines=TRUE, hline.after=NULL, 
+    add.to.row=NULL, 
+    sanitize.text.function = NULL, #function(x) x,
+    append=FALSE, preamble="", stand.alone=TRUE,
+...) {
+        
+#    if(exists("tablePath") && file.exists(tablePath)) {
+#        file.name=tablePath%+%"/"%+%file.name
+#    } else {
+#        file.name=file.name
+#    }    
+    
+    if (endsWith(file.name,".tex")) file.name=substr(file.name, 1, nchar(file.name)-4)
+    if (stand.alone) {
+        # create two files, one stand alone and one not, to facilitate debugging latex code
+        tmp=strsplit(file.name, split="/")[[1]]
+        if (length(tmp)==1) path="./" else path=concatList(tmp[-length(tmp)], "/")
+        foldername=path%+%"/input"
+        if(!file.exists(foldername)) dir.create(foldername) 
+        file.name.2=foldername%+%"/"%+%tmp[length(tmp)]%+%".tex"
+        file.name=file.name%+%".tex"
+    }
+    
+    if (include.dup.rownames) include.rownames=F
+    
+    if(is.data.frame(dat)) dat=list(dat)
+    if (!is.list(dat)) dat=list(dat)
+    
+    if (!append) { #start a new file
+        #document tag, preamble etc
+        mytex.begin(file.name, preamble)
+        if (stand.alone) {
+            #empty file
+            cat ("", file=file.name.2, append=FALSE)
+        }
+    } 
+    
+    if (length(dat)>0) {
+        names(dat)=gsub("_"," ",names(dat))
+        for (i in 1:length(dat)) {
+            dat1 = dat[[i]]        
+            if (length(dim(dat1))==1) {
+                # convert vector to matrix
+                dat1=matrix(c(dat1),nrow=1, dimnames=list(NULL,names(dat1)))
+            }
+            .ncol=ncol(dat1)
+            if (is.null(.ncol)) {
+                if (is.null(nrow(dat1))) .ncol=1
+                else .ncol=nrow(dat1)
+            }
+            
+            if (is.null(digits)) {
+                if (is.integer(dat1)) digits=0
+            }
+            
+            # we need align in preparing colnames
+            if (length(align)==.ncol+1) {
+                # no need to do anything
+            } else {
+                if (length(align)==1) align=rep(align,.ncol+1)
+                if (include.dup.rownames) align[2]="l" else align[1]="l" # col names
+            }
 
-# don't have to transpose x
-mywrite=function(x, ...){
-    if (is.list(x)) x=fill.jagged.array(x)
-    if (is.null(ncol(x))) i=length(x)
-    else i=ncol(x)
-    write (t(x), ncolumns=i, ...)
+            tmp=if(!is.null(sanitize.text.function)) sanitize.text.function(colnames(dat1)) else sanitize.text(sanitize.numbers(colnames(dat1)))
+            top.1=concatList("& \\multicolumn{1}{"%+%align[-1]%+%"}{"%+%tmp%+%"} ") %+% "\\\\ \n"%+% # center aligned column titles
+                "\\hline\n" # insert at the beginning of table, "\n" is added so that there is no need to keep it in col.title
+            if(!include.rownames) top.1=substr(top.1, 2,10000)
+            top=if(!include.colnames)  "" else top.1
+            if(include.dup.rownames) top="&"%+%top
+                
+            if (include.colnames & is.null(hline.after)) hline.after=c(nrow(dat1)) # cannot use default due to add.to.row    
+            include.colnames=FALSE
+            
+            tmp=names(dimnames(dat1))
+            if(!is.null(tmp) & is.null(col.headers)) {
+                if(trim(tmp[2])!="")
+                    col.headers="\\hline\n  "%+%tmp[1]%+%"&  \\multicolumn{"%+% ncol(dat1)%+%"}{c}{"%+%tmp[2]%+%"}   \\\\  \n"
+            }
+            if (!is.null(col.headers)) top=col.headers%+%top else top="\\hline  "%+%top
+            
+            if (is.null(add.to.row)) {
+                add.to.row=list(list(0), top)
+            } else {
+                add.to.row=list(c(list(0), add.to.row[[1]]), c(top, add.to.row[[2]]))
+            }
+            #print(add.to.row)
+            
+        
+            if (!is.matrix(dat1) & is.character(dat1)) {
+                cat (dat1%+%"\n\n\n", file=file.name, append=TRUE)
+                if(stand.alone) cat (dat1%+%"\n\n\n", file=file.name.2, append=TRUE)
+            } else {        
+                if (is.vector(dat1)) dat1=as.matrix(dat1)
+                
+                if (stand.alone & length(dat)>1) cat (names(dat)[i]%+%"\n\n", file=file.name, append=TRUE)
+                if (!is.null(dat1)) {
+                    if (!is.null(attr(dat1,"caption"))) caption=attr(dat1,"caption") else caption=NULL
+                    
+                    if (include.dup.rownames & !is.null(rownames(dat1))) {
+                        tmp=suppressWarnings(data.frame(rownames(dat1),data.frame(dat1))) # warnings about duplicate row names
+                        if (!is.null(colnames(dat1))) colnames(tmp)[2:ncol(tmp)]=colnames(dat1)
+                        dat1=tmp
+                        .ncol=.ncol+1
+                    }
+                    if (is.null(hline.after)) {
+                        if (lines) hline.after=c(-1,0,nrow(dat1)) else hline.after=c(nrow(dat1))
+                    }
+                    
+                    if(!include.rownames) rownames(dat1)=1:nrow(dat1)# otherwise there will be a warning from xtable
+                    
+                    print(..., xtable::xtable(dat1, 
+                            digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
+                            display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
+                            align=align, caption=caption, ...), 
+                        hline.after=hline.after, type = "latex", file = file.name, append = TRUE, floating = floating, 
+                        include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
+                        add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
+                    if (stand.alone) print(..., xtable::xtable(dat1, 
+                            digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
+                            display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
+                            align=align, caption=caption, ...), 
+                        hline.after=hline.after, type = "latex", file = file.name.2, append = TRUE, floating = floating, 
+                        include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
+                        add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
+                }
+                cat ("\n", file=file.name, append=TRUE)
+                if(stand.alone) cat ("\n", file=file.name.2, append=TRUE)
+            }
+        
+        }
+    }
+    
+    if(!append) {
+        mytex.end(file.name)
+    }
+    cat ("Writing table to "%+%getwd()%+%"/"%+%file.name%+%"\n")
 }
+#x=matrix(0,2,2)
+#attr(x,"caption")="cap"
+#mytex(x, floating=TRUE)
+
 
 # print a matrix/table or a list of them to a latex file as xtable
 # note file.name can not have space in it
@@ -79,151 +210,6 @@ sanitize.numbers <- function(x) {
 }
 
         
-mytex=function(dat=NULL, file.name="temp", 
-    digits=NULL, display=NULL, align="r", 
-    include.rownames=TRUE, include.dup.rownames=FALSE, include.colnames=TRUE,
-    col.headers=NULL,
-    comment=FALSE, floating=FALSE, 
-    lines=TRUE, hline.after=NULL, 
-    add.to.row=NULL, 
-    sanitize.text.function = NULL, #function(x) x,
-    append=FALSE, preamble="", stand.alone=TRUE,
-...) {
-        
-#    if(exists("tablePath") && file.exists(tablePath)) {
-#        file.name=tablePath%+%"/"%+%file.name
-#    } else {
-#        file.name=file.name
-#    }    
-    
-    if (endsWith(file.name,".tex")) file.name=substr(file.name, 1, nchar(file.name)-4)
-    if (stand.alone) {
-        # create two files, one stand alone and one not, to facilitate debugging latex code
-        tmp=strsplit(file.name, split="/")[[1]]
-        if (length(tmp)==1) path="./" else path=concatList(tmp[-length(tmp)], "/")
-        foldername=path%+%"/input"
-        if(!file.exists(foldername)) dir.create(foldername) 
-        file.name.2=foldername%+%"/"%+%tmp[length(tmp)]%+%".tex"
-        file.name=file.name%+%".tex"
-    }
-    
-    if (include.dup.rownames) include.rownames=F
-    
-    if(is.data.frame(dat)) dat=list(dat)
-    if (!is.list(dat)) dat=list(dat)
-    
-    if (!append) { #start a new file
-        #document tag, preamble etc
-        mytex.begin(file.name, preamble)
-        if (stand.alone) {
-            #empty file
-            cat ("", file=file.name.2, append=FALSE)
-        }
-    } 
-    
-    if (length(dat)>0) {
-        names(dat)=gsub("_"," ",names(dat))
-        for (i in 1:length(dat)) {
-            dat1 = dat[[i]]        
-            if (length(dim(dat1))==1) {
-                # convert vector to matrix
-                dat1=matrix(c(dat1),nrow=1, dimnames=list(NULL,names(dat1)))
-            }
-            .ncol=ncol(dat1)
-            if (is.null(.ncol)) {
-                if (is.null(nrow(dat1))) .ncol=1
-                else .ncol=nrow(dat1)
-            }
-            
-            if (is.null(digits)) {
-                if (is.integer(dat1)) digits=0
-            }
-            
-            tmp=if(!is.null(sanitize.text.function)) sanitize.text.function(colnames(dat1)) else sanitize.text(sanitize.numbers(colnames(dat1)))
-            top.1=concatList("& \\multicolumn{1}{c}{"%+%tmp%+%"} ") %+% "\\\\ \n"%+% # center aligned column titles
-                "\\hline\n" # insert at the beginning of table, "\n" is added so that there is no need to keep it in col.title
-            if(!include.rownames) top.1=substr(top.1, 2,10000)
-            top=if(!include.colnames)  "" else top.1
-            if(include.dup.rownames) top="&"%+%top
-                
-            if (include.colnames & is.null(hline.after)) hline.after=c(nrow(dat1)) # cannot use default due to add.to.row    
-            include.colnames=FALSE
-            
-            tmp=names(dimnames(dat1))
-            if(!is.null(tmp) & is.null(col.headers)) {
-                if(trim(tmp[2])!="")
-                    col.headers="\\hline\n  "%+%tmp[1]%+%"&  \\multicolumn{"%+% ncol(dat1)%+%"}{c}{"%+%tmp[2]%+%"}   \\\\  \n"
-            }
-            if (!is.null(col.headers)) top=col.headers%+%top else top="\\hline  "%+%top
-            
-            if (is.null(add.to.row)) {
-                add.to.row=list(list(0), top)
-            } else {
-                add.to.row=list(c(list(0), add.to.row[[1]]), c(top, add.to.row[[2]]))
-            }
-            #print(add.to.row)
-            
-        
-            if (!is.matrix(dat1) & is.character(dat1)) {
-                cat (dat1%+%"\n\n\n", file=file.name, append=TRUE)
-                if(stand.alone) cat (dat1%+%"\n\n\n", file=file.name.2, append=TRUE)
-            } else {        
-                if (is.vector(dat1)) dat1=as.matrix(dat1)
-                
-                if (stand.alone & length(dat)>1) cat (names(dat)[i]%+%"\n\n", file=file.name, append=TRUE)
-                if (!is.null(dat1)) {
-                    if (!is.null(attr(dat1,"caption"))) caption=attr(dat1,"caption") else caption=NULL
-                    
-                    if (include.dup.rownames & !is.null(rownames(dat1))) {
-                        tmp=suppressWarnings(data.frame(rownames(dat1),data.frame(dat1))) # warnings about duplicate row names
-                        if (!is.null(colnames(dat1))) colnames(tmp)[2:ncol(tmp)]=colnames(dat1)
-                        dat1=tmp
-                        .ncol=.ncol+1
-                    }
-                    if (is.null(hline.after)) {
-                        if (lines) hline.after=c(-1,0,nrow(dat1)) else hline.after=c(nrow(dat1))
-                    }
-                    if (length(align)==.ncol+1) {
-                        # no need to do anything
-                    } else {
-                        if (length(align)==1) align=rep(align,.ncol+1)
-                        if (include.dup.rownames) align[2]="l" else align[1]="l" # col names
-                    }
-                    
-                    if(!include.rownames) rownames(dat1)=1:nrow(dat1)# otherwise there will be a warning from xtable
-                    
-                    print(..., xtable::xtable(dat1, 
-                            digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
-                            display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
-                            align=align, caption=caption, ...), 
-                        hline.after=hline.after, type = "latex", file = file.name, append = TRUE, floating = floating, 
-                        include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
-                        add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
-                    if (stand.alone) print(..., xtable::xtable(dat1, 
-                            digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
-                            display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
-                            align=align, caption=caption, ...), 
-                        hline.after=hline.after, type = "latex", file = file.name.2, append = TRUE, floating = floating, 
-                        include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
-                        add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
-                }
-                cat ("\n", file=file.name, append=TRUE)
-                if(stand.alone) cat ("\n", file=file.name.2, append=TRUE)
-            }
-        
-        }
-    }
-    
-    if(!append) {
-        mytex.end(file.name)
-    }
-    cat ("Writing table to "%+%getwd()%+%"/"%+%file.name%+%"\n")
-}
-#x=matrix(0,2,2)
-#attr(x,"caption")="cap"
-#mytex(x, floating=TRUE)
-
-
 # write a table that contains mean and sd to temp.tex in the current working directory, getwd()
 # models can be a list of models, or a single model
 make.latex.coef.table = function (models, model.names=NULL, row.major=FALSE, round.digits=NULL) {
@@ -251,6 +237,22 @@ make.latex.coef.table = function (models, model.names=NULL, row.major=FALSE, rou
     else mytex (t(coef.table), align="r") 
 }
 
+
+roundup=function (value, digits) {
+    format(round(value, digits), nsmall=digits, scientific=FALSE) 
+}
+formatInt=function (x, digits, fill="0", ...) {
+    formatC(x, format="d", flag=fill, width=digits) 
+}
+formatDouble=roundup
+
+# don't have to transpose x
+mywrite=function(x, ...){
+    if (is.list(x)) x=fill.jagged.array(x)
+    if (is.null(ncol(x))) i=length(x)
+    else i=ncol(x)
+    write (t(x), ncolumns=i, ...)
+}
 
 # default row.names to FALSE
 # file name needs no file extension

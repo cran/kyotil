@@ -1,5 +1,5 @@
 ae6d92720b7cde7b75801052771a7ce1 *ChangeLog
-f0ca2a51e19914443b26b5b81588931b *DESCRIPTION
+e27011af868cdd60cbeecaa8b0c2525c *DESCRIPTION
 0d14217b4aad230e7b56e40ac9f11c99 *NAMESPACE
 a274260e29238e4b2e8571df3f5ea879 *R/Deming.R
 6b5233da2ab04ba17d214f8a6cf6724e *R/VEplot.R
@@ -14,13 +14,13 @@ dbb81564d62f7e930861c5b9aebdf963 *R/math.R
 2bb8ecc2705ff132771d99831ff5d05f *R/matrix2.R
 f0e8e3638bcbb7faffcbed8870e95d58 *R/misc.R
 c79cbe4c0593bd50567a3ea2557cad95 *R/plotting.R
-aae9aac97c001dc1b60c6f5799eeb01d *R/print.R
+3ee3d6c5c67423d26f73f220cd2d96c9 *R/print.R
 abca22f8178488e3c355369f216f0c01 *R/random.R
 4b11313c8bbbe2fd5db774c5a621ff96 *R/regression.model.functions.R
 c011e4787ab8ddf285cc3d3ae125f0d1 *R/sim.dat.tvarying.three.R
 faf1dc6a7f9cfef081db96b9ca6eb9ff *R/sim.dat.tvarying.two.R
 3c1e8ba9548e50508595a7f9a0b50e22 *R/stat.R
-a7f65fe57c4e4efbd6b8df881fe3be22 *R/string.R
+78aafdf5f99a64972dde74317420b691 *R/string.R
 30e63df5f11952a795b6f0ba8893cedd *R/sysdata.rda
 e068430b330ec705e25aec1557e4ba2c *R/tests.R
 a616e808bd826e929f56223020649675 *inst/unitTests/Makefile
@@ -43,7 +43,7 @@ b7c03f7edcf1492e7aabd215cf0124fa *man/matrix2.Rd
 2b99cd1776b7125d16c18490de72bf24 *man/misc.Rd
 5b8b12b53dc57e652a8789e1a00a5e9c *man/plotting.Rd
 47ccaa97e24e3a63c5da9aafa357f453 *man/print.Rd
-317fd8cb848f7b109ac3214237256505 *man/random.Rd
+f308ae9f7cdfcc67b59e97601d83e417 *man/random.Rd
 9fe2ea20916c7d576b54ef3389a5733e *man/regression.model.functions.Rd
 367696b12094afd5a1b64a66ee83ff0f *man/sim.dat.tvarying.Rd
 5faddb5f076b9c78bf1df67e44558333 *man/stat.Rd
