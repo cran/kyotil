@@ -1,4 +1,10 @@
-mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height=NULL, ext="eps", oma=NULL, mar=NULL,main.outer=FALSE, save2file=TRUE, ...) {    
+mypdf=function (...) mypostscript(ext="pdf",...) # cannot print both to screen and pdf
+
+mypng=function(...) mypostscript(ext="png",...)
+
+mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height=NULL, ext=c("eps","pdf","png"), oma=NULL, mar=NULL,main.outer=FALSE, save2file=TRUE, ...) {    
+    
+    ext=match.arg(ext)
     
     if (!is.null(mfcol)) {
         nrow=mfcol[1]; ncol=mfcol[2]        
@@ -45,11 +51,16 @@ mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height
         } else if (nrow==3 & ncol==2) {width=6.7; height=10.3
         } else if (nrow==4 & ncol==3) {width=9; height=12
         } else stop ("nrow x ncol not supported: "%+%nrow%+%" x "%+%ncol)
-    }
+    }    
     
     if(save2file){      
-        if (ext=="pdf") pdf (paper="special", file=file%+%"."%+%ext, width=width, height=height, ...)
-        else postscript (paper="special", horizontal=FALSE, file=file%+%"."%+%ext, width=width, height=height, ...)
+        if (ext=="pdf") {
+            pdf (paper="special", file=file%+%"."%+%ext, width=width, height=height, ...)
+        } else if (ext=="eps") {
+            postscript (paper="special", horizontal=FALSE, file=file%+%"."%+%ext, width=width, height=height, ...)
+        } else if (ext=="png") {
+            png (filename=file%+%"."%+%ext, width=width, height=height, units="in", res=150, ...)
+        }
         cat("Saving figure to "%+%paste(getwd(),"/",file,sep="")%+%"\n")        
     } else {
         print("not saving to file")
@@ -59,9 +70,7 @@ mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height
     else par(mfrow=mfrow)    
     
     if (!is.null(oma)) par(oma=oma)
-    if (!is.null(mar)) {
-        par(mar=mar)
-    }
+    if (!is.null(mar)) par(mar=mar)
     
     if (main.outer) {
         tmp=par()$oma
@@ -70,7 +79,6 @@ mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height
     }
     
 }
-mypdf=function (...) {mypostscript(ext="pdf",...)} # cannot print both to screen and pdf
 ##test
 #mypdf(mfrow=c(1,1),file="test1x1");plot(1:10,main="LUMX",xlab="t",ylab="y");dev.off()
 #mypdf(mfrow=c(1,2),file="test1x2");plot(1:10,main="LUMX",xlab="t",ylab="y");plot(1:10);dev.off()

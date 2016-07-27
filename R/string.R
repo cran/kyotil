@@ -73,30 +73,6 @@ lastIndex =function (s1, s2) {
     ret
 }
 
-# now part of base package, but we keep it here so that older version of R can run
-# return TRUE if s1 starts with s2? 
-startsWith=function(s1, s2){
-    sapply (s1, function (s) {
-        if ( substring (s, 1, nchar(s2)) == s2 ) {
-            return (TRUE);
-        } else {
-            return (FALSE);
-        }
-    })
-}
-# return TRUE if s1 ends with s2, s1 can be a vector
-endsWith=function(s1, s2){
-    sapply (s1, function (s) {
-        if ( substring (s, nchar(s)-nchar(s2)+1, nchar(s)) == s2 ) {
-            return (TRUE);
-        } else {
-            return (FALSE);
-        }
-    })
-}
-
-
-
 # return TRUE if s1 contains s2
 contain =function (s1, s2) {
     sapply (s1, function (s) {

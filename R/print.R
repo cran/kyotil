@@ -40,99 +40,104 @@ mytex=function(dat=NULL, file.name="temp",
         }
     } 
     
-    if (length(dat)>0) {
-        names(dat)=gsub("_"," ",names(dat))
-        for (i in 1:length(dat)) {
-            dat1 = dat[[i]]        
-            if (length(dim(dat1))==1) {
-                # convert vector to matrix
-                dat1=matrix(c(dat1),nrow=1, dimnames=list(NULL,names(dat1)))
-            }
-            .ncol=ncol(dat1)
-            if (is.null(.ncol)) {
-                if (is.null(nrow(dat1))) .ncol=1
-                else .ncol=nrow(dat1)
-            }
-            
-            if (is.null(digits)) {
-                if (is.integer(dat1)) digits=0
-            }
-            
-            # we need align in preparing colnames
-            if (length(align)==.ncol+1) {
-                # no need to do anything
-            } else {
-                if (length(align)==1) align=rep(align,.ncol+1)
-                if (include.dup.rownames) align[2]="l" else align[1]="l" # col names
-            }
-
-            tmp=if(!is.null(sanitize.text.function)) sanitize.text.function(colnames(dat1)) else sanitize.text(sanitize.numbers(colnames(dat1)))
-            top.1=concatList("& \\multicolumn{1}{"%+%align[-1]%+%"}{"%+%tmp%+%"} ") %+% "\\\\ \n"%+% # center aligned column titles
-                "\\hline\n" # insert at the beginning of table, "\n" is added so that there is no need to keep it in col.title
-            if(!include.rownames) top.1=substr(top.1, 2,10000)
-            top=if(!include.colnames)  "" else top.1
-            if(include.dup.rownames) top="&"%+%top
-                
-            if (include.colnames & is.null(hline.after)) hline.after=c(nrow(dat1)) # cannot use default due to add.to.row    
-            include.colnames=FALSE
-            
-            tmp=names(dimnames(dat1))
-            if(!is.null(tmp) & is.null(col.headers)) {
-                if(trim(tmp[2])!="")
-                    col.headers="\\hline\n  "%+%tmp[1]%+%"&  \\multicolumn{"%+% ncol(dat1)%+%"}{c}{"%+%tmp[2]%+%"}   \\\\  \n"
-            }
-            if (!is.null(col.headers)) top=col.headers%+%top else top="\\hline  "%+%top
-            
-            if (is.null(add.to.row)) {
-                add.to.row=list(list(0), top)
-            } else {
-                add.to.row=list(c(list(0), add.to.row[[1]]), c(top, add.to.row[[2]]))
-            }
-            #print(add.to.row)
-            
-        
-            if (!is.matrix(dat1) & is.character(dat1)) {
-                cat (dat1%+%"\n\n\n", file=file.name, append=TRUE)
-                if(stand.alone) cat (dat1%+%"\n\n\n", file=file.name.2, append=TRUE)
-            } else {        
-                if (is.vector(dat1)) dat1=as.matrix(dat1)
-                
-                if (stand.alone & length(dat)>1) cat (names(dat)[i]%+%"\n\n", file=file.name, append=TRUE)
-                if (!is.null(dat1)) {
-                    if (!is.null(attr(dat1,"caption"))) caption=attr(dat1,"caption") else caption=NULL
-                    
-                    if (include.dup.rownames & !is.null(rownames(dat1))) {
-                        tmp=suppressWarnings(data.frame(rownames(dat1),data.frame(dat1))) # warnings about duplicate row names
-                        if (!is.null(colnames(dat1))) colnames(tmp)[2:ncol(tmp)]=colnames(dat1)
-                        dat1=tmp
-                        .ncol=.ncol+1
-                    }
-                    if (is.null(hline.after)) {
-                        if (lines) hline.after=c(-1,0,nrow(dat1)) else hline.after=c(nrow(dat1))
-                    }
-                    
-                    if(!include.rownames) rownames(dat1)=1:nrow(dat1)# otherwise there will be a warning from xtable
-                    
-                    print(..., xtable::xtable(dat1, 
-                            digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
-                            display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
-                            align=align, caption=caption, ...), 
-                        hline.after=hline.after, type = "latex", file = file.name, append = TRUE, floating = floating, 
-                        include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
-                        add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
-                    if (stand.alone) print(..., xtable::xtable(dat1, 
-                            digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
-                            display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
-                            align=align, caption=caption, ...), 
-                        hline.after=hline.after, type = "latex", file = file.name.2, append = TRUE, floating = floating, 
-                        include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
-                        add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
-                }
-                cat ("\n", file=file.name, append=TRUE)
-                if(stand.alone) cat ("\n", file=file.name.2, append=TRUE)
-            }
-        
+    if (length(dat)==0) stop("length of dat is 0")
+    names(dat)=gsub("_"," ",names(dat))
+    for (i in 1:length(dat)) {
+    
+        dat1 = dat[[i]]   
+        if (is.null(dat1)) warning("some element of dat list is null")   
+         
+        # character only 
+        if (!is.matrix(dat1) & is.character(dat1)) {
+            cat (dat1%+%"\n\n\n", file=file.name, append=TRUE)
+            if(stand.alone) cat (dat1%+%"\n\n\n", file=file.name.2, append=TRUE)
+            next
         }
+            
+        # convert vector to matrix
+        if (length(dim(dat1))==1) dat1=matrix(c(dat1),nrow=1, dimnames=list(NULL,names(dat1)))
+        #if (is.vector(dat1)) dat1=as.matrix(dat1)
+    
+        dimnam=names(dimnames(dat1))
+        
+        # add rownames as the first column if necessary
+        if(include.dup.rownames & !is.null(rownames(dat1))) include.dup.rownames=TRUE else  include.dup.rownames=FALSE
+        if (include.dup.rownames) {
+            tmp=suppressWarnings(data.frame(rownames(dat1),data.frame(dat1))) # may generate warnings about duplicate row names
+            names(tmp)[1]=""
+            if (!is.null(colnames(dat1))) colnames(tmp)[2:ncol(tmp)]=colnames(dat1)
+            if (!is.null(dimnam)) if (is.na(dimnam[2])) colnames(tmp)[1]=dimnam[1] else if (dimnam[2]=="") colnames(tmp)[1]=dimnam[1] 
+            dat1=tmp
+        }
+        .ncol=ncol(dat1)
+        
+        if (is.null(digits)) if (is.integer(dat1)) digits=0
+        if (length(align)==.ncol+1) {
+            # no need to do anything
+        } else {
+            if (length(align)==1) align=rep(align,.ncol+1) else stop("length of align incorrect")
+            if (include.dup.rownames) align[2]="l" else align[1]="l" # col names
+        }
+    
+        if(!is.null(dimnam) & is.null(col.headers)) {
+            if(!is.na(dimnam[2]))
+              if(trim(dimnam[2])!="")
+                col.headers="\\hline\n  "%+%dimnam[1]%+%"&  \\multicolumn{"%+% ncol(dat1)%+%"}{c}{"%+%dimnam[2]%+%"}   \\\\  \n"
+        }
+        if (!is.null(col.headers)) top=col.headers else top="\\hline  "
+        
+        if(include.colnames) {
+            coln=if(!is.null(sanitize.text.function)) sanitize.text.function(colnames(dat1)) else sanitize.text(sanitize.numbers(colnames(dat1)))
+            top.1=concatList(" \\multicolumn{1}{"%+%align[-1]%+%"}{"%+%coln%+%"} ", sep="&") %+% "\\\\ \n"%+% # center aligned column titles
+                "\\hline\n" # insert at the beginning of table, "\n" is added so that there is no need to keep it in col.title
+            # add a column for rownames, which may include names of rownames
+            if(!include.dup.rownames) {
+                if(include.rownames) {
+                    top.1="&" %+% top.1
+                    if (!is.null(dimnam)) if (is.na(dimnam[2])) top.1=dimnam[1] %+% top.1 else if (trim(dimnam[2])=="") top.1=dimnam[1] %+% top.1
+                }
+            }
+            top=top%+%top.1
+            print(coln)
+            print(top.1)
+        }
+            
+        if (include.colnames & is.null(hline.after)) hline.after=c(nrow(dat1)) # cannot use default due to add.to.row    
+        include.colnames=FALSE        
+        
+        if (is.null(add.to.row)) {
+            add.to.row=list(list(0), top)
+        } else {
+            add.to.row=list(c(list(0), add.to.row[[1]]), c(top, add.to.row[[2]]))
+        }
+        #print(add.to.row)
+        
+        if (stand.alone & length(dat)>1) cat (names(dat)[i]%+%"\n\n", file=file.name, append=TRUE)
+        
+        if (!is.null(attr(dat1,"caption"))) caption=attr(dat1,"caption") else caption=NULL
+        
+        if (is.null(hline.after)) {
+            if (lines) hline.after=c(-1,0,nrow(dat1)) else hline.after=c(nrow(dat1))
+        }
+        
+        if(!include.rownames) rownames(dat1)=1:nrow(dat1)# otherwise there will be a warning from xtable
+        print(..., xtable::xtable(dat1, 
+                digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
+                display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
+                align=align, caption=caption, ...), 
+            hline.after=hline.after, type = "latex", file = file.name, append = TRUE, floating = floating, 
+            include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
+            add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
+        if (stand.alone) print(..., xtable::xtable(dat1, 
+                digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
+                display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
+                align=align, caption=caption, ...), 
+            hline.after=hline.after, type = "latex", file = file.name.2, append = TRUE, floating = floating, 
+            include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
+            add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
+        
+        cat ("\n", file=file.name, append=TRUE)
+        if(stand.alone) cat ("\n", file=file.name.2, append=TRUE)
     }
     
     if(!append) {
@@ -140,9 +145,30 @@ mytex=function(dat=NULL, file.name="temp",
     }
     cat ("Writing table to "%+%getwd()%+%"/"%+%file.name%+%"\n")
 }
-#x=matrix(0,2,2)
-#attr(x,"caption")="cap"
-#mytex(x, floating=TRUE)
+#x=matrix(0,2,2,dimnames=list(a=1:2, b=1:2));  mytex(x)
+#x=matrix(0,2,2,dimnames=list(a=1:2, 1:2));  mytex(x)
+
+# now part of base package, but we keep it here so that older version of R can run, and when we source this file, mytex can run
+# return TRUE if s1 starts with s2? 
+startsWith=function(s1, s2){
+    sapply (s1, function (s) {
+        if ( substring (s, 1, nchar(s2)) == s2 ) {
+            return (TRUE);
+        } else {
+            return (FALSE);
+        }
+    })
+}
+# return TRUE if s1 ends with s2, s1 can be a vector
+endsWith=function(s1, s2){
+    sapply (s1, function (s) {
+        if ( substring (s, nchar(s)-nchar(s2)+1, nchar(s)) == s2 ) {
+            return (TRUE);
+        } else {
+            return (FALSE);
+        }
+    })
+}
 
 
 # print a matrix/table or a list of them to a latex file as xtable

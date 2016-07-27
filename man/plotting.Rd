@@ -16,6 +16,7 @@
 \alias{mypairs}
 \alias{myhist}
 \alias{mypdf}
+\alias{mypng}
 \alias{mypostscript}
 \alias{panel.cor}
 \alias{panel.hist}
@@ -77,8 +78,11 @@ mypairs(dat, ...)
 
 mypdf(...)
 
+mypng(...)
+
 mypostscript(file = "temp", mfrow = c(1, 1), mfcol = NULL, width = NULL, height = NULL, 
-    ext = "eps", oma = NULL, mar = NULL, main.outer = FALSE, save2file = TRUE, ...)
+    ext = c("eps", "pdf", "png"), oma = NULL, mar = NULL, main.outer = FALSE, 
+    save2file = TRUE, ...)
 
 panel.cor(x, y, digits = 2, prefix = "", cex.cor, ...)
 

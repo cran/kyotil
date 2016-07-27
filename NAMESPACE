@@ -12,7 +12,7 @@ export(binary, binary2, f2c, ftoi, keepWarnings, meanmed, methods4, myaggregate,
     mysystem, mytapply, read.sv, read.tsv, table.prop, table.cases, table.cases.3, unix)
 
 export(abline.shade, abline.pt.slope, abline.pts, butterfly.plot, empty.plot, getMfrow, myforestplot, my.interaction.plot, 
-    myboxplot, myboxplot.formula, myboxplot.list, myboxplot.data.frame, mylegend, mymatplot, mypairs, mypdf, mypostscript, panel.cor, myhist,
+    myboxplot, myboxplot.formula, myboxplot.list, myboxplot.data.frame, mylegend, mymatplot, mypairs, mypdf, mypng, mypostscript, panel.cor, myhist,
     panel.hist, panel.nothing, corplot, corplot.default, corplot.formula)
 
 export(formatInt, formatDouble, make.latex.coef.table, mytex, mytex.begin, mytex.end, mywrite, mywrite.csv, roundup)
@@ -89,7 +89,7 @@ import(stats)
 import(graphics)
 
 
-importFrom("grDevices", "pdf", "postscript","rgb")
+importFrom("grDevices", "pdf", "postscript","rgb", "png")
 importFrom("methods", "getAllSuperClasses", "getClass", "getGenerics",
          "getMethods", "is", "linearizeMlist")
 importFrom("utils", "capture.output", "read.csv", "tail", "write.csv", "str")
