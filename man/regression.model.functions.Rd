@@ -46,8 +46,9 @@ getVarComponent(object, ...)
 
 getFixedEf(object, ...)
 
-risk.cal(risk, binary.outcome, weights=NULL, ngroups=10, main="", add=FALSE, 
-show.emp.risk=TRUE, lcol=2, ylim=NULL, scale=c("logit","risk"))
+risk.cal(risk, binary.outcome, weights = NULL, ngroups = NULL, 
+    cuts = NULL, main = "", add = FALSE, show.emp.risk = TRUE, 
+    lcol = 2, ylim = NULL, scale = c("logit", "risk"))
 interaction.table(fit, v1, v2, v1.type = "continuous", v2.type = "continuous",
 logistic.regression = TRUE)
 
@@ -61,7 +62,8 @@ logistic.regression = TRUE)
 \method{getFixedEf}{geese}(object, ...)
 \method{getFixedEf}{tps}(object, exp=FALSE, robust=TRUE, ...)
 
-\method{getFixedEf}{glm} (object, exp=FALSE, robust=TRUE, ...) 
+\method{getFixedEf}{glm} (object, exp = FALSE, robust = TRUE, ret.robcov = FALSE, 
+    ...)  
 
 
 \method{getFixedEf}{inla}(object, ...)
@@ -120,6 +122,12 @@ logistic.regression = TRUE)
 
 
 
+  \item{cuts}{
+%%     ~~Describe \code{fits} here~~
+}
+  \item{ret.robcov}{
+%%     ~~Describe \code{fits} here~~
+}
 
   \item{fits}{
 %%     ~~Describe \code{fits} here~~

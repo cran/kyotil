@@ -13,8 +13,7 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
         } else {
             tmp = getFixedEf (fit, robust=robust, ...)
         }
-        # the expectation is that est, pvalue, lb, ub
-        # or                      est, sth,    lb, ub, pvalue 
+        # tmp should be: est, se, lb, ub, pvalue 
         
         if (VE) {
             tmp[,1]=1-tmp[,1]
@@ -61,6 +60,10 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
             # est (p value #)
             out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (p value " %+% 
                 format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %+% ")" 
+        else if (type==9)
+            # est (pval)*
+            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
+                format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %+% ")" 
         else 
             stop ("getFormattedSummaries(). type not supported: "%+%type)
     
@@ -90,17 +93,20 @@ getVarComponent <- function(object, ...) UseMethod("getVarComponent")
 
 
 # if there is missing data and robust=T, some errors will happen. it is a useful error to have.
-getFixedEf.glm = function (object, exp=FALSE, robust=TRUE, ...) {
+# if ret.robcov TRUE, then returns robust variance-covariance matrix
+# infjack.glm defined later in this file
+getFixedEf.glm = function (object, exp=FALSE, robust=TRUE, ret.robcov=FALSE, ...) {
     out=summary(object)$coef
-    if (robust) {
-        V=infjack.glm(object, 1:nrow(object$data))
+    if (robust | ret.robcov) {
+        V=infjack.glm(object, 1:nrow(object$model)) # object$data may have NAs
+        if (ret.robcov) return (V)
         out[,2]=sqrt(diag(V))
         out[,3]=out[,1]/out[,2]
         out[,4]=2 * pnorm(-abs(out[,3]))
     }
     # to get est, p value, low bound, upper bound
-    out=cbind(out[,1],out[,4],out[,1]-1.96*out[,2],out[,1]+1.96*out[,2])
-    colnames(out)=c("est","p.value","(lower","upper)")
+    out=cbind(out[,1],out[,2],out[,1]-1.96*out[,2],out[,1]+1.96*out[,2],out[,4])
+    colnames(out)=c("est","se","(lower","upper)","p.value")
     if(exp) {
         out[,c(1,3,4)]=exp(out[,c(1,3,4)])
         colnames(out)[1]="OR"
@@ -434,26 +440,33 @@ estfun.glm<-function(glm.obj){
         mf<-model.frame(glm.obj)
         xmat<-model.matrix(terms(glm.obj),mf)       
     }
-    residuals(glm.obj,"working")*glm.obj$weights*xmat
+    residuals(glm.obj,"working")*glm.obj$weights*xmat[,rownames(summary(glm.obj)$cov.unscaled)] # the column selection is added to fix a bug caused by weird formula
 }
 
 
 # goodness of fit
 #  ngroups=10; main=""; add=FALSE; show.emp.risk=TRUE; lcol=1; ylim=NULL; weights=NULL
-risk.cal=function(risk, binary.outcome, weights=NULL, ngroups=10, main="", add=FALSE, show.emp.risk=TRUE, lcol=2, ylim=NULL, scale=c("logit","risk")){
+risk.cal=function(risk, binary.outcome, weights=NULL, ngroups=NULL, cuts=NULL, main="", add=FALSE, show.emp.risk=TRUE, lcol=2, ylim=NULL, scale=c("logit","risk")){
     
     scale=match.arg(scale)
     
     stopifnot(length(risk)==length(binary.outcome))
     if(!is.null(weights)) stopifnot(length(risk)==length(weights)) else weights=rep(1,length(risk))
     
-    if(length(table(risk))<ngroups) ngroups=length(table(risk))    
-    risk.cat=as.numeric(Hmisc::cut2(risk,g=ngroups))
+    if(is.null(cuts)) {
+        if(length(table(risk))<ngroups) ngroups=length(table(risk))
+        risk.cat=as.numeric(Hmisc::cut2(risk,g=ngroups))
+    } else {
+        risk.cat=as.numeric(Hmisc::cut2(risk,cuts=cuts))
+        print(table(risk.cat))
+        ngroups=length(table(risk.cat))
+    } 
     
     emp.risk=numeric(ngroups)
     for(i in 1:ngroups){
         emp.risk[i]=sum(binary.outcome[risk.cat==i])/sum(weights[risk.cat==i])
     }
+    print(emp.risk)
     
     xx=cbind(risk, "emp.risk"=emp.risk[risk.cat])
     xx=xx[order(xx[,"risk"]),]
@@ -472,6 +485,8 @@ risk.cal=function(risk, binary.outcome, weights=NULL, ngroups=10, main="", add=F
 
     plot(xx[,"risk"], type="l", xlab="", xaxt="n", main=main, col=1, ylim=ylim, ylab=ylab)
     if(show.emp.risk) lines(xx[,"emp.risk"], col=lcol, lty=2)
+    
+    print(table(xx[,"emp.risk"], useNA="ifany"))
         
     mylegend(col=1:lcol, lty=1:2, x=1, legend=c("model fit","empirical"))
     

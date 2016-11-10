@@ -1,8 +1,111 @@
-mypdf=function (...) mypostscript(ext="pdf",...) # cannot print both to screen and pdf
+#.mydev=list()
+myfigure=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height=NULL, oma=NULL, mar=NULL, main.outer=FALSE, ...) {        
+    if (!is.null(mfcol)) {
+        nrow=mfcol[1]; ncol=mfcol[2]        
+    } else {
+        nrow=mfrow[1]; ncol=mfrow[2]
+    }        
+    if(is.null(width) | is.null(height))  tmp=get.width.height(nrow,ncol) else tmp=c(width,height)
+ #   unlockBinding(".mydev", getNamespace("kyotil"))
+    eval(eval(substitute(expression(.mydev <<- list(width=tmp[1],height=tmp[2],file=file)))))             
+    
+    #pdf (paper="special", file=.mydev$file%+%"."%+%ext, width=.mydev$width, height=.mydev$height, ...)
+        
+    if (!is.null(mfcol)) par(mfcol=mfcol) else par(mfrow=mfrow)    
+    #needed for dev.copy
+    dev.control(displaylist = "enable")
+    if (!is.null(oma)) par(oma=oma)
+    if (!is.null(mar)) par(mar=mar)    
+    if (main.outer) {
+        tmp=par()$oma
+        tmp[3]=tmp[3]+1
+        par(oma=tmp)
+    }    
+}
+mydev.off=function(ext=c("pdf","png","tiff","eps"), res=200, mydev=NULL) {        
+    if (!is.null(mydev)) .mydev=mydev
+    exts=strsplit(ext, ",")[[1]]
+    for (ext in exts) {
+        if (ext=="pdf") {
+            dev.copy(pdf,        file=.mydev$file%+%"."%+%ext, width=.mydev$width, height=.mydev$height, paper="special")
+        } else if (ext=="eps") {
+            dev.copy(postscript, file=.mydev$file%+%"."%+%ext, width=.mydev$width, height=.mydev$height, paper="special", horizontal=FALSE)
+        } else if (ext=="png") {
+            dev.copy(png,    filename=.mydev$file%+%"."%+%ext, width=.mydev$width, height=.mydev$height, units="in", res=res)
+        } else if (ext=="tiff") {
+            dev.copy(tiff,   filename=.mydev$file%+%"."%+%ext, width=.mydev$width, height=.mydev$height, units="in", res=res, compression="jpeg")
+        }
+        dev.off()
+        cat("Saving figure to "%+%paste(getwd(),"/",.mydev$file,sep="")%+%"."%+%ext%+%"\n")        
+    }
+}
 
+get.width.height=function(nrow,ncol){
+    if (nrow==1 & ncol==1) {width=6.7; height=6.7
+    } else if (nrow==1 & ncol==2) {width=9.7; height=5.2
+    } else if (nrow==1 & ncol==3) {width=9.7; height=3.4
+    } else if (nrow==1 & ncol==4) {width=14; height=3.4
+    } else if (nrow==2 & ncol==3) {width=9.7; height=6.7
+    } else if (nrow==4 & ncol==6) {width=15; height=10
+    } else if (nrow==2 & ncol==4) {width=13; height=6.7
+    } else if (nrow==3 & ncol==6) {width=17.5; height=9
+    } else if (nrow==3 & ncol==7) {width=17.5; height=7
+    } else if (nrow==4 & ncol==8) {width=17.5; height=9
+    } else if (nrow==4 & ncol==7) {width=17.5; height=9
+    } else if (nrow==4 & ncol==9) {width=20; height=9
+    } else if (nrow==3 & ncol==5) {width=15; height=9.6
+    } else if (nrow==3 & ncol==4) {width=12; height=9.6
+    } else if (nrow==4 & ncol==5) {width=15; height=12.5
+    } else if (nrow==5 & ncol==6) {width=9; height=8.3
+    } else if (nrow==2 & ncol==2) {width=8; height=8.5
+    } else if (nrow==3 & ncol==3) {width=9.7; height=10.3
+    } else if (nrow==4 & ncol==4) {width=9.7; height=10.3
+    } else if (nrow==6 & ncol==5) {width=18; height=17
+    } else if (nrow==5 & ncol==5) {width=15; height=15
+    } else if (nrow==5 & ncol==3) {width=9; height=15
+    } else if (nrow==4 & ncol==2) {width=6; height=13
+    } else if (nrow==6 & ncol==3) {width=9; height=19
+    } else if (nrow==7 & ncol==3) {width=9; height=22
+    } else if (nrow==8 & ncol==5) {width=10; height=16
+    } else if (nrow==6 & ncol==4) {width=12; height=19
+    } else if (nrow==7 & ncol==5) {width=18; height=19
+    } else if (nrow==5 & ncol==4) {width=12; height=15
+    } else if (nrow==2 & ncol==1) {width=6.7; height=9.7
+    } else if (nrow==3 & ncol==1) {width=10; height=9.7
+    } else if (nrow==5 & ncol==1) {width=5; height=13
+    } else if (nrow==3 & ncol==2) {width=6.7; height=10.3
+    } else if (nrow==4 & ncol==3) {width=9; height=12
+    } else stop ("nrow x ncol not supported: "%+%nrow%+%" x "%+%ncol)
+    return(c(width,height))
+}
+
+##test
+
+#mypdf(mfrow=c(1,3),file="test1x3");plot(1:10,main="LUMX",xlab="t",ylab="y");plot(1:10);plot(1:10);dev.off()
+#mypdf(mfrow=c(2,3),file="test2x3");plot(1:10,main="LUMX",xlab="t",ylab="y");plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);dev.off()
+#mypdf(mfrow=c(4,4),file="test4x4");plot(1:10,main="LUMX",xlab="t",ylab="y");plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10,main="Luminex");dev.off()
+#mypdf(mfrow=c(1,1),file="test1x1", );plot(1:10,main="LUMX",xlab="t",ylab="y");dev.off()
+
+#    # use convert.ext to convert one format to another
+#    # get file name relative to getwd()
+#    # .Devices sometimes have "null device", sometimes have "windows"
+#    tmp=which(sapply(.Devices, function(x) x=="pdf"))
+#    if(length(tmp)==1) {
+#        filename=attr(.Devices[[tmp]],"filepath")         
+#    }
+#    # close pdf device or default device
+#    dev.off()
+#    # convert file if needed
+#    if(png & length(tmp)==1) {
+#        system('"C:/Program Files/ImageMagick-7.0.3-Q16/convert.exe" -resize 2000 -density 200 "'%+%getwd()%+%'/'%+%filename%+%'" "'%+%getwd()%+%'/'%+%fileStem(filename)%+%'.png"')
+#    }        
+
+# deprecated
+# cannot print both to pdf and tiff or print both to screen and pdf, 
+mypdf=function (...) mypostscript(ext="pdf",...)
 mypng=function(...) mypostscript(ext="png",...)
-
-mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height=NULL, ext=c("eps","pdf","png"), oma=NULL, mar=NULL,main.outer=FALSE, save2file=TRUE, ...) {    
+mytiff=function(...) mypostscript(ext="tiff",...)
+mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height=NULL, ext=c("eps","pdf","png","tiff"), oma=NULL, mar=NULL,main.outer=FALSE, save2file=TRUE, res=200, ...) {    
     
     ext=match.arg(ext)
     
@@ -59,7 +162,9 @@ mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height
         } else if (ext=="eps") {
             postscript (paper="special", horizontal=FALSE, file=file%+%"."%+%ext, width=width, height=height, ...)
         } else if (ext=="png") {
-            png (filename=file%+%"."%+%ext, width=width, height=height, units="in", res=150, ...)
+            png (filename=file%+%"."%+%ext, width=width, height=height, units="in", res=res, ...)
+        } else if (ext=="tiff") {
+            tiff (filename=file%+%"."%+%ext, width=width, height=height, units="in", res=res, compression="jpeg", ...)
         }
         cat("Saving figure to "%+%paste(getwd(),"/",file,sep="")%+%"\n")        
     } else {
@@ -79,13 +184,6 @@ mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height
     }
     
 }
-##test
-#mypdf(mfrow=c(1,1),file="test1x1");plot(1:10,main="LUMX",xlab="t",ylab="y");dev.off()
-#mypdf(mfrow=c(1,2),file="test1x2");plot(1:10,main="LUMX",xlab="t",ylab="y");plot(1:10);dev.off()
-#mypdf(mfrow=c(2,2),file="test2x2");plot(1:10,main="LUMX",xlab="t",ylab="y");plot(1:10);plot(1:10);plot(1:10);plot(1:10);dev.off()
-#mypdf(mfrow=c(1,3),file="test1x3");plot(1:10,main="LUMX",xlab="t",ylab="y");plot(1:10);plot(1:10);dev.off()
-#mypdf(mfrow=c(2,3),file="test2x3");plot(1:10,main="LUMX",xlab="t",ylab="y");plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);dev.off()
-#mypdf(mfrow=c(4,4),file="test4x4");plot(1:10,main="LUMX",xlab="t",ylab="y");plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10);plot(1:10,main="Luminex");dev.off()
 
 
 
@@ -107,7 +205,7 @@ panel.cor <- function(x, y, digits=2, prefix="", cex.cor,  ...)
     txt <- format(c(r, 0.123456789), digits=digits)[1]
     txt <- paste(prefix, txt, sep="")
     if(missing(cex.cor)) cex.cor <- 0.8/strwidth(txt)
-    text(0.5, 0.5, txt, cex = cex.cor * r)
+    text(0.5, 0.5, txt, cex = ifelse(cex.cor<0,-cex.cor, cex.cor * r) )
 }
 panel.hist <- function(x, ...)
 {
@@ -277,7 +375,8 @@ myboxplot.list=function(object, ...){
 my.interaction.plot=function(dat, x.ori=0, xaxislabels=rep("",2), cex.axis=1, add=FALSE, xlab="", ylab="", pcol=NULL, lcol=NULL, ...){
     if (!add) plot(0,0,type="n",xlim=c(1,2),ylim=range(dat), ylab=ylab, xlab=xlab, xaxt="n", ...)
     cex=.25; pch=19
-    if (is.null(lcol)) lcol=ifelse(dat[,1]>dat[,2],"red","black")
+    if (is.null(lcol)) lcol=ifelse(dat[,1]>dat[,2],"red","black") else if (length(lcol)==1) lcol=rep(lcol,nrow(dat))
+    if (!is.null(pcol)) if (length(pcol)==1) pcol=matrix(pcol,nrow(dat),2)
     for (i in 1:nrow(dat)) {
         points (1+x.ori, dat[i,1], cex=cex, pch=pch, col=ifelse(is.null(pcol), 1, pcol[i,1]))
         points (2+x.ori, dat[i,2], cex=cex, pch=pch, col=ifelse(is.null(pcol), 1, pcol[i,2]))
@@ -382,10 +481,29 @@ abline.pt.slope=function(pt1, slope, x2=NULL, ...){
     
 }
 
+# put a shade in a rectangle between a point and one of the four quadrants
+# pt is a vector of two values
+# col is red blue gree
+abline.shade=function(pt, quadrant=c(1,2,3,4), col=c(0,1,0), alpha=0.3){
+    usr <- par('usr')   #this may be useful
+    # rec: xleft, ybottom, xright, ytop
+    # usr: xleft, xright, ybottom, ytop
+    if (quadrant==1) {
+        rect(pt[1], pt[2], usr[2], usr[4], col=rgb(red=col[1], blue=col[2], green=col[3], alpha=alpha), border=NA) 
+    } else if (quadrant==2) {
+        rect(pt[1], usr[3], usr[2], pt[2], col=rgb(red=col[1], blue=col[2], green=col[3], alpha=alpha), border=NA) 
+    } else if (quadrant==3) {
+        rect(usr[1], usr[3], pt[1], pt[2], col=rgb(red=col[1], blue=col[2], green=col[3], alpha=alpha), border=NA) 
+    } else if (quadrant==4) {
+        rect(usr[1], pt[2], pt[1], usr[4], col=rgb(red=col[1], blue=col[2], green=col[3], alpha=alpha), border=NA) 
+    } 
+    
+}
+
 # put a shade between two lines
 # x is a vector of two values
 # col is red blue gree
-abline.shade=function(x, col=c(0,1,0)){
+abline.shade.2=function(x, col=c(0,1,0)){
     usr <- par('usr') 
     rect(x[1], usr[3], x[2], usr[4], col=rgb(red=col[1], blue=col[2], green=col[3], alpha=.5), border=NA) 
 }
@@ -438,3 +556,5 @@ plot.ellipse=function(x0,y0,a=1,b=1,theta=0,alpha=0,add=TRUE,...) {
         lines(x,y,...)
     } else plot(x, y, type = "l",...)
 }
+
+add.mtext.label=function(text, cex=1.4, adj=-0.2) mtext(side=3, line=2, adj=adj, text=text, cex=cex, font=2, xpd=NA)

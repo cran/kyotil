@@ -6,13 +6,13 @@ export(concatList, AR1, EXCH, fill.jagged.array, getMidPoints, getUpperRight, la
     rep.matrix.block, shift.left, shift.right, thin.rows, ThinRows, tr)
 
 export("%+%", concatList, contain, escapeUnderline, fileStem, firstIndex, getExt, getFileStem, getStem, 
-    lastIndex, myprint, myprint.default, remove.prefix, VEplot, VEplot.cox.zph, myplot.cox.zph, age_calc)
+    lastIndex, myprint, myprint.default, remove.prefix, VEplot, VEplot.glm, VEplot.cox.zph, myplot.cox.zph, age_calc)
 
 export(binary, binary2, f2c, ftoi, keepWarnings, meanmed, methods4, myaggregate, myreshapewide, mysapply, myscale, 
     mysystem, mytapply, read.sv, read.tsv, table.prop, table.cases, table.cases.3, unix)
 
-export(abline.shade, abline.pt.slope, abline.pts, butterfly.plot, empty.plot, getMfrow, myforestplot, my.interaction.plot, 
-    myboxplot, myboxplot.formula, myboxplot.list, myboxplot.data.frame, mylegend, mymatplot, mypairs, mypdf, mypng, mypostscript, panel.cor, myhist,
+export(abline.shade, abline.shade.2, abline.pt.slope, abline.pts, butterfly.plot, empty.plot, getMfrow, myforestplot, my.interaction.plot, 
+    myboxplot, myboxplot.formula, myboxplot.list, myboxplot.data.frame, mylegend, mymatplot, mypairs, mypdf, mypng, mytiff, mypostscript, panel.cor, myhist, mydev.off, myfigure, wtd.hist,
     panel.hist, panel.nothing, corplot, corplot.default, corplot.formula)
 
 export(formatInt, formatDouble, make.latex.coef.table, mytex, mytex.begin, mytex.end, mywrite, mywrite.csv, roundup)
@@ -29,7 +29,7 @@ export(hosmerlem, quick.t.test, signtest, tukey.mtest, vector.t.test, summ, mult
 
 export(getK, trim)
 
-export(pava, get.sim.res)
+export(pava, get.sim.res, Deming)
 
 export(.as.double, DXD, symprod, txSy, tXDX, interpolate)
 
@@ -37,7 +37,7 @@ export(make.timedep.dataset, sim.dat.tvarying.two, sim.dat.tvarying.three)
 
 export(cox.zph.2)
 
-export(cor.mixed, cor.mixed.vector, cor.mixed.formula, cor.mixed.default)
+export(cor.mixed, cor.mixed.vector, cor.mixed.formula, cor.mixed.default, add.mtext.label)
 
 
 S3method(cor.mixed,vector)
@@ -47,6 +47,7 @@ S3method(cor.mixed,default)
 
 
 S3method(VEplot,cox.zph) 
+S3method(VEplot,glm) 
 S3method(coef,geese )
 S3method(corplot,default )
 S3method(corplot,formula)
@@ -78,11 +79,18 @@ S3method(getFixedEf, lme)
 S3method(getFixedEf, lmerMod)
 S3method(getFixedEf, logistf)
 S3method(getFixedEf, matrix)
+S3method(getFixedEf, matrix)
 
 S3method(coef, tps)
 S3method(vcov, tps)
 S3method(getFixedEf, tps)
 S3method(predict, tps)
+
+S3method(coef, Deming)
+S3method(vcov, Deming)
+S3method(getFixedEf, Deming)
+S3method(predict, Deming)
+S3method(summary, Deming)
 
 
 import(stats)
@@ -93,3 +101,5 @@ importFrom("grDevices", "pdf", "postscript","rgb", "png")
 importFrom("methods", "getAllSuperClasses", "getClass", "getGenerics",
          "getMethods", "is", "linearizeMlist")
 importFrom("utils", "capture.output", "read.csv", "tail", "write.csv", "str")
+importFrom("grDevices", "dev.control", "dev.copy", "dev.off",
+           "nclass.FD", "nclass.Sturges", "nclass.scott", "tiff")

@@ -121,3 +121,29 @@ myplot.cox.zph=function (x, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var,
         }
     }
 }
+
+
+# plot VE curve as function of a covariate from a fitted glm logistic regression model
+# get CI by delta method on log(R1/R2), then transform
+# X1 is nxp matrix where trt is 1, vacc. Should match coef
+# X2 is nxp matrix where trt is 0, plac
+# x is the covariate
+# ... plotting arguments
+VEplot.glm=function (object, X1, X2, x, ...) {
+    fit=object
+    
+    p1=c(expit(X1%*%coef(fit)))
+    p2=c(expit(X2%*%coef(fit)))
+    deriv.=-(1-p2)*X2+(1-p1)*X1
+    V=getFixedEf(fit, ret.robcov=T)
+    sd.=sqrt(diag(deriv.%*%V%*%t(deriv.)))
+    
+    est=p1/p2
+    CIs=rbind(log(est)-1.96*sd., log(est)+1.96*sd.)
+    CIs=exp(CIs)
+    
+    ve=1-est    
+    plot(x,ve, type="l", ...)    
+    lines(x,1-CIs[1,],lty=2)
+    lines(x,1-CIs[2,],lty=2)
+}

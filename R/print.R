@@ -88,7 +88,7 @@ mytex=function(dat=NULL, file.name="temp",
         
         if(include.colnames) {
             coln=if(!is.null(sanitize.text.function)) sanitize.text.function(colnames(dat1)) else sanitize.text(sanitize.numbers(colnames(dat1)))
-            top.1=concatList(" \\multicolumn{1}{"%+%align[-1]%+%"}{"%+%coln%+%"} ", sep="&") %+% "\\\\ \n"%+% # center aligned column titles
+            top.1=concatList(" \\multicolumn{1}{c}{"%+%coln%+%"} ", sep="&") %+% "\\\\ \n"%+% # center aligned column titles
                 "\\hline\n" # insert at the beginning of table, "\n" is added so that there is no need to keep it in col.title
             # add a column for rownames, which may include names of rownames
             if(!include.dup.rownames) {
@@ -98,13 +98,14 @@ mytex=function(dat=NULL, file.name="temp",
                 }
             }
             top=top%+%top.1
-            print(coln)
-            print(top.1)
+#            print(coln)
+#            print(top.1)
         }
             
         if (include.colnames & is.null(hline.after)) hline.after=c(nrow(dat1)) # cannot use default due to add.to.row    
         include.colnames=FALSE        
         
+        #print(add.to.row)
         if (is.null(add.to.row)) {
             add.to.row=list(list(0), top)
         } else {

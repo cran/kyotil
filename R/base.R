@@ -4,7 +4,7 @@ cbind.uneven=function(li) {
     alllen=lapply(allnames, length)
     nams = allnames[[which.max(alllen)]]
     nams= c(nams, setdiff(unique(unlist(allnames)), nams)) # append additional names
-    myprint(nams)
+    #myprint(nams)
     
     res=NULL
     for (a in li){
@@ -17,6 +17,7 @@ cbind.uneven=function(li) {
             res=as.data.frame(cbind(res,toadd, stringsAsFactors=FALSE))
         }
     }
+    colnames(res)=names(li)
     res
 }
 

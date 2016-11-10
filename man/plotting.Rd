@@ -1,7 +1,9 @@
 \name{plotting}
 \alias{abline.pt.slope}
+\alias{wtd.hist}
 \alias{abline.pts}
 \alias{abline.shade}
+\alias{abline.shade.2}
 \alias{butterfly.plot}
 \alias{empty.plot}
 \alias{getMfrow}
@@ -24,6 +26,12 @@
 \alias{corplot}
 \alias{corplot.default}
 \alias{corplot.formula}
+\alias{VEplot.glm}
+\alias{add.mtext.label}
+\alias{mydev.off}
+\alias{myfigure}
+\alias{mytiff}
+
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Plotting Functions}
@@ -55,7 +63,12 @@ my.interaction.plot(dat, x.ori = 0, xaxislabels = rep("", 2), cex.axis = 1, add 
 
 myboxplot(object, ...)
 
-abline.shade(x, col=c(0,1,0))
+abline.shade.2(x, col=c(0,1,0))
+abline.shade(pt, quadrant=c(1,2,3,4), col=c(0,1,0), alpha=0.3)
+
+\method{VEplot}{glm}(object, X1, X2, x, ...)
+add.mtext.label (text, cex = 1.4, adj = -0.2) 
+mydev.off(ext = c("pdf", "png", "tiff", "eps"), res = 200, mydev=NULL)
 
 
 \method{myboxplot}{formula}(formula, data, cex=.5, xlab="", ylab="", main="", box=TRUE, 
@@ -76,13 +89,29 @@ mymatplot (x, y, type="b", lty=1:5, pch=NULL, col=1:6, xlab=NULL, ylab="",
                  
 mypairs(dat, ...)
 
+wtd.hist (x, breaks = "Sturges", freq = NULL, probability = !freq, 
+    include.lowest = TRUE, right = TRUE, density = NULL, angle = 45, 
+    col = NULL, border = NULL, main = paste("Histogram of", xname), 
+    xlim = range(breaks), ylim = NULL, xlab = xname, ylab, axes = TRUE, 
+    plot = TRUE, labels = FALSE, nclass = NULL, weight = NULL, 
+    ...) 
+
+
+
+myfigure(file = "temp", mfrow = c(1, 1), mfcol = NULL, width = NULL, 
+    height = NULL, oma = NULL, mar = NULL, main.outer = FALSE, 
+    ...) 
+
+
 mypdf(...)
 
 mypng(...)
+mytiff(...)
 
-mypostscript(file = "temp", mfrow = c(1, 1), mfcol = NULL, width = NULL, height = NULL, 
-    ext = c("eps", "pdf", "png"), oma = NULL, mar = NULL, main.outer = FALSE, 
-    save2file = TRUE, ...)
+mypostscript(file = "temp", mfrow = c(1, 1), mfcol = NULL, width = NULL, 
+    height = NULL, ext = c("eps", "pdf", "png", "tiff"), oma = NULL, 
+    mar = NULL, main.outer = FALSE, save2file = TRUE, res = 200, 
+    ...)
 
 panel.cor(x, y, digits = 2, prefix = "", cex.cor, ...)
 
@@ -113,13 +142,71 @@ col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FAL
   \item{slope}{
 %%     ~~Describe \code{slope} here~~
 }
+  \item{mydev}{
+%%     ~~Describe \code{slope} here~~
+}
   \item{jitter}{Boolean}
   \item{add.interaction}{Boolean}
   \item{\dots}{
 %%     ~~Describe \code{\dots} here~~
 }
 
+  \item{adj}{
+%%     ~~Describe \code{pt2} here~~
+}
+
+  \item{breaks}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{freq}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{probability}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{include.lowest}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{right}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{density}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{angle}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{border}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{axes}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{plot}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{labels}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{nclass}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{weight}{
+%%     ~~Describe \code{pt2} here~~
+}
+
+
+
   \item{pt2}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{pt}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{quadrant}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{alpha}{
 %%     ~~Describe \code{pt2} here~~
 }
 
@@ -129,6 +216,9 @@ col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FAL
   \item{lwd}{
 line width.
 }
+  \item{res}{
+resolution.
+}
   \item{legend.inset}{
 legend inset
 }
@@ -136,6 +226,9 @@ legend inset
 %%     ~~Describe \code{dat2} here~~
 }
   \item{add}{
+%%     ~~Describe \code{add} here~~
+}
+  \item{text}{
 %%     ~~Describe \code{add} here~~
 }
   \item{log}{
@@ -233,6 +326,12 @@ string. For example, "t","w","f","k", "tw"
 %%     ~~Describe \code{legend} here~~
 }
   \item{x}{
+%%     ~~Describe \code{x} here~~
+}
+  \item{X1}{
+%%     ~~Describe \code{x} here~~
+}
+  \item{X2}{
 %%     ~~Describe \code{x} here~~
 }
   \item{lty}{
@@ -344,13 +443,15 @@ col.1 is the color used for CIs that do not include null, col.2 is used for CIs 
 If order is TRUE, the rows are ordered by the first column of dat. descreasing can be used to change the behavior of order.
 
 corplot.formula uses MethComp::Deming by Bendix Carstensen to fit Deming regression.
+
+wtd.hist is copied from weights package.
 }
 
 \examples{
-mypdf(mfrow=c(1,2))
+myfigure(mfrow=c(1,2), file="tmp")
     plot(1:10)
     plot(1:10)
-dev.off()
+mydev.off(ext="png,pdf")
 
 set.seed(1)
 x=1:50+rnorm(50,0,4)
