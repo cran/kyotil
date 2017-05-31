@@ -1,4 +1,4 @@
-cbind.uneven=function(li) {
+cbind.uneven=function(..., li) {
     # bind a list of data frame or named vector that are not of the same length
     allnames=lapply(li, rownames)
     alllen=lapply(allnames, length)
@@ -291,12 +291,12 @@ table.prop=function (x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE,useNA="
 
 # case is vector of 0/1 and group is vector of multi-group indicators
 # the second row is taken in the computation, so be careful about NA's
-table.cases=function (case,group,include.all=TRUE) {
+table.cases=function (case,group,include.all=TRUE,desc="cases") {
     tbl=table(case, group)
 #    tab=binom::binom.confint(x=c(tbl[2,],if(include.all) sum(tbl[2,])), n=c(colSums(tbl),if(include.all) sum(tbl)), alpha=0.05, method=c("wilson"))[,-1] # remove method column
     tab=Hmisc::binconf(x=c(tbl[2,],if(include.all) sum(tbl[2,])), n=c(colSums(tbl),if(include.all) sum(tbl)), alpha=0.05, method=c("wilson"), include.x=TRUE, include.n=TRUE)
     tab[,3:5]=tab[,3:5]*100 # get percentage
-    colnames(tab)=c("# cases","# total","% cases","lb","ub")
+    colnames(tab)=c("# "%+%desc,"# total","% "%+%desc,"lb","ub")
     rownames(tab)=c(colnames(tbl),if(include.all) "all")
     tab
 }

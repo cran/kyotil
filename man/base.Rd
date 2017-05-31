@@ -35,8 +35,7 @@ f2c convert temperature from f to c/
 
 }
 \usage{
-
-cbind.uneven(li)
+\method{cbind}{uneven}(..., li)
 binary(i)
 
 multi.outer (f, ... ) 
@@ -72,7 +71,7 @@ read.tsv(file, header = TRUE, sep = "\t", ...)
 
 table.prop(x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE,useNA="ifany") 
 
-table.cases  (case,group,include.all=TRUE)
+table.cases  (case,group,include.all=TRUE,desc="cases")
 table.cases.3(case,group1,group2)
 
 unix()
@@ -117,6 +116,9 @@ a formula object.}
 %%     ~~Describe \code{ANY} here~~
 }
 
+  \item{desc}{
+%%     ~~Describe \code{by} here~~
+}
   \item{by}{
 %%     ~~Describe \code{by} here~~
 }

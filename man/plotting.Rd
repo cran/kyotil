@@ -68,12 +68,12 @@ abline.shade(pt, quadrant=c(1,2,3,4), col=c(0,1,0), alpha=0.3)
 
 \method{VEplot}{glm}(object, X1, X2, x, ...)
 add.mtext.label (text, cex = 1.4, adj = -0.2) 
-mydev.off(ext = c("pdf", "png", "tiff", "eps"), res = 200, mydev=NULL)
+mydev.off(file="temp", ext = c("png","pdf","tiff","eps"), res = 200, mydev=NULL)
 
 
 \method{myboxplot}{formula}(formula, data, cex=.5, xlab="", ylab="", main="", box=TRUE, 
 at=NULL, na.action=NULL, pch=1, col=1, test="", reshape.formula=NULL, jitter=TRUE, 
-add.interaction=FALSE,  drop.unused.levels = TRUE, ...)
+add.interaction=FALSE,  drop.unused.levels = TRUE, bg.pt=NULL, ...)
     
 
 \method{myboxplot}{data.frame}(object, cex = 0.5, ylab = "", xlab = "", main = "", box = TRUE,
@@ -81,11 +81,11 @@ add.interaction=FALSE,  drop.unused.levels = TRUE, ...)
 
 \method{myboxplot}{list}(object, ...)
 
-mylegend(legend, x, lty = NULL, bty = "n", ...)
+mylegend(legend, x, y=NULL, lty = NULL, bty = "n", ...)
 
 mymatplot (x, y, type="b", lty=1:5, pch=NULL, col=1:6, xlab=NULL, ylab="", 
     draw.x.axis=TRUE, bg=NA, lwd=1, at=NULL, make.legend=TRUE, legend=NULL, 
-    legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, ...) 
+    legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, xaxt = "s", ...) 
                  
 mypairs(dat, ...)
 
@@ -98,9 +98,8 @@ wtd.hist (x, breaks = "Sturges", freq = NULL, probability = !freq,
 
 
 
-myfigure(file = "temp", mfrow = c(1, 1), mfcol = NULL, width = NULL, 
-    height = NULL, oma = NULL, mar = NULL, main.outer = FALSE, 
-    ...) 
+myfigure(mfrow = c(1, 1), mfcol = NULL, width = NULL, 
+    height = NULL, oma = NULL, mar = NULL, main.outer = FALSE, bg=NULL) 
 
 
 mypdf(...)
@@ -154,11 +153,17 @@ col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FAL
   \item{adj}{
 %%     ~~Describe \code{pt2} here~~
 }
+  \item{xaxt}{
+%%     ~~Describe \code{pt2} here~~
+}
 
   \item{breaks}{
 %%     ~~Describe \code{pt2} here~~
 }
   \item{freq}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{bg.pt}{
 %%     ~~Describe \code{pt2} here~~
 }
   \item{probability}{
@@ -448,10 +453,10 @@ wtd.hist is copied from weights package.
 }
 
 \examples{
-myfigure(mfrow=c(1,2), file="tmp")
+myfigure(mfrow=c(1,2))
     plot(1:10)
     plot(1:10)
-mydev.off(ext="png,pdf")
+mydev.off(ext="png,pdf", file="tmp")
 
 set.seed(1)
 x=1:50+rnorm(50,0,4)

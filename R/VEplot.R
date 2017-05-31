@@ -7,19 +7,16 @@
 
 VEplot <- function(object, ...) UseMethod("VEplot")
  
-VEplot.cox.zph = function (object, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var, ylab="VE", xlab="Time", ...) {
-
+VEplot.cox.zph = function (object, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var, ylab="VE", xlab="Time", xaxt="s", cex.axis=1, ...) {
     myplot.cox.zph (x=object, resid=resid, se = se, df = df, nsmo = nsmo, var = var, 
-        coef.transform=function(x) 1-exp(x), # this is the only parameter provided in VEplot.cox.zph
-        ylab=ylab, xlab=xlab, ...)
-        
+    coef.transform=function(x) 1-exp(x), # this is the only parameter provided in VEplot.cox.zph
+    ylab=ylab, xlab=xlab, xaxt=xaxt, cex.axis=cex.axis, ...)        
 }
 
 myplot.cox.zph=function (x, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var, 
     # parameters not part of plot.cox.zph
     coef.transform=NULL, # a function to transform the coefficients
-    ylab=NULL, 
-    xlab="Time", 
+    ylab=NULL, xlab="Time", xaxt="s", cex.axis=1,
     ...) 
 {
     xx <- x$x
@@ -98,17 +95,18 @@ myplot.cox.zph=function (x, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var,
                 yr <- range(yr, yup, ylow)
             }
         }
-        
+    
         if (x$transform == "identity") 
-            plot(range(xx), yr, type = "n", xlab = xlab, ylab = ylab[i], 
+            plot(range(xx), yr, type = "n", xlab = xlab, ylab = ylab[i], xaxt=xaxt, cex.axis=cex.axis,
                 ...)
         else if (x$transform == "log") 
-            plot(range(xx), yr, type = "n", xlab = xlab, ylab = ylab[i], 
+            plot(range(xx), yr, type = "n", xlab = xlab, ylab = ylab[i], xaxt=xaxt, cex.axis=cex.axis, 
                 log = "x", ...)
         else {
-            plot(range(xx), yr, type = "n", xlab = xlab, ylab = ylab[i], 
-                axes = FALSE, ...)
-            axis(1, xaxisval, xaxislab)
+            plot(range(xx), yr, type = "n", xlab = xlab, ylab = ylab[i], axes = FALSE, ...)
+            if (xaxt!="n") {
+                axis(1, xaxisval, xaxislab, cex.axis=cex.axis, ...)
+            }
             axis(2)
             box()
         }

@@ -72,7 +72,7 @@ mytex=function(dat=NULL, file.name="temp",
         .ncol=ncol(dat1)
         
         if (is.null(digits)) if (is.integer(dat1)) digits=0
-        if (length(align)==.ncol+1) {
+        if (length(align)==.ncol+1) {# align is a vector
             # no need to do anything
         } else {
             if (length(align)==1) align=rep(align,.ncol+1) else stop("length of align incorrect")
@@ -88,18 +88,22 @@ mytex=function(dat=NULL, file.name="temp",
         
         if(include.colnames) {
             coln=if(!is.null(sanitize.text.function)) sanitize.text.function(colnames(dat1)) else sanitize.text(sanitize.numbers(colnames(dat1)))
-            top.1=concatList(" \\multicolumn{1}{c}{"%+%coln%+%"} ", sep="&") %+% "\\\\ \n"%+% # center aligned column titles
+            # to make border in the column names, but centrally aligned
+            align.1=gsub("l","c",align[-1])
+            align.1=gsub("r","c",align.1)
+            if(!(include.rownames | include.dup.rownames)) align.1=align.1[-1] 
+            top.1=concatList(" \\multicolumn{1}{"%+%align.1%+%"}{"%+%coln%+%"} ", sep="&") %+% "\\\\ \n"%+% # center aligned column titles
                 "\\hline\n" # insert at the beginning of table, "\n" is added so that there is no need to keep it in col.title
+            #print(coln);print(top.1);print(align.1)
             # add a column for rownames, which may include names of rownames
-            if(!include.dup.rownames) {
+            if(!include.dup.rownames) { 
                 if(include.rownames) {
                     top.1="&" %+% top.1
                     if (!is.null(dimnam)) if (is.na(dimnam[2])) top.1=dimnam[1] %+% top.1 else if (trim(dimnam[2])=="") top.1=dimnam[1] %+% top.1
                 }
             }
             top=top%+%top.1
-#            print(coln)
-#            print(top.1)
+            #print(coln);print(top.1);print(align.1)
         }
             
         if (include.colnames & is.null(hline.after)) hline.after=c(nrow(dat1)) # cannot use default due to add.to.row    

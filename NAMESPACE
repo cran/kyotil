@@ -1,6 +1,6 @@
-useDynLib(kyotil)
+useDynLib(kyotil, .registration = TRUE)
 
-export(cbind.uneven, as.binary, binom.coef, expit, H, mutual.info, info.cor, l.measure, logDiffExp, logit, logMeanExp, logSumExp, logSumExpFor2, permn, Stirling2, rbilogistic, rbigamma) 
+export(as.binary, binom.coef, expit, H, mutual.info, info.cor, l.measure, logDiffExp, logit, logMeanExp, logSumExp, logSumExpFor2, permn, Stirling2, rbilogistic, rbigamma) 
 
 export(concatList, AR1, EXCH, fill.jagged.array, getMidPoints, getUpperRight, last, mix, rep.data.frame, rep.matrix, 
     rep.matrix.block, shift.left, shift.right, thin.rows, ThinRows, tr)
@@ -25,7 +25,7 @@ export(coef.geese, getFixedEf, getFixedEf.coxph, getFixedEf.gam, getFixedEf.gee,
     vcov.tps, coef.tps, predict.tps, getFixedEf.tps,
     risk.cal)
 
-export(hosmerlem, quick.t.test, signtest, tukey.mtest, vector.t.test, summ, multi.outer)
+export(hosmerlem, quick.t.test, signtest, tukey.mtest, vector.t.test, summ, multi.outer, myfisher.test)
 
 export(getK, trim)
 
@@ -91,6 +91,9 @@ S3method(vcov, Deming)
 S3method(getFixedEf, Deming)
 S3method(predict, Deming)
 S3method(summary, Deming)
+
+S3method(cbind, uneven)
+
 
 
 import(stats)

@@ -1,16 +1,15 @@
-#.mydev=list()
-myfigure=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height=NULL, oma=NULL, mar=NULL, main.outer=FALSE, ...) {        
+# one issue with myfigure/mydev.off is that positioning of legend depends on the graphical window size in R
+# bg is needed b/c by default the bg is transparent
+myfigure=function (mfrow=c(1,1), mfcol=NULL, width=NULL, height=NULL, oma=NULL, mar=NULL, main.outer=FALSE, bg=NULL) {        
     if (!is.null(mfcol)) {
         nrow=mfcol[1]; ncol=mfcol[2]        
     } else {
         nrow=mfrow[1]; ncol=mfrow[2]
     }        
     if(is.null(width) | is.null(height))  tmp=get.width.height(nrow,ncol) else tmp=c(width,height)
- #   unlockBinding(".mydev", getNamespace("kyotil"))
-    eval(eval(substitute(expression(.mydev <<- list(width=tmp[1],height=tmp[2],file=file)))))             
+ #   unlockBinding(".mydev", getNamespace("kyotil")) #won't pass rcmdcheck 
+    eval(eval(substitute(expression(.mydev <<- list(width=tmp[1],height=tmp[2])))))             
     
-    #pdf (paper="special", file=.mydev$file%+%"."%+%ext, width=.mydev$width, height=.mydev$height, ...)
-        
     if (!is.null(mfcol)) par(mfcol=mfcol) else par(mfrow=mfrow)    
     #needed for dev.copy
     dev.control(displaylist = "enable")
@@ -21,22 +20,35 @@ myfigure=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height=NUL
         tmp[3]=tmp[3]+1
         par(oma=tmp)
     }    
+    if(!is.null(bg)) par(bg=bg)
 }
-mydev.off=function(ext=c("pdf","png","tiff","eps"), res=200, mydev=NULL) {        
+mydev.off=function(file="temp", ext=c("png","pdf","tiff","eps"), res=200, mydev=NULL) {        
     if (!is.null(mydev)) .mydev=mydev
     exts=strsplit(ext, ",")[[1]]
+    tmp=strsplit(file,"/")[[1]]
     for (ext in exts) {
         if (ext=="pdf") {
-            dev.copy(pdf,        file=.mydev$file%+%"."%+%ext, width=.mydev$width, height=.mydev$height, paper="special")
+            subfolder=concatList(c(tmp[-length(tmp)], "pdf"), sep="/")
+            filename=if(file.exists(subfolder))  subfolder%+%"/"%+%last(tmp) else file
+            dev.copy(pdf,        file=filename%+%"."%+%ext, width=.mydev$width, height=.mydev$height, paper="special")
+            cat("Saving figure to "%+%paste(getwd(),"/",filename,sep="")%+%"."%+%ext%+%"\n")        
         } else if (ext=="eps") {
-            dev.copy(postscript, file=.mydev$file%+%"."%+%ext, width=.mydev$width, height=.mydev$height, paper="special", horizontal=FALSE)
+            subfolder=concatList(c(tmp[-length(tmp)], "eps"), sep="/")
+            filename=if(file.exists(subfolder))  subfolder%+%"/"%+%last(tmp) else file
+            dev.copy(postscript, file=filename%+%"."%+%ext, width=.mydev$width, height=.mydev$height, paper="special", horizontal=FALSE)
+            cat("Saving figure to "%+%paste(getwd(),"/",filename,sep="")%+%"."%+%ext%+%"\n")        
         } else if (ext=="png") {
-            dev.copy(png,    filename=.mydev$file%+%"."%+%ext, width=.mydev$width, height=.mydev$height, units="in", res=res)
+            subfolder=concatList(c(tmp[-length(tmp)], "png"), sep="/")
+            filename=if(file.exists(subfolder))  subfolder%+%"/"%+%last(tmp) else file
+            dev.copy(png,    filename=filename%+%"."%+%ext, width=.mydev$width, height=.mydev$height, units="in", res=res)
+            cat("Saving figure to "%+%paste(getwd(),"/",filename,sep="")%+%"."%+%ext%+%"\n")        
         } else if (ext=="tiff") {
-            dev.copy(tiff,   filename=.mydev$file%+%"."%+%ext, width=.mydev$width, height=.mydev$height, units="in", res=res, compression="jpeg")
+            subfolder=concatList(c(tmp[-length(tmp)], "tiff"), sep="/")
+            filename=if(file.exists(subfolder))  subfolder%+%"/"%+%last(tmp) else file
+            dev.copy(tiff,   filename=filename%+%"."%+%ext, width=.mydev$width, height=.mydev$height, units="in", res=res, compression="jpeg")
+            cat("Saving figure to "%+%paste(getwd(),"/",filename,sep="")%+%"."%+%ext%+%"\n")        
         }
         dev.off()
-        cat("Saving figure to "%+%paste(getwd(),"/",.mydev$file,sep="")%+%"."%+%ext%+%"\n")        
     }
 }
 
@@ -188,9 +200,9 @@ mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height
 
 
 # if lty is specified, a line will be drawn
-mylegend=function(legend, x, lty=NULL,bty="n", ...) {
-    x=switch(x, "topleft", "top", "topright", "left", "center" , "right", "bottomleft", "bottom", "bottomright")
-    legend(bty=bty,x=x, legend=legend, lty=lty, ...)
+mylegend=function(legend, x, y=NULL, lty=NULL,bty="n", ...) {
+    if(is.null(y)) x=switch(x, "topleft", "top", "topright", "left", "center" , "right", "bottomleft", "bottom", "bottomright")
+    legend(bty=bty,x=x, y=y, legend=legend, lty=lty, ...)
 }
 
 
@@ -278,7 +290,7 @@ myboxplot <- function(object, ...) UseMethod("myboxplot")
 # myboxplot.formula and myboxplot.list make a boxplot with data points and do inferences for two group comparions. 
 # cex=.5; ylab=""; xlab=""; main=""; box=FALSE; highlight.list=NULL; at=NULL;pch=1;col=1;
 myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box=TRUE, at=NULL, na.action=NULL,
-    pch=1, col=1, test="", reshape.formula=NULL, jitter=TRUE, add.interaction=FALSE,  drop.unused.levels = TRUE, ...){
+    pch=1, col=1, test="", reshape.formula=NULL, jitter=TRUE, add.interaction=FALSE,  drop.unused.levels = TRUE, bg.pt=NULL, ...){
     
     save.seed <- try(get(".Random.seed", .GlobalEnv), silent=TRUE) 
     if (class(save.seed)=="try-error") {        
@@ -295,7 +307,10 @@ myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box
          len.n=sapply(tmp.dat, length)
          tmp.dat=tmp.dat[len.n!=0]
      }
-     res=boxplot(tmp.dat, range=0, xlab=xlab, at=at, col=NULL, cex=cex, pars = list(boxwex = if(box) 0.8 else 0), main=main, ylab=ylab, ...)
+     res=boxplot(tmp.dat, range=0, xlab=xlab, at=at, col=NULL, cex=cex, 
+        boxlty=if(!box) 0 else NULL,whisklty=if(!box) 0 else NULL,staplelty=if(!box) 0 else NULL,
+        #pars = list(boxwex = if(box) 0.8 else 0, staplewex = if(box) 0.5 else 0, outwex = if(box) 0.5 else 0), 
+        main=main, ylab=ylab, ...)
     
     dat.tmp=model.frame(formula, data)
     xx=interaction(dat.tmp[,-1])
@@ -307,7 +322,7 @@ myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box
     }      
     if (add.interaction) jitter=FALSE
     if (jitter) xx=jitter(xx)  
-    points(xx, dat.tmp[[1]], cex=cex,pch=pch,col=col)
+    points(xx, dat.tmp[[1]], cex=cex,pch=pch,col=col, bg=bg.pt)
     
     # restore rng state 
     assign(".Random.seed", save.seed, .GlobalEnv)     
@@ -357,7 +372,7 @@ myboxplot.matrix=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, a
 }
 
 myboxplot.list=function(object, ...){
-
+    
     # make a dataframe out of list object
     dat=NULL
     if(is.null(names(object))) names(object)=1:length(object)
@@ -511,7 +526,7 @@ abline.shade.2=function(x, col=c(0,1,0)){
 #abline.pt.slope(c(1,1), 1)
 mymatplot=function(x, y, type="b", lty=1:5, pch=NULL, col=1:6, xlab=NULL, ylab="", 
     draw.x.axis=TRUE, bg=NA, lwd=1, at=NULL, make.legend=TRUE, legend=NULL, 
-    legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, ...) {
+    legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, xaxt="s", ...) {
     
     missing.y=FALSE
     if (missing(y)) {
@@ -522,8 +537,9 @@ mymatplot=function(x, y, type="b", lty=1:5, pch=NULL, col=1:6, xlab=NULL, ylab="
     
     if (is.null(xlab)) xlab=names(dimnames(y))[1]
     if (is.null(legend.title)) legend.title=names(dimnames(y))[2]
-    matplot(x, y, lty=lty, pch=pch, col=col, xlab=xlab, xaxt="n", ylab=ylab, bg=bg, lwd=lwd, type=type, ...)
-    if(missing.y & draw.x.axis) axis(side=1, at=x, labels=rownames(y)) else if (draw.x.axis) axis(side=1, at=x, labels=x)
+    matplot(x, y, lty=lty, pch=pch, col=col, xlab=xlab, xaxt=xaxt, ylab=ylab, bg=bg, lwd=lwd, type=type, ...)
+    if (xaxt=="n") 
+        if(missing.y & draw.x.axis) axis(side=1, at=x, labels=rownames(y)) else if (draw.x.axis) axis(side=1, at=x, labels=x)
     if (make.legend) {
         if (is.null(legend)) legend=colnames(y)
         if (length(unique(pch))>1) {

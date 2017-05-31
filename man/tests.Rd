@@ -1,5 +1,6 @@
 \name{testing.functions}
 \alias{hosmerlem}
+\alias{myfisher.test}
 \alias{quick.t.test}
 \alias{signtest}
 \alias{tukey.mtest}
@@ -22,10 +23,15 @@ signtest(x)
 tukey.mtest(mu, ms, n)
 
 vector.t.test(mean.x, mean.y, var.x, var.y, n)
+
+myfisher.test(x,y,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 
+  \item{\dots}{
+%%     ~~Describe \code{\dots} here~~
+}
   \item{y}{
 %%     ~~Describe \code{y} here~~
 }

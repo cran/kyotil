@@ -93,3 +93,10 @@ l.measure = function(two.by.two.matrix) {
 }
 ## test: 
 # l.measure(matrix(c(1,0,0,1),2,2))
+
+# an alternative way to call fisher.test, both x and y are vectors of 0's and 1's
+myfisher.test=function(x,y,...){
+    stopifnot(all(c(x,y) %in% c(0,1)))
+    a=cbind(c(sum(x),sum(1-x)), c(sum(y),sum(1-y)))
+    fisher.test(a,...)
+}

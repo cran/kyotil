@@ -28,29 +28,33 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
         
         if (!is.null(rows)) tmp=tmp[intersect(rows,1:nrow(tmp)),]# take only some rows
         
+        est.=tmp[,1,drop=FALSE]
+        # replace large values
+        est.=ifelse(est.>100,">100",format(round(est., est.digits), nsmall=est.digits, scientific=FALSE))
+        
         if (type==1)
             # est only
-            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) 
+            out=drop(est. )
         else if (type==2)
             # est (se)
-            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
+            out=est. %+% " (" %+% 
                 format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE) %+% ")" %+%
                 ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==3)
             # est (lb, up)
-            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
+            out=est. %+% " (" %+% 
                 lb %+% ", " %+% ub %+% ")" 
         else if (type==4)
             # a space is inserted between est and se, they could be post-processed in swp
-            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " " %+% 
+            out=est. %+% " " %+% 
                 format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE)
         else if (type==5)
             # est **
-            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+%
+            out=est. %+%
                 ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==6)
             # est (pval)*
-            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
+            out=est. %+% " (" %+% 
                 format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %+% ")" %+%
                 ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==7)
@@ -58,15 +62,18 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
             out=" (" %+% lb %+% ", " %+% ub %+% ")" 
         else if (type==8)
             # est (p value #)
-            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (p value " %+% 
+            out=est. %+% " (p value " %+% 
                 format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %+% ")" 
         else if (type==9)
             # est (pval)*
-            out=format(round(tmp[,1,drop=FALSE], est.digits), nsmall=est.digits, scientific=FALSE) %+% " (" %+% 
+            out=est. %+% " (" %+% 
                 format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %+% ")" 
+        else if (type==10)
+            # pval
+            out=format(round(tmp[,p.val.col,drop=TRUE], 3), nsmall=3, scientific=FALSE) 
         else 
             stop ("getFormattedSummaries(). type not supported: "%+%type)
-    
+            
         names(out)=rownames(tmp)
         out
     })

@@ -12,12 +12,12 @@ Vaccine efficacy plots.
 VEplot (object, ...) 
  
 \method{VEplot}{cox.zph} (object, resid = TRUE, se = TRUE, df = 4, nsmo = 40, 
-    var, ylab="VE", xlab="Time", ...) 
+    var, ylab="VE", xlab="Time", xaxt="s", cex.axis=1, ...) 
 
 myplot.cox.zph (x, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var, 
     coef.transform=NULL, 
     ylab=NULL, 
-    xlab="Time", 
+    xlab="Time", xaxt="s", cex.axis=1, 
     ...) 
 
 }
@@ -32,6 +32,8 @@ myplot.cox.zph (x, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var,
   \item{nsmo}{number of points used to plot the fitted spline}
   \item{var}{estimated variance matrix from the Cox model fit}
   \item{xlab}{x label}
+  \item{xaxt}{x axis}
+  \item{cex.axis}{cex for axis}
   \item{ylab}{y label}
   \item{coef.transform}{a function to transform Cox hazard ratio estimate}
   \item{...}{additional parameters}
@@ -61,7 +63,7 @@ temp <- cox.zph(vfit)
 
 par(mfrow=c(2,2))
 for (v in c("trt","age")) {
-    VEplot(temp, var=v, resid=FALSE, main=v, ylab="VE")
+    VEplot(temp, var=v, resid=FALSE, main=v, ylab="VE", cex.axis=1.5)
     plot(temp, var=v, resid=FALSE, main=v)
 }
 

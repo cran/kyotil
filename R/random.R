@@ -117,7 +117,10 @@ rbilogistic=function(n, loc.1, loc.2, scale.1, scale.2, rho) {
         myMvd <- copula::mvdc(copula=myCop, margins=c("logis", "logis"), paramMargins=list(list(location=loc.1, scale=scale.1), list(location=loc.2, scale=scale.2)))
         dat <- (copula::rMvdc(n, myMvd))        
     } else {
-        stop("cannot simulate a bivariate logistic distribution with this correlation value")
+        # use normal copula outside those windows of rho
+        myCop <- copula::normalCopula(param=rho)
+        myMvd <- copula::mvdc(copula=myCop, margins=c("logis", "logis"), paramMargins=list(list(location=loc.1, scale=scale.1), list(location=loc.2, scale=scale.2)))
+        dat <- (copula::rMvdc(n, myMvd))        
     }
 }
 
