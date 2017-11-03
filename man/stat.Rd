@@ -10,6 +10,7 @@
 \alias{yule.y}
 \alias{kappa.cor}
 \alias{l.measure}
+\alias{skew}
 \title{
 Stat Functions
 }
@@ -28,6 +29,7 @@ cor.mixed(x, ...)
 \method{cor.mixed}{vector} (x, y, na.fun, method=c("pearson","spearman"), ...) 
 \method{cor.mixed}{formula} (formula, data, na.fun, method=c("pearson","spearman"), ...) 
 
+skew (x, na.rm = FALSE) 
 
 info.cor(two.way.table)
 
@@ -44,6 +46,9 @@ l.measure(two.by.two.matrix)
 either a count vector or a probability vector, but can not be a vector of membership indicator
 }
   \item{logbase}{
+%%     ~~Describe \code{logbase} here~~
+}
+  \item{na.rm}{
 %%     ~~Describe \code{logbase} here~~
 }
 

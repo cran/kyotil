@@ -22,9 +22,9 @@ formatInt(x, digits, fill = "0", ...)
 
 make.latex.coef.table(models, model.names = NULL, row.major = FALSE, round.digits = NULL)
 
-mytex (dat=NULL, file.name="temp", 
+mytex(dat=NULL, file.name="temp", 
     digits=NULL, display=NULL, align="r", 
-    include.rownames=TRUE, include.dup.rownames=FALSE, include.colnames=TRUE,
+    include.rownames=TRUE, include.colnames=TRUE,
     col.headers=NULL,
     comment=FALSE, floating=FALSE, 
     lines=TRUE, hline.after=NULL, 
@@ -32,7 +32,7 @@ mytex (dat=NULL, file.name="temp",
     sanitize.text.function = NULL, #function(x) x,
     append=FALSE, preamble="", stand.alone=TRUE,
 ...) 
-       
+
 mytex.begin(file.name, preamble = "")
 
 mytex.end(file.name)
@@ -41,9 +41,10 @@ mywrite(x, ...)
 
 mywrite.csv(x, file = "tmp", row.names = FALSE, digits = NULL, ...)
 
-roundup(value, digits)
+roundup (value, digits, na.to.empty=TRUE) 
 
-formatDouble(value, digits)
+formatDouble(value, digits, na.to.empty=TRUE)
+
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -56,6 +57,9 @@ formatDouble(value, digits)
   \item{sanitize.text.function}{a function}
   \item{stand.alone}{Boolean. If true, only one latex file that is stand alone file is made; otherwise both a file that is to be inputted and a standalone version are made}
 
+  \item{na.to.empty}{
+%%     ~~Describe \code{value} here~~
+}
   \item{value}{
 %%     ~~Describe \code{value} here~~
 }
@@ -100,9 +104,6 @@ formatDouble(value, digits)
   \item{include.rownames}{
 %%     ~~Describe \code{include.rownames} here~~
 }
-  \item{include.dup.rownames}{
-%%     ~~Describe \code{include.dup.rownames} here~~
-}
   \item{floating}{
 %%     ~~Describe \code{floating} here~~
 }
@@ -135,13 +136,29 @@ formatInt(3, 2) # 03
 
 
 \dontrun{ 
-mytex (tab, file="tables/"%+%label%+%"/interaction_bstiter_type1_4",  include.dup.rownames = T, 
-    include.colnames = TRUE, col.headers = 
-  "\\\\hline\n  &  \\\\multicolumn{2}{c}{Vaccine}  &  \\\\multicolumn{2}{c}{Control} \\\\\\\\  \n",
-    comment = FALSE, 
-    floating = FALSE, lines = TRUE, hline.after = c(10,20,30,40), add.to.row = NULL, 
-    align=c("c","|c","c","c","c"), # vertical lines in the table
-    sanitize.text.function = NULL) 
+
+# col.headers has to have the RIGHT number of columns in the next three examples!
+
+# include.rownames=T, no duplicate rownames, align can have 4/5 elements, col.headers has 5 columns
+tab=diag(1:4); rownames(tab)<-colnames(tab)<-1:4
+mytex (tab, file="tmp", include.rownames = TRUE, 
+    align=c("c","c","c|","c","c"), col.headers=
+    "\\hline\n & \\multicolumn{2}{c|}{Vaccine} & \\multicolumn{2}{c}{Control} \\\\ \n")
+
+# include.rownames=T, duplicate rownames, align can have 4 or 5 elements, col.headers has 5 columns
+tab=diag(1:4); rownames(tab)=rep(1,4); colnames(tab)<-1:4
+mytex (tab, file="tmp", include.rownames = TRUE, 
+    align=c("c","c|","c","c"), col.headers=
+    "\\hline\n & \\multicolumn{2}{c|}{Vaccine} & \\multicolumn{2}{c}{Control} \\\\ \n") 
+
+# include.rownames=F, align can have 4 or 5 elements, col.headers has 4 columns!
+tab=diag(1:4); rownames(tab)<-colnames(tab)<-1:4
+mytex (tab, file="tmp", include.rownames = FALSE, 
+    align=c("c","c","c|","c","c"), col.headers=
+    "\\hline\n     \\multicolumn{2}{c|}{Vaccine} & \\multicolumn{2}{c}{Control} \\\\ \n") 
+
 }
+
+
 
 }

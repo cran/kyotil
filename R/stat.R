@@ -100,3 +100,19 @@ myfisher.test=function(x,y,...){
     a=cbind(c(sum(x),sum(1-x)), c(sum(y),sum(1-y)))
     fisher.test(a,...)
 }
+
+# copied from moments package
+skew=function (x, na.rm = FALSE) 
+{
+    if (is.matrix(x)) 
+        apply(x, 2, skew, na.rm = na.rm)
+    else if (is.vector(x)) {
+        if (na.rm) 
+            x <- x[!is.na(x)]
+        n <- length(x)
+        (sum((x - mean(x))^3)/n)/(sum((x - mean(x))^2)/n)^(3/2)
+    }
+    else if (is.data.frame(x)) 
+        sapply(x, skew, na.rm = na.rm)
+    else skew(as.vector(x), na.rm = na.rm)
+}

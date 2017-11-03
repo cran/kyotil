@@ -1,9 +1,11 @@
-cbind.uneven=function(..., li) {
+cbinduneven=function(li) {
     # bind a list of data frame or named vector that are not of the same length
     allnames=lapply(li, rownames)
     alllen=lapply(allnames, length)
-    nams = allnames[[which.max(alllen)]]
+    #nams = allnames[[which.max(alllen)]]
+    nams = allnames[[1]]# so that the rows are added consecutively
     nams= c(nams, setdiff(unique(unlist(allnames)), nams)) # append additional names
+    if (any(nams=="")) stop("cbinduneven: empty rownames are not allowed:\n"%+%concatList(nams,"|"))
     #myprint(nams)
     
     res=NULL
@@ -180,7 +182,7 @@ mytapply = function (X, INDEX, FUN = NULL, ..., simplify = TRUE)
     ansmat
 }
 
-# category.var is 
+# idvar used to be optional: it was taken to be idvar=setdiff(names(dat), c(category.var,outcome.var))
 myreshapewide=function(formula, dat, idvar, keep.extra.col=FALSE){
     tmp = as.character(formula)
     outcome.var=tmp[2]
@@ -210,6 +212,12 @@ myreshapewide=function(formula, dat, idvar, keep.extra.col=FALSE){
 #    }
     reshape(dat, direction="wide", v.names=outcome.var, timevar=category.var, idvar=idvar )
 }
+
+
+myreshapelong=function(dat, cols.to.be.stacked, label.cols.to.be.stacked, new.col.name){
+    reshape(dat, direction="long", varying = cols.to.be.stacked, v.names = new.col.name, timevar=label.cols.to.be.stacked, times=cols.to.be.stacked)
+}
+
 
 # keep column names
 # return data frame if input is data frame

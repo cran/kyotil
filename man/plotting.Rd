@@ -63,6 +63,16 @@ my.interaction.plot(dat, x.ori = 0, xaxislabels = rep("", 2), cex.axis = 1, add 
 
 myboxplot(object, ...)
 
+\method{myboxplot}{formula}(formula, data, cex=.5, xlab="", ylab="", main="", box=TRUE, 
+at=NULL, na.action=NULL, pch=1, col=1, test="", friedman.test.formula=NULL, 
+reshape.formula=NULL, reshape.id=NULL, jitter=TRUE, add.interaction=FALSE,  
+drop.unused.levels = TRUE, bg.pt=NULL, ...)
+    
+\method{myboxplot}{data.frame}(object, cex = 0.5, ylab = "", xlab = "", main = "", box = TRUE,
+    at = NULL, pch = 1, col = 1, test = "", ...)
+
+\method{myboxplot}{list}(object, ...)
+
 abline.shade.2(x, col=c(0,1,0))
 abline.shade(pt, quadrant=c(1,2,3,4), col=c(0,1,0), alpha=0.3)
 
@@ -70,22 +80,12 @@ abline.shade(pt, quadrant=c(1,2,3,4), col=c(0,1,0), alpha=0.3)
 add.mtext.label (text, cex = 1.4, adj = -0.2) 
 mydev.off(file="temp", ext = c("png","pdf","tiff","eps"), res = 200, mydev=NULL)
 
-
-\method{myboxplot}{formula}(formula, data, cex=.5, xlab="", ylab="", main="", box=TRUE, 
-at=NULL, na.action=NULL, pch=1, col=1, test="", reshape.formula=NULL, jitter=TRUE, 
-add.interaction=FALSE,  drop.unused.levels = TRUE, bg.pt=NULL, ...)
-    
-
-\method{myboxplot}{data.frame}(object, cex = 0.5, ylab = "", xlab = "", main = "", box = TRUE,
-    at = NULL, pch = 1, col = 1, test = "", ...)
-
-\method{myboxplot}{list}(object, ...)
-
 mylegend(legend, x, y=NULL, lty = NULL, bty = "n", ...)
 
-mymatplot (x, y, type="b", lty=1:5, pch=NULL, col=1:6, xlab=NULL, ylab="", 
+mymatplot(x, y, type="b", lty=c(1,2,1,2,1,2), pch=NULL, 
+    col=rep(c("darkgray","black"),each=3), xlab=NULL, ylab="", 
     draw.x.axis=TRUE, bg=NA, lwd=1, at=NULL, make.legend=TRUE, legend=NULL, 
-    legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, xaxt = "s", ...) 
+    legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, xaxt="s", ...) 
                  
 mypairs(dat, ...)
 
@@ -112,7 +112,7 @@ mypostscript(file = "temp", mfrow = c(1, 1), mfcol = NULL, width = NULL,
     mar = NULL, main.outer = FALSE, save2file = TRUE, res = 200, 
     ...)
 
-panel.cor(x, y, digits = 2, prefix = "", cex.cor, ...)
+panel.cor(x, y, digits=2, prefix="", cex.cor, cor., ...)
 
 panel.hist(x, ...)
 
@@ -139,6 +139,15 @@ col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FAL
 %%     ~~Describe \code{pt1} here~~
 }
   \item{slope}{
+%%     ~~Describe \code{slope} here~~
+}
+  \item{friedman.test.formula}{
+%%     ~~Describe \code{slope} here~~
+}
+  \item{reshape.id}{
+%%     ~~Describe \code{slope} here~~
+}
+  \item{cor.}{
 %%     ~~Describe \code{slope} here~~
 }
   \item{mydev}{

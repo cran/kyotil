@@ -1,7 +1,7 @@
 Package: kyotil
 LazyLoad: yes
 LazyData: yes
-Version: 2017.6-1
+Version: 2017.10-31
 Title: Utility Functions by Youyi, Krisz and Others
 Author: Youyi Fong <youyifong@gmail.com>, Krisztian Sebestyen <ksebestyen@gmail.com>
 Maintainer: Youyi Fong <youyifong@gmail.com>
@@ -12,6 +12,6 @@ Suggests: RUnit, lme4, nlme, xtable, MASS, splines, survival, abind,
 Description: A miscellaneous set of functions for printing, plotting, kernels, etc. Additional contributors are acknowledged on individual function help pages.
 License: GPL (>= 2)
 NeedsCompilation: yes
-Packaged: 2017-05-31 16:59:48 UTC; Youyi
+Packaged: 2017-11-03 03:14:10 UTC; Youyi
 Repository: CRAN
-Date/Publication: 2017-05-31 22:44:42 UTC
+Date/Publication: 2017-11-03 12:20:00 UTC

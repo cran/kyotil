@@ -27,6 +27,7 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
         if(to.trim) ub=trim(ub)
         
         if (!is.null(rows)) tmp=tmp[intersect(rows,1:nrow(tmp)),]# take only some rows
+        # str(lb); str(ub); str(est.) # make sure they are not data frames 
         
         est.=tmp[,1,drop=FALSE]
         # replace large values
@@ -40,10 +41,11 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
             out=est. %+% " (" %+% 
                 format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE) %+% ")" %+%
                 ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
-        else if (type==3)
+        else if (type==3) {
             # est (lb, up)
             out=est. %+% " (" %+% 
                 lb %+% ", " %+% ub %+% ")" 
+        }
         else if (type==4)
             # a space is inserted between est and se, they could be post-processed in swp
             out=est. %+% " " %+% 
@@ -81,7 +83,7 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
         
     if (is.list(res)) {
     # if the fits have different number of parameters, we need this
-        res=cbind.uneven(lapply(res, function (x) as.matrix(x, ncol=1)))
+        res=cbinduneven(li=lapply(res, function (x) as.matrix(x, ncol=1)))
         colnames(res)=names(fits)
     } else if (!is.matrix(res)) {
     # if there is only one coefficient, we need this
@@ -117,6 +119,19 @@ getFixedEf.glm = function (object, exp=FALSE, robust=TRUE, ret.robcov=FALSE, ...
     if(exp) {
         out[,c(1,3,4)]=exp(out[,c(1,3,4)])
         colnames(out)[1]="OR"
+    }
+    out
+}
+
+getFixedEf.gee = function (object,exp=FALSE,  ...) {
+    #print("in getFixedEf.gee")
+    out=as.matrix(summary(object)$coef )
+    # Estimate Std.err Wald Pr(>|W|)
+    out=cbind(out[,1:2], out[,1]-1.96*out[,2], out[,1]+1.96*out[,2], out[,4,drop=FALSE])
+    colnames(out)=c("est","se","(lower","upper)","p.value")
+    if(exp) {
+        out[,c(1,3,4)]=exp(out[,c(1,3,4)])
+        colnames(out)[1]="RR"
     }
     out
 }
@@ -185,10 +200,6 @@ getFixedEf.lm = function (object, ...) {
     out=summary(object)$coef
     colnames(out)[4]="p-val"
     out
-}
-
-getFixedEf.gee = function (object, ...) {
-    summary(object)$coef
 }
 
 getFixedEf.inla = function (object, ...) {

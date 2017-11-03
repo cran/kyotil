@@ -1,5 +1,5 @@
 \name{base.functions}
-\alias{cbind.uneven}
+\alias{cbinduneven}
 \alias{binary}
 \alias{binary2}
 \alias{f2c}
@@ -20,12 +20,13 @@
 \alias{table.cases}
 \alias{table.cases.3}
 \alias{multi.outer}
+\alias{myreshapelong}
 
 \title{
 Some Base Functions
 }
 \description{
-cbind.uneven binds together a list of matrixes/dataframes of different lengths, rows are matched by names
+cbinduneven binds together a list of matrixes/dataframes of different lengths, rows are matched by names
 binary returns binary representation of an integer. 
 binary2 returns binary representatin of an integer with leading 0, the length of string is n.
 mysystem can call any exe file that is in the PATH
@@ -35,11 +36,12 @@ f2c convert temperature from f to c/
 
 }
 \usage{
-\method{cbind}{uneven}(..., li)
+cbinduneven(li)
 binary(i)
 
 multi.outer (f, ... ) 
 
+myreshapelong(dat, cols.to.be.stacked, label.cols.to.be.stacked, new.col.name)
 
 binary2(i, n)
 
@@ -78,6 +80,14 @@ unix()
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+
+  \item{cols.to.be.stacked}{
+%%     ~~Describe \code{i} here~~
+}
+  \item{label.cols.to.be.stacked}{
+%%     ~~Describe \code{i} here~~
+}
+
 
   \item{li}{a list}  
   \item{i}{
@@ -207,10 +217,18 @@ Boolean
 binary(5) ###  101
 binary2(5, 4)
 
+a=data.frame("x"=1:2)
+b=data.frame("y"=3:5);#rownames(b)[3]=""
+cbinduneven(list(a,b))
 
 \dontrun{
 # the formula in myreshapewide can only have one variable in the right hand side
     myreshapewide(fi~week, dat, c("ptid","stim"))
+
+    myaggregate(subset(dat.poc, select=c(HIV, trt)), list(dat.poc$f), function(x) 
+      with(x, c(fisher.test(HIV, trt)$estimate, fisher.test(HIV, trt)$p.value)))
+
+
 }
 
 }

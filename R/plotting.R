@@ -57,37 +57,49 @@ get.width.height=function(nrow,ncol){
     } else if (nrow==1 & ncol==2) {width=9.7; height=5.2
     } else if (nrow==1 & ncol==3) {width=9.7; height=3.4
     } else if (nrow==1 & ncol==4) {width=14; height=3.4
+
     } else if (nrow==2 & ncol==3) {width=9.7; height=6.7
-    } else if (nrow==4 & ncol==6) {width=15; height=10
     } else if (nrow==2 & ncol==4) {width=13; height=6.7
+    } else if (nrow==2 & ncol==2) {width=8; height=8.5
+    } else if (nrow==2 & ncol==1) {width=6.7; height=9.7
+    
     } else if (nrow==3 & ncol==6) {width=17.5; height=9
     } else if (nrow==3 & ncol==7) {width=17.5; height=7
-    } else if (nrow==4 & ncol==8) {width=17.5; height=9
-    } else if (nrow==4 & ncol==7) {width=17.5; height=9
-    } else if (nrow==4 & ncol==9) {width=20; height=9
     } else if (nrow==3 & ncol==5) {width=15; height=9.6
     } else if (nrow==3 & ncol==4) {width=12; height=9.6
-    } else if (nrow==4 & ncol==5) {width=15; height=12.5
-    } else if (nrow==5 & ncol==6) {width=9; height=8.3
-    } else if (nrow==2 & ncol==2) {width=8; height=8.5
     } else if (nrow==3 & ncol==3) {width=9.7; height=10.3
-    } else if (nrow==4 & ncol==4) {width=9.7; height=10.3
-    } else if (nrow==6 & ncol==5) {width=18; height=17
-    } else if (nrow==5 & ncol==5) {width=15; height=15
-    } else if (nrow==5 & ncol==3) {width=9; height=15
-    } else if (nrow==4 & ncol==2) {width=6; height=13
-    } else if (nrow==6 & ncol==3) {width=9; height=19
-    } else if (nrow==7 & ncol==3) {width=9; height=22
-    } else if (nrow==8 & ncol==5) {width=10; height=16
-    } else if (nrow==6 & ncol==4) {width=12; height=19
-    } else if (nrow==7 & ncol==5) {width=18; height=19
-    } else if (nrow==5 & ncol==4) {width=12; height=15
-    } else if (nrow==2 & ncol==1) {width=6.7; height=9.7
-    } else if (nrow==3 & ncol==1) {width=10; height=9.7
-    } else if (nrow==5 & ncol==1) {width=5; height=13
+    } else if (nrow==3 & ncol==1) {width=6; height=9.7
     } else if (nrow==3 & ncol==2) {width=6.7; height=10.3
+
+    } else if (nrow==4 & ncol==1) {width=4; height=13
+    } else if (nrow==4 & ncol==2) {width=6; height=13
     } else if (nrow==4 & ncol==3) {width=9; height=12
-    } else stop ("nrow x ncol not supported: "%+%nrow%+%" x "%+%ncol)
+    } else if (nrow==4 & ncol==4) {width=9.7; height=10.3
+    } else if (nrow==4 & ncol==5) {width=15; height=12.5
+    } else if (nrow==4 & ncol==6) {width=15; height=10
+    } else if (nrow==4 & ncol==7) {width=17.5; height=9
+    } else if (nrow==4 & ncol==9) {width=20; height=9
+    } else if (nrow==4 & ncol==8) {width=17.5; height=9
+    
+    } else if (nrow==5 & ncol==1) {width=5; height=13
+    } else if (nrow==5 & ncol==2) {width=7; height=15
+    } else if (nrow==5 & ncol==3) {width=9; height=15
+    } else if (nrow==5 & ncol==4) {width=12; height=15
+    } else if (nrow==5 & ncol==5) {width=15; height=15
+    } else if (nrow==5 & ncol==6) {width=9; height=8.3
+
+    } else if (nrow==6 & ncol==5) {width=18; height=17
+    } else if (nrow==6 & ncol==3) {width=9; height=19
+    } else if (nrow==6 & ncol==4) {width=12; height=19
+
+    } else if (nrow==7 & ncol==3) {width=9; height=22
+    } else if (nrow==7 & ncol==5) {width=18; height=19
+
+    } else if (nrow==8 & ncol==5) {width=10; height=16
+    } else {
+        warning ("nrow x ncol not supported: "%+%nrow%+%" x "%+%ncol %+% ". Default to 10x10")
+        width=10; height=10
+    }
     return(c(width,height))
 }
 
@@ -130,43 +142,8 @@ mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height
     #if (nrow>4) warning ("nrow > 4 will not fit a page without making the figures hard to see")
     
     # sca controls how much to scale down for use in a paper
-    if(is.null(width) | is.null(height))  {
-        if (nrow==1 & ncol==1) {width=6.7; height=6.7
-        } else if (nrow==1 & ncol==2) {width=9.7; height=5.2
-        } else if (nrow==1 & ncol==3) {width=9.7; height=3.4
-        } else if (nrow==1 & ncol==4) {width=14; height=3.4
-        } else if (nrow==2 & ncol==3) {width=9.7; height=6.7
-        } else if (nrow==4 & ncol==6) {width=15; height=10
-        } else if (nrow==2 & ncol==4) {width=13; height=6.7
-        } else if (nrow==3 & ncol==6) {width=17.5; height=9
-        } else if (nrow==3 & ncol==7) {width=17.5; height=7
-        } else if (nrow==4 & ncol==8) {width=17.5; height=9
-        } else if (nrow==4 & ncol==7) {width=17.5; height=9
-        } else if (nrow==4 & ncol==9) {width=20; height=9
-        } else if (nrow==3 & ncol==5) {width=15; height=9.6
-        } else if (nrow==3 & ncol==4) {width=12; height=9.6
-        } else if (nrow==4 & ncol==5) {width=15; height=12.5
-        } else if (nrow==5 & ncol==6) {width=9; height=8.3
-        } else if (nrow==2 & ncol==2) {width=8; height=8.5
-        } else if (nrow==3 & ncol==3) {width=9.7; height=10.3
-        } else if (nrow==4 & ncol==4) {width=9.7; height=10.3
-        } else if (nrow==6 & ncol==5) {width=18; height=17
-        } else if (nrow==5 & ncol==5) {width=15; height=15
-        } else if (nrow==5 & ncol==3) {width=9; height=15
-        } else if (nrow==4 & ncol==2) {width=6; height=13
-        } else if (nrow==6 & ncol==3) {width=9; height=19
-        } else if (nrow==7 & ncol==3) {width=9; height=22
-        } else if (nrow==8 & ncol==5) {width=10; height=16
-        } else if (nrow==6 & ncol==4) {width=12; height=19
-        } else if (nrow==7 & ncol==5) {width=18; height=19
-        } else if (nrow==5 & ncol==4) {width=12; height=15
-        } else if (nrow==2 & ncol==1) {width=6.7; height=9.7
-        } else if (nrow==3 & ncol==1) {width=10; height=9.7
-        } else if (nrow==5 & ncol==1) {width=5; height=13
-        } else if (nrow==3 & ncol==2) {width=6.7; height=10.3
-        } else if (nrow==4 & ncol==3) {width=9; height=12
-        } else stop ("nrow x ncol not supported: "%+%nrow%+%" x "%+%ncol)
-    }    
+    if(is.null(width) | is.null(height))  tmp=get.width.height(nrow,ncol) else tmp=c(width,height)
+    width=tmp[1]; height=tmp[2]
     
     if(save2file){      
         if (ext=="pdf") {
@@ -207,13 +184,14 @@ mylegend=function(legend, x, y=NULL, lty=NULL,bty="n", ...) {
 
 
 # copied from pairs help page
-## put (absolute) correlations on the upper panels,
-## with size proportional to the correlations.
-panel.cor <- function(x, y, digits=2, prefix="", cex.cor,  ...)
+# if cex.cor is negative, the sign is reversed and the font of cor is fixed. otherwise, by default, the font of cor is proportional to cor
+# allow cor to be spearman or pearson
+# will generating lots of warnings, ignore them
+panel.cor <- function(x, y, digits=2, prefix="", cex.cor, cor., ...)
 {
     usr <- par("usr"); on.exit(par(usr))
     par(usr = c(0, 1, 0, 1))
-    r <- abs(cor(x, y, method="pearson", use="pairwise.complete.obs"))
+    r <- cor(x, y, method=ifelse(missing(cor.), "spearman", cor.), use="pairwise.complete.obs")
     txt <- format(c(r, 0.123456789), digits=digits)[1]
     txt <- paste(prefix, txt, sep="")
     if(missing(cex.cor)) cex.cor <- 0.8/strwidth(txt)
@@ -289,8 +267,9 @@ myboxplot <- function(object, ...) UseMethod("myboxplot")
 # this function may fail sometimes, most likely at eval
 # myboxplot.formula and myboxplot.list make a boxplot with data points and do inferences for two group comparions. 
 # cex=.5; ylab=""; xlab=""; main=""; box=FALSE; highlight.list=NULL; at=NULL;pch=1;col=1;
+# friedman.test.formula is of the form a ~ b | c
 myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box=TRUE, at=NULL, na.action=NULL,
-    pch=1, col=1, test="", reshape.formula=NULL, jitter=TRUE, add.interaction=FALSE,  drop.unused.levels = TRUE, bg.pt=NULL, ...){
+    pch=1, col=1, test="", friedman.test.formula=NULL, reshape.formula=NULL, reshape.id=NULL, jitter=TRUE, add.interaction=FALSE,  drop.unused.levels = TRUE, bg.pt=NULL, ...){
     
     save.seed <- try(get(".Random.seed", .GlobalEnv), silent=TRUE) 
     if (class(save.seed)=="try-error") {        
@@ -312,11 +291,12 @@ myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box
         #pars = list(boxwex = if(box) 0.8 else 0, staplewex = if(box) 0.5 else 0, outwex = if(box) 0.5 else 0), 
         main=main, ylab=ylab, ...)
     
-    dat.tmp=model.frame(formula, data)
-    xx=interaction(dat.tmp[,-1])
+    # na.action is key below b/c otherwise pch vector will be out of sync with data when there are missing data
+    dat.tmp=model.frame(formula, data, na.action=NULL);# str(dat.tmp); str(data)
+    xx=interaction(dat.tmp[,-1]); #str(xx); print(table(xx))
     if(drop.unused.levels) xx=droplevels(xx)
     if(is.null(at)){        
-        xx=as.numeric(xx)
+        xx=as.numeric(xx); #print(table(xx))
     } else{
         xx=at[xx]
     }      
@@ -348,13 +328,20 @@ myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box
             sub=sub%+%" Kruskal "%+%ifelse(length(test)==1,"p-val ","")%+%signif(p.val,2)
         }
         if ("f" %in% test) {
-            dat.wide=myreshapewide (reshape.formula, data, idvar = NULL)
-            #str(dat.wide)# show this so that we know we are using the right data to do the test
-            ftest = friedman.test (as.matrix(dat.wide[,-(1)]))
-            p.val=ftest$p.value
-            pvals=c(pvals, Friedman=p.val)
-            if (add.interaction) my.interaction.plot(as.matrix(dat.wide[,-1]), add=T)
-            sub=sub%+%" Friedman "%+%ifelse(length(test)==1,"p-val ","")%+%signif(p.val,2)
+            if (!is.null(friedman.test.formula)) {
+            # if there is missing data, this won't work, try the else and supply reshape.formula and reshape.id
+                p.val=friedman.test(friedman.test.formula, data)$p.value
+                pvals=c(pvals, Friedman=p.val)
+                sub=sub%+%" Friedman "%+%ifelse(length(test)==1,"p-val ","")%+%signif(p.val,2)
+            } else if (!is.null(reshape.formula) & !is.null(reshape.id)) {
+                dat.wide=myreshapewide (reshape.formula, data, idvar = reshape.id)
+                #str(dat.wide)# show this so that we know we are using the right data to do the test
+                ftest = try(friedman.test (as.matrix(dat.wide[,-(1)])),silent=T)
+                if (!inherits(ftest,"try-error")) p.val=ftest$p.value else p.val=NA
+                pvals=c(pvals, Friedman=p.val)
+                if (add.interaction) my.interaction.plot(as.matrix(dat.wide[,-1]), add=T)
+                sub=sub%+%" Friedman "%+%ifelse(length(test)==1,"p-val ","")%+% ifelse (is.na(p.val), "NA", signif(p.val,2))
+            } else warning("cannot perform Friedman test without friedman.test.formula or reshape.formula,reshape.id")
         }
         title(sub=sub)
         res$pvals=pvals
@@ -524,7 +511,7 @@ abline.shade.2=function(x, col=c(0,1,0)){
 }
 
 #abline.pt.slope(c(1,1), 1)
-mymatplot=function(x, y, type="b", lty=1:5, pch=NULL, col=1:6, xlab=NULL, ylab="", 
+mymatplot=function(x, y, type="b", lty=c(1,2,1,2,1,2), pch=NULL, col=rep(c("darkgray","black"),each=3), xlab=NULL, ylab="", 
     draw.x.axis=TRUE, bg=NA, lwd=1, at=NULL, make.legend=TRUE, legend=NULL, 
     legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, xaxt="s", ...) {
     

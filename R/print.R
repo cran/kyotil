@@ -1,6 +1,6 @@
 mytex=function(dat=NULL, file.name="temp", 
     digits=NULL, display=NULL, align="r", 
-    include.rownames=TRUE, include.dup.rownames=FALSE, include.colnames=TRUE,
+    include.rownames=TRUE, include.colnames=TRUE,
     col.headers=NULL,
     comment=FALSE, floating=FALSE, 
     lines=TRUE, hline.after=NULL, 
@@ -26,7 +26,6 @@ mytex=function(dat=NULL, file.name="temp",
         file.name=file.name%+%".tex"
     }
     
-    if (include.dup.rownames) include.rownames=F
     
     if(is.data.frame(dat)) dat=list(dat)
     if (!is.list(dat)) dat=list(dat)
@@ -39,6 +38,9 @@ mytex=function(dat=NULL, file.name="temp",
             cat ("", file=file.name.2, append=FALSE)
         }
     } 
+    
+    add.to.row.0=add.to.row
+    include.colnames.0=include.colnames
     
     if (length(dat)==0) stop("length of dat is 0")
     names(dat)=gsub("_"," ",names(dat))
@@ -60,47 +62,49 @@ mytex=function(dat=NULL, file.name="temp",
     
         dimnam=names(dimnames(dat1))
         
+        .ncol=ncol(dat1)
+        if (length(align)==1) {
+            align=rep(align,.ncol+1)
+        } else if (length(align)==.ncol) {
+            align=c("l",align) #align may not include alignment for the rownames, just pad it
+        } else if (length(align)!=.ncol+1) {
+            str(align); str(dat1); myprint(.ncol); stop("length of align incorrect")
+        }
+        
         # add rownames as the first column if necessary
-        if(include.dup.rownames & !is.null(rownames(dat1))) include.dup.rownames=TRUE else  include.dup.rownames=FALSE
-        if (include.dup.rownames) {
+        if(include.rownames & anyDuplicated(rownames(dat1))) {
             tmp=suppressWarnings(data.frame(rownames(dat1),data.frame(dat1))) # may generate warnings about duplicate row names
             names(tmp)[1]=""
             if (!is.null(colnames(dat1))) colnames(tmp)[2:ncol(tmp)]=colnames(dat1)
             if (!is.null(dimnam)) if (is.na(dimnam[2])) colnames(tmp)[1]=dimnam[1] else if (dimnam[2]=="") colnames(tmp)[1]=dimnam[1] 
             dat1=tmp
-        }
-        .ncol=ncol(dat1)
+            include.rownames=FALSE
+            if (length(align)==ncol(dat1)) align=c("l",align) # need to extend align on the left
+            .ncol=.ncol+1
+        } 
         
         if (is.null(digits)) if (is.integer(dat1)) digits=0
-        if (length(align)==.ncol+1) {# align is a vector
-            # no need to do anything
-        } else {
-            if (length(align)==1) align=rep(align,.ncol+1) else stop("length of align incorrect")
-            if (include.dup.rownames) align[2]="l" else align[1]="l" # col names
-        }
-    
+        
         if(!is.null(dimnam) & is.null(col.headers)) {
             if(!is.na(dimnam[2]))
               if(trim(dimnam[2])!="")
-                col.headers="\\hline\n  "%+%dimnam[1]%+%"&  \\multicolumn{"%+% ncol(dat1)%+%"}{c}{"%+%dimnam[2]%+%"}   \\\\  \n"
+                col.headers="\\hline\n  "%+%dimnam[1]%+%"&  \\multicolumn{"%+% (ncol(dat1)-ifelse(include.rownames,1,0)) %+%"}{c}{"%+%dimnam[2]%+%"}   \\\\  \n"
         }
         if (!is.null(col.headers)) top=col.headers else top="\\hline  "
         
         if(include.colnames) {
-            coln=if(!is.null(sanitize.text.function)) sanitize.text.function(colnames(dat1)) else sanitize.text(sanitize.numbers(colnames(dat1)))
             # to make border in the column names, but centrally aligned
-            align.1=gsub("l","c",align[-1])
-            align.1=gsub("r","c",align.1)
-            if(!(include.rownames | include.dup.rownames)) align.1=align.1[-1] 
+            coln=if(!is.null(sanitize.text.function)) sanitize.text.function(colnames(dat1)) else sanitize.text(sanitize.numbers(colnames(dat1)))
+            align.1=align[-1]
+            align.1=gsub("[lr]","c",align.1)
             top.1=concatList(" \\multicolumn{1}{"%+%align.1%+%"}{"%+%coln%+%"} ", sep="&") %+% "\\\\ \n"%+% # center aligned column titles
                 "\\hline\n" # insert at the beginning of table, "\n" is added so that there is no need to keep it in col.title
-            #print(coln);print(top.1);print(align.1)
+            #print(coln);print(top.1);print(align.1);print(align)
+            
             # add a column for rownames, which may include names of rownames
-            if(!include.dup.rownames) { 
-                if(include.rownames) {
-                    top.1="&" %+% top.1
-                    if (!is.null(dimnam)) if (is.na(dimnam[2])) top.1=dimnam[1] %+% top.1 else if (trim(dimnam[2])=="") top.1=dimnam[1] %+% top.1
-                }
+            if(include.rownames) {
+                top.1="&" %+% top.1
+                if (!is.null(dimnam)) if (is.na(dimnam[2])) top.1=dimnam[1] %+% top.1 else if (trim(dimnam[2])=="") top.1=dimnam[1] %+% top.1
             }
             top=top%+%top.1
             #print(coln);print(top.1);print(align.1)
@@ -109,7 +113,6 @@ mytex=function(dat=NULL, file.name="temp",
         if (include.colnames & is.null(hline.after)) hline.after=c(nrow(dat1)) # cannot use default due to add.to.row    
         include.colnames=FALSE        
         
-        #print(add.to.row)
         if (is.null(add.to.row)) {
             add.to.row=list(list(0), top)
         } else {
@@ -117,13 +120,18 @@ mytex=function(dat=NULL, file.name="temp",
         }
         #print(add.to.row)
         
-        if (stand.alone & length(dat)>1) cat (names(dat)[i]%+%"\n\n", file=file.name, append=TRUE)
+        if (length(dat)>1) {
+            cat ("\\vspace{20pt}"%+%names(dat)[i]%+%"\n\n", file=file.name, append=TRUE)
+            cat ("\\vspace{20pt}"%+%names(dat)[i]%+%"\n\n", file=file.name.2, append=TRUE)
+        }
         
         if (!is.null(attr(dat1,"caption"))) caption=attr(dat1,"caption") else caption=NULL
         
         if (is.null(hline.after)) {
             if (lines) hline.after=c(-1,0,nrow(dat1)) else hline.after=c(nrow(dat1))
+            if (!include.colnames) hline.after=hline.after[-(1:2)]
         }
+        #print(hline.after)
         
         if(!include.rownames) rownames(dat1)=1:nrow(dat1)# otherwise there will be a warning from xtable
         print(..., xtable::xtable(dat1, 
@@ -143,6 +151,9 @@ mytex=function(dat=NULL, file.name="temp",
         
         cat ("\n", file=file.name, append=TRUE)
         if(stand.alone) cat ("\n", file=file.name.2, append=TRUE)
+        # restore some variables that have changed in this function
+        add.to.row=add.to.row.0
+        include.colnames=include.colnames.0
     }
     
     if(!append) {
@@ -269,8 +280,9 @@ make.latex.coef.table = function (models, model.names=NULL, row.major=FALSE, rou
 }
 
 
-roundup=function (value, digits) {
-    format(round(value, digits), nsmall=digits, scientific=FALSE) 
+roundup=function (value, digits, na.to.empty=TRUE) {
+    out=format(round(value, digits), nsmall=digits, scientific=FALSE) 
+    if(na.to.empty) sub("NA|NaN","",out) else out
 }
 formatInt=function (x, digits, fill="0", ...) {
     formatC(x, format="d", flag=fill, width=digits) 

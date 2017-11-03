@@ -155,26 +155,57 @@ multi.outer <- function(f, ... ) {
 }
 
 
-get.sim.res = function(foldername, verbose=TRUE) {
+last = function (x, n=1, ...) {
+    if (length(x)==1 & is.character(x)) tail (readLines(x), n=n, ...) # read file, length(x)==1 is needed b/c otherwise last(c("a","b")) won't behave properly
+    else if (is.vector(x)) x[length(x)]
+    else if (is.matrix(x)) x[nrow(x),]
+    else if (is.array(x)) x[length(x)]
+    else if (is.list(x)) x[[length(x)]]
+    else stop ("last(): x not supported")
+}
+
+
+sample.for.cv=function(dat, v, seed){
+    save.seed <- try(get(".Random.seed", .GlobalEnv), silent=TRUE) 
+    if (class(save.seed)=="try-error") {set.seed(1); save.seed <- get(".Random.seed", .GlobalEnv) }      
+    set.seed(seed)
+    n1=sum(dat$y==1)
+    n2=sum(!dat$y==1)
+    test.set = c(sample(which (dat$y==1), round(n1/v)), sample(which (dat$y==0), round(n2/v)))
+    train.set = setdiff(1:nrow(dat), test.set)
+    assign(".Random.seed", save.seed, .GlobalEnv)     
+    list("train"=train.set, "test"=test.set)
+}
+
+
+get.sim.res = function(dir, res.name="res", verbose=TRUE) {
     
     if (!requireNamespace("abind")) {print("abind does not load successfully"); return (NULL) }
     
     ## get file names
-    tmp=list.files(path=foldername, pattern="batch[0-9]+.*.Rdata")
+    tmp=list.files(path=dir, pattern="batch[0-9]+.*.Rdata")
     if (length(tmp)==0) {
         # no files yet
         stop ("no files\n")
     } else {
-        fileNames = foldername %+%"/"%+%tmp
+        fileNames = dir %+%"/"%+%tmp
     }
     
     ## read files
-    res=lapply(fileNames, function(x) {load(file=x); res})
+    res=lapply(fileNames, function(x) {load(file=x); get(res.name)})
+    # check dimension
+    dims=lapply(res, dim)
+    dim.same=sapply(dims, function(x) x==dims[[1]])
+    if(!all(dim.same)) {
+        print(dims)
+        stop("not all files have the same dimensional results")
+    }
+    
     res.all = do.call(abind::abind, res)
     names(dimnames(res.all))=names(dimnames(res[[1]]))
     
     if(verbose) str(res.all)
-
+    
     if(verbose>=2) {
         cat("number of files: "%+%length(fileNames),"\n")
         print(dimnames(res.all)[[1]])
@@ -183,11 +214,107 @@ get.sim.res = function(foldername, verbose=TRUE) {
     res.all    
 }
 
-last = function (x, n=1, ...) {
-    if (length(x)==1 & is.character(x)) tail (readLines(x), n=n, ...) # read file, length(x)==1 is needed b/c otherwise last(c("a","b")) won't behave properly
-    else if (is.vector(x)) x[length(x)]
-    else if (is.matrix(x)) x[nrow(x),]
-    else if (is.array(x)) x[length(x)]
-    else if (is.list(x)) x[[length(x)]]
-    else stop ("last(): x not supported")
+MCsummary=function(dir, res.name="res", verbose=TRUE){
+    
+    if(verbose) cat("\nsummarizing simulation results from ",dir,"\n",sep="")
+    res.all=get.sim.res(dir,res.name,verbose=verbose)
+    
+#    # some subsetting
+#    if(exclude.some) {
+##            # remove those with NA sd.smooth.chngpt
+##            vcov.na=is.na(res.all["sd.smooth.chngpt",])
+##            myprint(mean(vcov.na))
+##            res.all=res.all[,!vcov.na]
+#        
+#        #
+#        q.1=0.05
+#        subset=res.all["sd.robust.(x-chngpt)+",]>quantile(res.all["sd.robust.(x-chngpt)+",],1-q.1,na.rm=T) |
+#               res.all["sd.robust.chngpt",]>quantile(res.all["sd.robust.chngpt",],1-q.1,na.rm=T) |
+#               res.all["sd.robust.z",]>quantile(res.all["sd.robust.z",],1-q.1,na.rm=T) #|
+#               # the distribution of res.all["(x-chngpt)+",] is very skewed. One implication is that quadratic_norm_segmented_n500 MC sd is much bigger than Model se, but we will explain it in the text
+#               #res.all["(x-chngpt)+",]>quantile(res.all["(x-chngpt)+",],1-q.1,na.rm=T) |
+#               #res.all["(x-chngpt)+",]<quantile(res.all["(x-chngpt)+",],q.1/2,na.rm=T)
+#        myprint(mean(subset)) # percent to be excluded
+#        res.all=res.all[,!subset]
+#    }
+    
+        
+    mean.=      apply(res.all, 1:(length(dim(res.all))-1), function(x) mean(x, trim=0, na.rm=T))
+    median.=    apply(res.all, 1:(length(dim(res.all))-1), function(x) median(x, na.rm=T)) 
+    sd.=        apply(res.all, 1:(length(dim(res.all))-1), function(x) sd(x, na.rm=T)) 
+    skew.=      apply(res.all, 1:(length(dim(res.all))-1), function(x) skew(x, na.rm=T))    
+    width.mc=   apply(res.all, 1:(length(dim(res.all))-1), function(x) diff(quantile(x, c(.025,.975), na.rm=T))) # MC 95% interval
+    # if res.all is two-dimensional, mean. etc is only one-dimensional, needs fix
+    if(is.null(dim(mean.))) {dim(mean.)<-dim(median.)<-dim(sd.)<-dim(skew.)<-dim(width.mc)<-dim(bias)<-dim(rel.bias)<-dim(medbias)<-dim(rel.medbias)<-c(length(mean.),1)} # 
+    
+#    # coverage of MC.sd, not implemented for now
+#    mc.sd=apply(res.all, 1:(length(dim(res.all))-1), function(x) sd(x, na.rm=T))[1:0]
+#    cvg.mc.sd=apply(res.all[1:p,]>coef.0-1.96*mc.sd & res.all[1:p,]<coef.0+1.96*mc.sd, 1, mean, na.rm=T)
+    
+    list(mean=mean., median=median., sd=sd., skew=skew., width.mc=width.mc) 
+        
+}
+
+# sum.sd determines whether we take mean of sd or median of sd, e.g. when computing summary of CI width
+#exclude.some=T; verbose=T; coef.0=NULL; digit1=2; sum.est="mean"; sum.sd="median"; style=1; keep.intercept=FALSE
+getFormattedMCSummary=function(path, sim, nn, fit.method, exclude.some=T, verbose=T, coef.0=NULL, digit1=2, sum.est=c("mean","median"), sum.sd=c("median","mean"),style=1, keep.intercept=FALSE) {
+  
+    sum.est<-match.arg(sum.est)    
+    sum.sd<-match.arg(sum.sd)    
+    names(nn)=nn
+    stats=lapply(nn, function(n) {
+        dir=path%+%"/"%+% sim%+%"_"%+%n%+%"_"%+%fit.method    
+        MCsummary(dir, verbose=verbose)
+    })    
+    stat.names=last(dimnames(stats[[1]]$mean))[[1]] 
+    sd.methods=sub("sd.","",stat.names[startsWith(stat.names,"sd.")  ])
+    if (verbose) myprint(sd.methods)        
+    
+    # in the following objects, stats from different sample sizes are stacked one upon another
+    # c() allows us to assign names 
+    tab.1=cbind(
+         mean.est=   c(do.call(rbind, lapply(stats, function (x) x$mean       [,"est",drop=F])))
+        ,median.est= c(do.call(rbind, lapply(stats, function (x) x$median     [,"est",drop=F]))) 
+        ,sd.est=     c(do.call(rbind, lapply(stats, function (x) x$sd         [,"est",drop=F]))) 
+        ,skew.est=   c(do.call(rbind, lapply(stats, function (x) x$skew       [,"est",drop=F]))) 
+        ,mcwdth.est= c(do.call(rbind, lapply(stats, function (x) x$width.mc   [,"est",drop=F]))) 
+        ,              do.call(rbind, lapply(stats, function (x) x[[sum.sd]]  [,startsWith(stat.names,"sd."),drop=F]))
+        ,              do.call(rbind, lapply(stats, function (x) x$mean       [,startsWith(stat.names,"covered."),drop=F]))
+    )    
+    p=nrow(tab.1)/length(nn)
+    
+    # add width of CI based on sd
+    tmp=               do.call(rbind, lapply(stats, function (x) x[[sum.sd]]  [,startsWith(stat.names,"sd."),drop=F])) * 2 * 1.96
+    colnames(tmp)=sub("sd.","wdth.",colnames(tmp))
+    tab.1=cbind(tab.1, tmp)
+    
+    # compute bias based on coef.0
+    if(!is.null(coef.0)) {
+        tab.1=cbind(tab.1
+            ,meanbias=        tab.1[,"mean.est"]-coef.0
+            ,rel.meanbias=   (tab.1[,"mean.est"]-coef.0)/coef.0
+            ,medianbias=      tab.1[,"median.est"]-coef.0
+            ,rel.medianbias= (tab.1[,"median.est"]-coef.0)/coef.0
+        )
+    }
+    
+    # ro-oder the rows such that stats from different parameters are stacked one upon another    
+    tab.2=apply(tab.1, 2, function(x) t(matrix(x,nrow=p)))
+    rownames(tab.2)=rep(nn,p)
+    
+    if(style==1) {
+        out=cbind(
+              "$n$"=          c(rep(nn,p))
+            , "est"=          c(formatDouble(tab.2[,sum.est%+%".est"] ,digit1))
+            , "est(\\%bias)"= c(formatDouble( tab.2[,sum.est%+%".est"] ,digit1)%+%"("%+%round( tab.2[,"rel."%+%sum.est%+%"bias"] *100)%+%")")
+            , "range"=        c(formatDouble( tab.2[,"mcwdth.est"],digit1))
+            # put width and coverage prob together, e.g. 0.17(93)
+            ,                 matrix(formatDouble(tab.2[,startsWith(colnames(tab.2),"wdth.")],digit1) %+% ifelse (is.nan(tab.2[,startsWith(colnames(tab.2),"covered.")]),"", "("%+%round( tab.2[,startsWith(colnames(tab.2),"covered.")] *100)%+%")"), 
+                                  nrow=p*length(nn), dimnames=list(NULL,sd.methods))
+        ) 
+        if(!keep.intercept) out=out[-(1:length(nn)),] 
+    } else stop("style not supported")
+    
+    out
+        
 }

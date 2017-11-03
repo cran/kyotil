@@ -146,7 +146,7 @@ rep.matrix = function (x, times=1, each=1, by.row=TRUE, ...) {
 # rep.data.frame(chi[21,], 2)
 rep.data.frame = function (x, times=1, ...){
     out = x
-    if (time==1) return (out)
+    if (times==1) return (out)
     for (i in 2:times) {
         out = rbind (out, x)
     }

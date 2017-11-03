@@ -1,6 +1,7 @@
 \name{misc}
 \alias{pava}
 \alias{summ}
+\alias{sample.for.cv}
 \title{
 Misc Functions
 }
@@ -11,14 +12,25 @@ Misc functions. summ computes iterative sum, sort of like diff.
 
 pava (x, wt = rep(1, length(x)))
 summ(x)
+sample.for.cv (dat, v, seed)
 }
 \arguments{
 
+  \item{dat}{a data frame. One of the columns must be named y and y should be 0/1 with 1 for case and 0 for control}
+  \item{v}{v-fold cross validation}
+  \item{seed}{seed for random number generators}
   \item{x}{
-%%     ~~Describe \code{x} here~~
-}
+    %%     ~~Describe \code{x} here~~
+    }
   \item{wt}{
-%%     ~~Describe \code{var.equal} here~~
+    %%     ~~Describe \code{var.equal} here~~
+    }
 }
 
+\value{
+  sample.for.cv returns a list of two vector of integers: train and test, which refer to the rows of dat
+}
+
+\details{
+ sample.for.cv: case and controls are sampled separately.
 }

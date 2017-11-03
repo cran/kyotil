@@ -10,6 +10,12 @@
 \alias{rnorm.cor}
 \alias{rmixnorm}
 \alias{rnorm.norm.gamma}
+\alias{rdoublexp}
+\alias{ddoublexp}
+\alias{qdoublexp}
+\alias{pdoublexp}
+\alias{rbidoublexp}
+
 \title{
 Random Functions
 }
@@ -39,9 +45,28 @@ rnorm.cor(n, mu, sd, alpha)
 rnorm.norm.gamma(n, mu.0, lambda, alpha, beta)
 
 rmixnorm (n, mix.p, mu1, mu2, sd1, sd2)
+
+rdoublexp(n, location=0, scale=1) 
+ddoublexp(x, location=0, scale=1) 
+qdoublexp(p, location=0, scale=1) 
+pdoublexp(q, location=0, scale=1) 
+
+rbidoublexp(n, loc.1, loc.2, scale.1, scale.2, rho) 
+
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+
+  \item{q}{
+%%     ~~Describe \code{x} here~~
+}
+  \item{location}{
+%%     ~~Describe \code{x} here~~
+}
+  \item{scale}{
+%%     ~~Describe \code{x} here~~
+}
+
 
   \item{x}{
 %%     ~~Describe \code{x} here~~

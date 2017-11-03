@@ -57,7 +57,7 @@ logistic.regression = TRUE)
 
 \method{getFixedEf}{gam}(object, ...)
 
-\method{getFixedEf}{gee}(object, ...)
+\method{getFixedEf}{gee}(object, exp = FALSE, ...)
 
 \method{getFixedEf}{geese}(object, ...)
 \method{getFixedEf}{tps}(object, exp=FALSE, robust=TRUE, ...)
