@@ -6,7 +6,9 @@ mytex=function(dat=NULL, file.name="temp",
     lines=TRUE, hline.after=NULL, 
     add.to.row=NULL, 
     sanitize.text.function = NULL, #function(x) x,
-    append=FALSE, preamble="", stand.alone=TRUE,
+    append=FALSE, preamble="", stand.alone=TRUE, 
+    caption=NULL, label=file.name, table.placement="h!",
+    verbose=FALSE,
 ...) {
         
 #    if(exists("tablePath") && file.exists(tablePath)) {
@@ -22,8 +24,8 @@ mytex=function(dat=NULL, file.name="temp",
         if (length(tmp)==1) path="./" else path=concatList(tmp[-length(tmp)], "/")
         foldername=path%+%"/input"
         if(!file.exists(foldername)) dir.create(foldername) 
-        file.name.2=foldername%+%"/"%+%tmp[length(tmp)]%+%".tex"
-        file.name=file.name%+%".tex"
+        file.name.2=foldername%+%"/"%+%tmp[length(tmp)]
+        file.name=file.name
     }
     
     
@@ -32,10 +34,10 @@ mytex=function(dat=NULL, file.name="temp",
     
     if (!append) { #start a new file
         #document tag, preamble etc
-        mytex.begin(file.name, preamble)
+        mytex.begin(file.name%+%".tex", preamble)
         if (stand.alone) {
             #empty file
-            cat ("", file=file.name.2, append=FALSE)
+            cat ("", file=file.name.2%+%".tex", append=FALSE)
         }
     } 
     
@@ -51,8 +53,8 @@ mytex=function(dat=NULL, file.name="temp",
          
         # character only 
         if (!is.matrix(dat1) & is.character(dat1)) {
-            cat (dat1%+%"\n\n\n", file=file.name, append=TRUE)
-            if(stand.alone) cat (dat1%+%"\n\n\n", file=file.name.2, append=TRUE)
+            cat (dat1%+%"\n\n\n", file=file.name%+%".tex", append=TRUE)
+            if(stand.alone) cat (dat1%+%"\n\n\n", file=file.name.2%+%".tex", append=TRUE)
             next
         }
             
@@ -63,13 +65,15 @@ mytex=function(dat=NULL, file.name="temp",
         dimnam=names(dimnames(dat1))
         
         .ncol=ncol(dat1)
+        if(verbose) myprint(align)
         if (length(align)==1) {
-            align=rep(align,.ncol+1)
+            align=rep(align,.ncol+1); align[1]="l"
         } else if (length(align)==.ncol) {
             align=c("l",align) #align may not include alignment for the rownames, just pad it
         } else if (length(align)!=.ncol+1) {
             str(align); str(dat1); myprint(.ncol); stop("length of align incorrect")
         }
+        if(verbose) myprint(align)
         
         # add rownames as the first column if necessary
         if(include.rownames & anyDuplicated(rownames(dat1))) {
@@ -88,7 +92,7 @@ mytex=function(dat=NULL, file.name="temp",
         if(!is.null(dimnam) & is.null(col.headers)) {
             if(!is.na(dimnam[2]))
               if(trim(dimnam[2])!="")
-                col.headers="\\hline\n  "%+%dimnam[1]%+%"&  \\multicolumn{"%+% (ncol(dat1)-ifelse(include.rownames,1,0)) %+%"}{c}{"%+%dimnam[2]%+%"}   \\\\  \n"
+                col.headers="\\hline\n  "%+%ifelse(include.rownames,dimnam[1]%+%"&","")%+%"  \\multicolumn{"%+% ncol(dat1) %+%"}{c}{"%+%dimnam[2]%+%"}   \\\\  \n"
         }
         if (!is.null(col.headers)) top=col.headers else top="\\hline  "
         
@@ -121,11 +125,11 @@ mytex=function(dat=NULL, file.name="temp",
         #print(add.to.row)
         
         if (length(dat)>1) {
-            cat ("\\vspace{20pt}"%+%names(dat)[i]%+%"\n\n", file=file.name, append=TRUE)
-            cat ("\\vspace{20pt}"%+%names(dat)[i]%+%"\n\n", file=file.name.2, append=TRUE)
+            cat ("\\vspace{20pt}"%+%names(dat)[i]%+%"\n\n", file=file.name%+%".tex", append=TRUE)
+            cat ("\\vspace{20pt}"%+%names(dat)[i]%+%"\n\n", file=file.name.2%+%".tex", append=TRUE)
         }
         
-        if (!is.null(attr(dat1,"caption"))) caption=attr(dat1,"caption") else caption=NULL
+        #if (!is.null(attr(dat1,"caption"))) caption=attr(dat1,"caption") else caption=NULL
         
         if (is.null(hline.after)) {
             if (lines) hline.after=c(-1,0,nrow(dat1)) else hline.after=c(nrow(dat1))
@@ -137,55 +141,32 @@ mytex=function(dat=NULL, file.name="temp",
         print(..., xtable::xtable(dat1, 
                 digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
                 display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
-                align=align, caption=caption, ...), 
-            hline.after=hline.after, type = "latex", file = file.name, append = TRUE, floating = floating, 
+                align=align, caption=caption, label=label, ...), 
+            hline.after=hline.after, type = "latex", file = file.name%+%".tex", append = TRUE, floating = floating, table.placement=table.placement, 
             include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
             add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
         if (stand.alone) print(..., xtable::xtable(dat1, 
                 digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
                 display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
-                align=align, caption=caption, ...), 
-            hline.after=hline.after, type = "latex", file = file.name.2, append = TRUE, floating = floating, 
+                align=align, caption=caption, label=label, ...), 
+            hline.after=hline.after, type = "latex", file = file.name.2%+%".tex", append = TRUE, floating = floating, table.placement=table.placement, 
             include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
             add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
         
-        cat ("\n", file=file.name, append=TRUE)
-        if(stand.alone) cat ("\n", file=file.name.2, append=TRUE)
+        cat ("\n", file=file.name%+%".tex", append=TRUE)
+        if(stand.alone) cat ("\n", file=file.name.2%+%".tex", append=TRUE)
         # restore some variables that have changed in this function
         add.to.row=add.to.row.0
         include.colnames=include.colnames.0
     }
     
     if(!append) {
-        mytex.end(file.name)
+        mytex.end(file.name%+%".tex")
     }
     cat ("Writing table to "%+%getwd()%+%"/"%+%file.name%+%"\n")
 }
 #x=matrix(0,2,2,dimnames=list(a=1:2, b=1:2));  mytex(x)
 #x=matrix(0,2,2,dimnames=list(a=1:2, 1:2));  mytex(x)
-
-# now part of base package, but we keep it here so that older version of R can run, and when we source this file, mytex can run
-# return TRUE if s1 starts with s2? 
-startsWith=function(s1, s2){
-    sapply (s1, function (s) {
-        if ( substring (s, 1, nchar(s2)) == s2 ) {
-            return (TRUE);
-        } else {
-            return (FALSE);
-        }
-    })
-}
-# return TRUE if s1 ends with s2, s1 can be a vector
-endsWith=function(s1, s2){
-    sapply (s1, function (s) {
-        if ( substring (s, nchar(s)-nchar(s2)+1, nchar(s)) == s2 ) {
-            return (TRUE);
-        } else {
-            return (FALSE);
-        }
-    })
-}
-
 
 # print a matrix/table or a list of them to a latex file as xtable
 # note file.name can not have space in it

@@ -71,7 +71,8 @@ read.sv(file, header = TRUE, ...)
 
 read.tsv(file, header = TRUE, sep = "\t", ...)
 
-table.prop(x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE,useNA="ifany") 
+table.prop(x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE,useNA="ifany",
+    add.perc=FALSE)
 
 table.cases  (case,group,include.all=TRUE,desc="cases")
 table.cases.3(case,group1,group2)
@@ -201,6 +202,9 @@ Boolean
   \item{useNA}{
 %%     ~~Describe \code{FUN} here~~
 }
+  \item{add.perc}{
+%%     ~~Describe \code{FUN} here~~
+}
   \item{include.all}{
 %%     ~~Describe \code{FUN} here~~
 }
@@ -224,6 +228,9 @@ cbinduneven(list(a,b))
 \dontrun{
 # the formula in myreshapewide can only have one variable in the right hand side
     myreshapewide(fi~week, dat, c("ptid","stim"))
+
+    myreshapelong(dat.201.neut, cols.to.be.stacked=c("MN.3","SF162","SVA.MLV"), 
+        label.cols.to.be.stacked="antigen", new.col.name="y")
 
     myaggregate(subset(dat.poc, select=c(HIV, trt)), list(dat.poc$f), function(x) 
       with(x, c(fisher.test(HIV, trt)$estimate, fisher.test(HIV, trt)$p.value)))

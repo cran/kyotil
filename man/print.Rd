@@ -31,6 +31,8 @@ mytex(dat=NULL, file.name="temp",
     add.to.row=NULL, 
     sanitize.text.function = NULL, #function(x) x,
     append=FALSE, preamble="", stand.alone=TRUE,
+    caption=NULL, label=file.name, table.placement="h!",
+    verbose=FALSE,
 ...) 
 
 mytex.begin(file.name, preamble = "")
@@ -57,6 +59,14 @@ formatDouble(value, digits, na.to.empty=TRUE)
   \item{sanitize.text.function}{a function}
   \item{stand.alone}{Boolean. If true, only one latex file that is stand alone file is made; otherwise both a file that is to be inputted and a standalone version are made}
 
+  \item{caption}{
+%%     ~~Describe \code{value} here~~
+}
+  \item{label}{ default to be the same as file.name stem
+}
+  \item{table.placement}{
+%%     ~~Describe \code{value} here~~
+}
   \item{na.to.empty}{
 %%     ~~Describe \code{value} here~~
 }
@@ -113,6 +123,9 @@ formatDouble(value, digits, na.to.empty=TRUE)
   \item{\dots}{
 %%     ~~Describe \code{\dots} here~~
 }
+  \item{verbose}{
+%%     ~~Describe \code{\dots} here~~
+}
 
 
 
@@ -137,25 +150,41 @@ formatInt(3, 2) # 03
 
 \dontrun{ 
 
-# col.headers has to have the RIGHT number of columns in the next three examples!
+# demo of dimnames
+tab=diag(1:4); rownames(tab)<-colnames(tab)<-1:4; names(dimnames(tab))=c("age","height")
+# for greek letter in the labels, we need sanitize.text.function=identity
+rownames(tab)[1]="$\\alpha$"
+# note that to use caption, floating needs to be TRUE
+mytex (tab, file="tmp1", sanitize.text.function=identity, 
+    caption="This is a caption .........................", caption.placement="top",
+    floating=TRUE)
 
-# include.rownames=T, no duplicate rownames, align can have 4/5 elements, col.headers has 5 columns
+# col.headers has to have the RIGHT number of columns 
+# but align is more flexible, may not need to include the rownames col
 tab=diag(1:4); rownames(tab)<-colnames(tab)<-1:4
 mytex (tab, file="tmp", include.rownames = TRUE, 
     align=c("c","c","c|","c","c"), col.headers=
     "\\hline\n & \\multicolumn{2}{c|}{Vaccine} & \\multicolumn{2}{c}{Control} \\\\ \n")
-
-# include.rownames=T, duplicate rownames, align can have 4 or 5 elements, col.headers has 5 columns
+# not include rownames
+mytex (tab, file="tmp", include.rownames = FALSE, 
+    align=c("c","c","c|","c","c"), col.headers=
+    "\\hline\n     \\multicolumn{2}{c|}{Vaccine} & \\multicolumn{2}{c}{Control} \\\\ \n") 
+# It should work even if some rownames are duplicated
 tab=diag(1:4); rownames(tab)=rep(1,4); colnames(tab)<-1:4
 mytex (tab, file="tmp", include.rownames = TRUE, 
     align=c("c","c|","c","c"), col.headers=
     "\\hline\n & \\multicolumn{2}{c|}{Vaccine} & \\multicolumn{2}{c}{Control} \\\\ \n") 
 
-# include.rownames=F, align can have 4 or 5 elements, col.headers has 4 columns!
-tab=diag(1:4); rownames(tab)<-colnames(tab)<-1:4
-mytex (tab, file="tmp", include.rownames = FALSE, 
-    align=c("c","c","c|","c","c"), col.headers=
-    "\\hline\n     \\multicolumn{2}{c|}{Vaccine} & \\multicolumn{2}{c}{Control} \\\\ \n") 
+
+# add.to.rows
+tab=diag(1:4); rownames(tab)<-1:4; colnames(tab)<-c("a","b","c","d")
+mytex (tab, file="tmp",
+    add.to.row=list( list(0,2),
+        c("          \\multicolumn{5}{l}{Heading 1} \\\\ \n",
+          "\\hline\n \\multicolumn{5}{l}{Heading 2}\\\\ \n"
+    ))
+)
+
 
 }
 

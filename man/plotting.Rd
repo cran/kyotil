@@ -66,7 +66,7 @@ myboxplot(object, ...)
 \method{myboxplot}{formula}(formula, data, cex=.5, xlab="", ylab="", main="", box=TRUE, 
 at=NULL, na.action=NULL, pch=1, col=1, test="", friedman.test.formula=NULL, 
 reshape.formula=NULL, reshape.id=NULL, jitter=TRUE, add.interaction=FALSE,  
-drop.unused.levels = TRUE, bg.pt=NULL, ...)
+drop.unused.levels = TRUE, bg.pt=NULL, add=FALSE, ...)
     
 \method{myboxplot}{data.frame}(object, cex = 0.5, ylab = "", xlab = "", main = "", box = TRUE,
     at = NULL, pch = 1, col = 1, test = "", ...)
@@ -458,7 +458,7 @@ If order is TRUE, the rows are ordered by the first column of dat. descreasing c
 
 corplot.formula uses MethComp::Deming by Bendix Carstensen to fit Deming regression.
 
-wtd.hist is copied from weights package.
+wtd.hist is copied from weights package, author: Josh Pasek.
 }
 
 \examples{

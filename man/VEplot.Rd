@@ -52,7 +52,7 @@ myplot.cox.zph adds the following parameters to the original list of parameters 
 Youyi Fong, Dennis Chao
 }
 \references{
-Durham, L. Kathryn, et al. "Estimation of vaccine efficacy in the presence of waning: application to cholera vaccines." American Journal of Epidemiology 147.10 (1998): 948-959.
+Durham, Longini, Halloran, Clemens, Azhar and Rao (1998) "Estimation of vaccine efficacy in the presence of waning: application to cholera vaccines." American Journal of Epidemiology 147(10): 948-959.
 }
 \examples{
 

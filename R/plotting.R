@@ -54,7 +54,7 @@ mydev.off=function(file="temp", ext=c("png","pdf","tiff","eps"), res=200, mydev=
 
 get.width.height=function(nrow,ncol){
     if (nrow==1 & ncol==1) {width=6.7; height=6.7
-    } else if (nrow==1 & ncol==2) {width=9.7; height=5.2
+    } else if (nrow==1 & ncol==2) {width=9.7; height=4.5
     } else if (nrow==1 & ncol==3) {width=9.7; height=3.4
     } else if (nrow==1 & ncol==4) {width=14; height=3.4
 
@@ -194,8 +194,9 @@ panel.cor <- function(x, y, digits=2, prefix="", cex.cor, cor., ...)
     r <- cor(x, y, method=ifelse(missing(cor.), "spearman", cor.), use="pairwise.complete.obs")
     txt <- format(c(r, 0.123456789), digits=digits)[1]
     txt <- paste(prefix, txt, sep="")
-    if(missing(cex.cor)) cex.cor <- 0.8/strwidth(txt)
-    text(0.5, 0.5, txt, cex = ifelse(cex.cor<0,-cex.cor, cex.cor * r) )
+    if(missing(cex.cor)) cex.cor <- 1.5
+    #text(0.5, 0.5, txt, cex = cex.cor) # do this if we don't want cex to depend on correlations
+    text(0.5, 0.5, txt, cex = ifelse(r<0,cex.cor*sqrt(-r), cex.cor * sqrt(r)) )
 }
 panel.hist <- function(x, ...)
 {
@@ -269,7 +270,7 @@ myboxplot <- function(object, ...) UseMethod("myboxplot")
 # cex=.5; ylab=""; xlab=""; main=""; box=FALSE; highlight.list=NULL; at=NULL;pch=1;col=1;
 # friedman.test.formula is of the form a ~ b | c
 myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box=TRUE, at=NULL, na.action=NULL,
-    pch=1, col=1, test="", friedman.test.formula=NULL, reshape.formula=NULL, reshape.id=NULL, jitter=TRUE, add.interaction=FALSE,  drop.unused.levels = TRUE, bg.pt=NULL, ...){
+    pch=1, col=1, test="", friedman.test.formula=NULL, reshape.formula=NULL, reshape.id=NULL, jitter=TRUE, add.interaction=FALSE,  drop.unused.levels = TRUE, bg.pt=NULL, add=FALSE, ...){
     
     save.seed <- try(get(".Random.seed", .GlobalEnv), silent=TRUE) 
     if (class(save.seed)=="try-error") {        
@@ -289,7 +290,7 @@ myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box
      res=boxplot(tmp.dat, range=0, xlab=xlab, at=at, col=NULL, cex=cex, 
         boxlty=if(!box) 0 else NULL,whisklty=if(!box) 0 else NULL,staplelty=if(!box) 0 else NULL,
         #pars = list(boxwex = if(box) 0.8 else 0, staplewex = if(box) 0.5 else 0, outwex = if(box) 0.5 else 0), 
-        main=main, ylab=ylab, ...)
+        main=main, ylab=ylab, add=add, ...)
     
     # na.action is key below b/c otherwise pch vector will be out of sync with data when there are missing data
     dat.tmp=model.frame(formula, data, na.action=NULL);# str(dat.tmp); str(data)

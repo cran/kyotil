@@ -318,3 +318,7 @@ getFormattedMCSummary=function(path, sim, nn, fit.method, exclude.some=T, verbos
     out
         
 }
+
+
+# replace empty strings with NAs
+empty2na=function(x) {x[x==""]=NA; x = as.factor(as.character(x))}

@@ -9,7 +9,7 @@ export("%+%", concatList, contain, escapeUnderline, fileStem, firstIndex, getExt
     lastIndex, myprint, myprint.default, remove.prefix, VEplot, VEplot.glm, VEplot.cox.zph, myplot.cox.zph, age_calc)
 
 export(binary, binary2, f2c, ftoi, keepWarnings, meanmed, methods4, myaggregate, myreshapelong, myreshapewide, mysapply, myscale, 
-    mysystem, mytapply, read.sv, read.tsv, table.prop, table.cases, table.cases.3, unix)
+    mysystem, mytapply, read.sv, read.tsv, table.prop, table.cases, table.cases.3, unix, DMHeatMap)
 
 export(abline.shade, abline.shade.2, abline.pt.slope, abline.pts, butterfly.plot, empty.plot, getMfrow, myforestplot, my.interaction.plot, 
     myboxplot, myboxplot.formula, myboxplot.list, myboxplot.data.frame, mylegend, mymatplot, mypairs, mypdf, mypng, mytiff, mypostscript, panel.cor, myhist, mydev.off, myfigure, wtd.hist,
@@ -29,7 +29,7 @@ export(hosmerlem, quick.t.test, signtest, tukey.mtest, vector.t.test, summ, mult
 
 export(getK, trim)
 
-export(pava, get.sim.res, getFormattedMCSummary, MCsummary, Deming)
+export(pava, get.sim.res, getFormattedMCSummary, MCsummary, Deming, empty2na)
 
 export(.as.double, DXD, symprod, txSy, tXDX, interpolate)
 

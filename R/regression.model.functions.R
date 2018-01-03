@@ -17,8 +17,10 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
         
         if (VE) {
             tmp[,1]=1-tmp[,1]
-            tmp[,3]=1-tmp[,3]
-            tmp[,4]=1-tmp[,4]
+            # reverse lb and ub
+            tmpv=tmp[,4]
+            tmp[,4]=1-tmp[,3]
+            tmp[,3]=1-tmpv
         }
         p.val.col=which(startsWith(tolower(colnames(tmp)),"p"))
         lb=formatDouble(tmp[,3,drop=FALSE], est.digits) 

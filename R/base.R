@@ -271,7 +271,7 @@ keepWarnings <- function(expr) {
 
 # make table that shows both counts/frequency and proportions
 # style 1: count only; 2: count + percentage; 3: percentage only
-table.prop=function (x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE,useNA="ifany") {
+table.prop=function (x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE,useNA="ifany",add.perc=FALSE) {
     if (is.null(y)) {
         tbl=table(x,useNA=useNA)
         whole.table.add.to.1=TRUE  # to trick the computation of prop
@@ -280,7 +280,7 @@ table.prop=function (x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE,useNA="
     }
     if (whole.table.add.to.1) prop = tbl/sum(tbl) else prop = apply (tbl, 2, prop.table)
     if (style==2) {
-        res = tbl %+% " (" %+% round(prop*100,digit) %+% ")"
+        res = tbl %+% " (" %+% round(prop*100,digit) %+%ifelse(add.perc,"%","")%+% ")"
     } else if (style==3) {
         res = prop*100 # no need to do formating here
     } else if (style==4) {
@@ -320,9 +320,10 @@ table.cases.3=function(case,group1,group2){
     n.x=length(table(group1))
     n.y=length(table(group2))
     tab=table(group1, group2, case)
+    #print(tab);str(tab);print(rownames(tab));print(colnames(tab))
     res=matrix(round(100*tab[,,2]/(tab[,,1]+tab[,,2])) %+%  "% (" %+% tab[,,2] %+% "/" %+%(tab[,,1]+tab[,,2])%+% ")",nrow=n.x)
-    rownames(res)= if(n.x==2) c("low","high") else c("low","medium","high")
-    colnames(res)= if(n.y==2) c("low","high") else c("low","medium","high")
+    if (!is.null(rownames(tab))) rownames(res)=rownames(tab)# if(n.x==2) c("low","high") else c("low","medium","high")
+    if (!is.null(colnames(tab))) colnames(res)=colnames(tab)# if(n.y==2) c("low","high") else c("low","medium","high")
     res
 }
 

@@ -2,6 +2,7 @@
 \alias{pava}
 \alias{summ}
 \alias{sample.for.cv}
+\alias{empty2na}
 \title{
 Misc Functions
 }
@@ -13,6 +14,8 @@ Misc functions. summ computes iterative sum, sort of like diff.
 pava (x, wt = rep(1, length(x)))
 summ(x)
 sample.for.cv (dat, v, seed)
+empty2na(x) 
+
 }
 \arguments{
 
