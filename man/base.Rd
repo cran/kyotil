@@ -21,6 +21,7 @@
 \alias{table.cases.3}
 \alias{multi.outer}
 \alias{myreshapelong}
+\alias{mycor}
 
 \title{
 Some Base Functions
@@ -72,15 +73,51 @@ read.sv(file, header = TRUE, ...)
 read.tsv(file, header = TRUE, sep = "\t", ...)
 
 table.prop(x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE,useNA="ifany",
-    add.perc=FALSE)
+    add.perc=FALSE, add.total.column = FALSE)
 
 table.cases  (case,group,include.all=TRUE,desc="cases")
 table.cases.3(case,group1,group2)
 
 unix()
+
+mycor (x, use = "everything", method = c("pearson", "kendall", "spearman"), 
+    alternative = c("two.sided", "less", "greater"), exact = NULL, 
+    conf.level = 0.95, continuity = FALSE, 
+    digits.coef=2, digits.pval=3,
+    ...) 
+
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+
+  \item{add.total.column}{
+%%     ~~Describe \code{i} here~~
+}
+  \item{use}{
+%%     ~~Describe \code{i} here~~
+}
+  \item{method}{
+%%     ~~Describe \code{i} here~~
+}
+  \item{alternative}{
+%%     ~~Describe \code{i} here~~
+}
+  \item{exact}{
+%%     ~~Describe \code{i} here~~
+}
+  \item{conf.level}{
+%%     ~~Describe \code{i} here~~
+}
+  \item{continuity}{
+%%     ~~Describe \code{i} here~~
+}
+  \item{digits.coef}{
+%%     ~~Describe \code{i} here~~
+}
+  \item{digits.pval}{
+%%     ~~Describe \code{i} here~~
+}
+
 
   \item{cols.to.be.stacked}{
 %%     ~~Describe \code{i} here~~

@@ -35,7 +35,7 @@ getK=function(X,kernel,para=NULL,X2=NULL,C = NULL){
         l=tcrossprod(X,X2), # linear
         i = R_ibs(X,X2,para), # IBS 
         h = R_hamming.sim(X,X2,para),
-        stop(kernel %+% " kernel not supported")
+        stop(kernel %.% " kernel not supported")
     )
     
 }

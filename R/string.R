@@ -1,10 +1,16 @@
 # paste two strings together
-# e.g. "a" %+% "b"
+# e.g. "a" %.% "b"
 
 "%+%" <- function (a, b) {
+    .Deprecated("%.%")
     out=paste(a,b,sep="")
     out
 }
+"%.%" <- function (a, b) {
+    out=paste(a,b,sep="")
+    out
+}
+
 
 
 

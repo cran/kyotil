@@ -22,18 +22,15 @@ formatInt(x, digits, fill = "0", ...)
 
 make.latex.coef.table(models, model.names = NULL, row.major = FALSE, round.digits = NULL)
 
-mytex(dat=NULL, file.name="temp", 
-    digits=NULL, display=NULL, align="r", 
-    include.rownames=TRUE, include.colnames=TRUE,
-    col.headers=NULL,
-    comment=FALSE, floating=FALSE, 
-    lines=TRUE, hline.after=NULL, 
-    add.to.row=NULL, 
-    sanitize.text.function = NULL, #function(x) x,
-    append=FALSE, preamble="", stand.alone=TRUE,
-    caption=NULL, label=file.name, table.placement="h!",
-    verbose=FALSE,
-...) 
+mytex (dat = NULL, file.name = "temp", digits = NULL, display
+                 = NULL, align = "r", include.rownames = TRUE,
+                 include.colnames = TRUE, col.headers = NULL, comment =
+                 FALSE, floating = FALSE, lines = TRUE, hline.after =
+                 NULL, add.to.row = NULL, sanitize.text.function =
+                 NULL, append = FALSE, preamble = "", stand.alone =
+                 TRUE, caption = NULL, label = paste("tab",
+                 last(strsplit(file.name, "/")[[1]]), sep = " "),
+                 table.placement = "h!", verbose = FALSE, ...)
 
 mytex.begin(file.name, preamble = "")
 

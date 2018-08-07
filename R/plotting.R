@@ -22,31 +22,31 @@ myfigure=function (mfrow=c(1,1), mfcol=NULL, width=NULL, height=NULL, oma=NULL, 
     }    
     if(!is.null(bg)) par(bg=bg)
 }
-mydev.off=function(file="temp", ext=c("png","pdf","tiff","eps"), res=200, mydev=NULL) {        
+mydev.off=function(file="temp", ext=c("png,pdf"), res=200, mydev=NULL) {        
     if (!is.null(mydev)) .mydev=mydev
     exts=strsplit(ext, ",")[[1]]
     tmp=strsplit(file,"/")[[1]]
     for (ext in exts) {
         if (ext=="pdf") {
             subfolder=concatList(c(tmp[-length(tmp)], "pdf"), sep="/")
-            filename=if(file.exists(subfolder))  subfolder%+%"/"%+%last(tmp) else file
-            dev.copy(pdf,        file=filename%+%"."%+%ext, width=.mydev$width, height=.mydev$height, paper="special")
-            cat("Saving figure to "%+%paste(getwd(),"/",filename,sep="")%+%"."%+%ext%+%"\n")        
+            filename=if(file.exists(subfolder))  subfolder%.%"/"%.%last(tmp) else file
+            dev.copy(pdf,        file=filename%.%"."%.%ext, width=.mydev$width, height=.mydev$height, paper="special")
+            cat("Saving figure to "%.%paste(getwd(),"/",filename,sep="")%.%"."%.%ext%.%"\n")        
         } else if (ext=="eps") {
             subfolder=concatList(c(tmp[-length(tmp)], "eps"), sep="/")
-            filename=if(file.exists(subfolder))  subfolder%+%"/"%+%last(tmp) else file
-            dev.copy(postscript, file=filename%+%"."%+%ext, width=.mydev$width, height=.mydev$height, paper="special", horizontal=FALSE)
-            cat("Saving figure to "%+%paste(getwd(),"/",filename,sep="")%+%"."%+%ext%+%"\n")        
+            filename=if(file.exists(subfolder))  subfolder%.%"/"%.%last(tmp) else file
+            dev.copy(postscript, file=filename%.%"."%.%ext, width=.mydev$width, height=.mydev$height, paper="special", horizontal=FALSE)
+            cat("Saving figure to "%.%paste(getwd(),"/",filename,sep="")%.%"."%.%ext%.%"\n")        
         } else if (ext=="png") {
             subfolder=concatList(c(tmp[-length(tmp)], "png"), sep="/")
-            filename=if(file.exists(subfolder))  subfolder%+%"/"%+%last(tmp) else file
-            dev.copy(png,    filename=filename%+%"."%+%ext, width=.mydev$width, height=.mydev$height, units="in", res=res)
-            cat("Saving figure to "%+%paste(getwd(),"/",filename,sep="")%+%"."%+%ext%+%"\n")        
+            filename=if(file.exists(subfolder))  subfolder%.%"/"%.%last(tmp) else file
+            dev.copy(png,    filename=filename%.%"."%.%ext, width=.mydev$width, height=.mydev$height, units="in", res=res)
+            cat("Saving figure to "%.%paste(getwd(),"/",filename,sep="")%.%"."%.%ext%.%"\n")        
         } else if (ext=="tiff") {
             subfolder=concatList(c(tmp[-length(tmp)], "tiff"), sep="/")
-            filename=if(file.exists(subfolder))  subfolder%+%"/"%+%last(tmp) else file
-            dev.copy(tiff,   filename=filename%+%"."%+%ext, width=.mydev$width, height=.mydev$height, units="in", res=res, compression="jpeg")
-            cat("Saving figure to "%+%paste(getwd(),"/",filename,sep="")%+%"."%+%ext%+%"\n")        
+            filename=if(file.exists(subfolder))  subfolder%.%"/"%.%last(tmp) else file
+            dev.copy(tiff,   filename=filename%.%"."%.%ext, width=.mydev$width, height=.mydev$height, units="in", res=res, compression="jpeg")
+            cat("Saving figure to "%.%paste(getwd(),"/",filename,sep="")%.%"."%.%ext%.%"\n")        
         }
         dev.off()
     }
@@ -54,7 +54,7 @@ mydev.off=function(file="temp", ext=c("png","pdf","tiff","eps"), res=200, mydev=
 
 get.width.height=function(nrow,ncol){
     if (nrow==1 & ncol==1) {width=6.7; height=6.7
-    } else if (nrow==1 & ncol==2) {width=9.7; height=4.5
+    } else if (nrow==1 & ncol==2) {width=9.7; height=5
     } else if (nrow==1 & ncol==3) {width=9.7; height=3.4
     } else if (nrow==1 & ncol==4) {width=14; height=3.4
 
@@ -97,7 +97,7 @@ get.width.height=function(nrow,ncol){
 
     } else if (nrow==8 & ncol==5) {width=10; height=16
     } else {
-        warning ("nrow x ncol not supported: "%+%nrow%+%" x "%+%ncol %+% ". Default to 10x10")
+        warning ("nrow x ncol not supported: "%.%nrow%.%" x "%.%ncol %.% ". Default to 10x10")
         width=10; height=10
     }
     return(c(width,height))
@@ -121,7 +121,7 @@ get.width.height=function(nrow,ncol){
 #    dev.off()
 #    # convert file if needed
 #    if(png & length(tmp)==1) {
-#        system('"C:/Program Files/ImageMagick-7.0.3-Q16/convert.exe" -resize 2000 -density 200 "'%+%getwd()%+%'/'%+%filename%+%'" "'%+%getwd()%+%'/'%+%fileStem(filename)%+%'.png"')
+#        system('"C:/Program Files/ImageMagick-7.0.3-Q16/convert.exe" -resize 2000 -density 200 "'%.%getwd()%.%'/'%.%filename%.%'" "'%.%getwd()%.%'/'%.%fileStem(filename)%.%'.png"')
 #    }        
 
 # deprecated
@@ -147,15 +147,15 @@ mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height
     
     if(save2file){      
         if (ext=="pdf") {
-            pdf (paper="special", file=file%+%"."%+%ext, width=width, height=height, ...)
+            pdf (paper="special", file=file%.%"."%.%ext, width=width, height=height, ...)
         } else if (ext=="eps") {
-            postscript (paper="special", horizontal=FALSE, file=file%+%"."%+%ext, width=width, height=height, ...)
+            postscript (paper="special", horizontal=FALSE, file=file%.%"."%.%ext, width=width, height=height, ...)
         } else if (ext=="png") {
-            png (filename=file%+%"."%+%ext, width=width, height=height, units="in", res=res, ...)
+            png (filename=file%.%"."%.%ext, width=width, height=height, units="in", res=res, ...)
         } else if (ext=="tiff") {
-            tiff (filename=file%+%"."%+%ext, width=width, height=height, units="in", res=res, compression="jpeg", ...)
+            tiff (filename=file%.%"."%.%ext, width=width, height=height, units="in", res=res, compression="jpeg", ...)
         }
-        cat("Saving figure to "%+%paste(getwd(),"/",file,sep="")%+%"\n")        
+        cat("Saving figure to "%.%paste(getwd(),"/",file,sep="")%.%"\n")        
     } else {
         print("not saving to file")
     }
@@ -194,9 +194,11 @@ panel.cor <- function(x, y, digits=2, prefix="", cex.cor, cor., ...)
     r <- cor(x, y, method=ifelse(missing(cor.), "spearman", cor.), use="pairwise.complete.obs")
     txt <- format(c(r, 0.123456789), digits=digits)[1]
     txt <- paste(prefix, txt, sep="")
-    if(missing(cex.cor)) cex.cor <- 1.5
+    if(missing(cex.cor)) cex.cor <- 2.5
     #text(0.5, 0.5, txt, cex = cex.cor) # do this if we don't want cex to depend on correlations
     text(0.5, 0.5, txt, cex = ifelse(r<0,cex.cor*sqrt(-r), cex.cor * sqrt(r)) )
+#    print(txt); text(.1, .1, "a"); text(.9, .9, "a")
+#    abline(v=1e3)
 }
 panel.hist <- function(x, ...)
 {
@@ -206,10 +208,160 @@ panel.hist <- function(x, ...)
     breaks <- h$breaks; nB <- length(breaks)
     y <- h$counts; y <- y/max(y)
     rect(breaks[-nB], 0, breaks[-1], y, col="cyan", ...)
+#    abline(v=1e3)
+#    abline(h=.5)
 }
 panel.nothing=function(x, ...) {}
-mypairs=function(dat, ...){
-    pairs(dat, lower.panel=panel.smooth, upper.panel=panel.cor, diag.panel=panel.hist, ...)
+# panel.ladder is a copy of panel.smooth with modifications
+panel.ladder=function (x, y, col = par("col"), bg = NA, 
+    cex = 1, col.smooth = "red", span = 2/3, iter = 3, cex.text=1.2, cex.star=2,
+    cor.,  ...) 
+{
+    points(x, y, pch = 20, col = col, bg = bg, cex = cex)
+    dxy=as.data.frame(cbind(x,y)); dxy=dxy[complete.cases(dxy),]
+    r.lm=lm(y~x, dxy) 
+    lines(r.lm, col="1", pred.level=NA)#, args.pband=list(col=SetAlpha("blue",1)) )# 
+        
+    r <- cor(x, y, method=ifelse(missing(cor.), "spearman", cor.), use="pairwise.complete.obs")
+    x.1=(x-min(x,na.rm=T))/(max(x,na.rm=T)-min(x,na.rm=T))
+    y.1=(y-min(y,na.rm=T))/(max(y,na.rm=T)-min(y,na.rm=T))
+    p=suppressWarnings(cor.test(x,y, method = ifelse(missing(cor.), "spearman", cor.))$p.value)
+    sig=ifelse (round(p,2)<=0.05,ifelse (p<0.01,  ifelse (p<0.01,"***","**")  ,"*"),"")
+    text(0*(max(x,na.rm=T)-min(x,na.rm=T))+min(x,na.rm=T), y = 1*(max(y,na.rm=T)-min(y,na.rm=T))+min(y,na.rm=T), labels = "r = "%.%round(r,2), adj = c(0,1), pos = NULL, offset = 0.5, vfont = NULL, cex = cex.text, col = 2, font = 2)
+    text(1*(max(x,na.rm=T)-min(x,na.rm=T))+min(x,na.rm=T), y = 1*(max(y,na.rm=T)-min(y,na.rm=T))+min(y,na.rm=T), labels = sig,                 adj = c(1,1), pos = NULL, offset = 0.5, vfont = NULL, cex = cex.star, col = 2, font = 2)
+
+#    ok <- is.finite(x) & is.finite(y)
+#    if (any(ok)) 
+#        lines(stats::lowess(x[ok], y[ok], f = span, iter = iter), 
+#            col = col.smooth, ...)
+}
+# when log="xy" is passed in, diag and upper panels do not print properly
+mypairs=function(dat, ladder=FALSE, ...){
+    if(ladder) { # ladder plot
+        .pairs(dat, lower.panel=panel.ladder, upper.panel=NULL, diag.panel=NULL, xaxt="n", yaxt="n", gap=0, ...)
+    } else {
+        .pairs(dat, lower.panel=panel.smooth, upper.panel=panel.cor, diag.panel=panel.hist, ...)
+    }    
+}
+# a copy of pairs with only one change that is needed to not draw boxes long the diagonal line
+.pairs=function (x, labels, panel = points, ...,
+          lower.panel = panel, upper.panel = panel,
+          diag.panel = NULL, text.panel = textPanel,
+          label.pos = 0.5 + has.diag/3, line.main = 3,
+          cex.labels = NULL, font.labels = 1, 
+          row1attop = TRUE, gap = 1, log = ""){
+    if(doText <- missing(text.panel) || is.function(text.panel))
+    textPanel <-
+        function(x = 0.5, y = 0.5, txt, cex, font)
+        text(x, y, txt, cex = cex, font = font)
+    
+    localAxis <- function(side, x, y, xpd, bg, col=NULL, main, oma, ...) {
+      ## Explicitly ignore any color argument passed in as
+      ## it was most likely meant for the data points and
+      ## not for the axis.
+        xpd <- NA
+        if(side %% 2L == 1L && xl[j]) xpd <- FALSE
+        if(side %% 2L == 0L && yl[i]) xpd <- FALSE
+        if(side %% 2L == 1L) Axis(x, side = side, xpd = xpd, ...)
+        else Axis(y, side = side, xpd = xpd, ...)
+    }
+    
+    localPlot <- function(..., main, oma, font.main, cex.main) plot(...)
+    localLowerPanel <- function(..., main, oma, font.main, cex.main)
+        lower.panel(...)
+    localUpperPanel <- function(..., main, oma, font.main, cex.main)
+        upper.panel(...)
+    
+    localDiagPanel <- function(..., main, oma, font.main, cex.main)
+        diag.panel(...)
+    
+    dots <- list(...); nmdots <- names(dots)
+    if (!is.matrix(x)) {
+        x <- as.data.frame(x)
+        for(i in seq_along(names(x))) {
+            if(is.factor(x[[i]]) || is.logical(x[[i]]))
+               x[[i]] <- as.numeric(x[[i]])
+            if(!is.numeric(unclass(x[[i]])))
+                stop("non-numeric argument to 'pairs'")
+        }
+    } else if (!is.numeric(x)) stop("non-numeric argument to 'pairs'")
+    panel <- match.fun(panel)
+    if((has.lower <- !is.null(lower.panel)) && !missing(lower.panel))
+        lower.panel <- match.fun(lower.panel)
+    if((has.upper <- !is.null(upper.panel)) && !missing(upper.panel))
+        upper.panel <- match.fun(upper.panel)
+    if((has.diag  <- !is.null( diag.panel)) && !missing( diag.panel))
+        diag.panel <- match.fun( diag.panel)
+    
+    if(row1attop) {
+        tmp <- lower.panel; lower.panel <- upper.panel; upper.panel <- tmp
+        tmp <- has.lower; has.lower <- has.upper; has.upper <- tmp
+    }
+    
+    nc <- ncol(x)
+    if (nc < 2) stop("only one column in the argument to 'pairs'")
+    if(doText) {
+    if (missing(labels)) {
+        labels <- colnames(x)
+        if (is.null(labels)) labels <- paste("var", 1L:nc)
+    }
+    else if(is.null(labels)) doText <- FALSE
+    }
+    oma <- if("oma" %in% nmdots) dots$oma
+    main <- if("main" %in% nmdots) dots$main
+    if (is.null(oma))
+    oma <- c(4, 4, if(!is.null(main)) 6 else 4, 4)
+    opar <- par(mfrow = c(nc, nc), mar = rep.int(gap/2, 4), oma = oma)
+    on.exit(par(opar))
+    dev.hold(); on.exit(dev.flush(), add = TRUE)
+    
+    xl <- yl <- logical(nc)
+    if (is.numeric(log)) xl[log] <- yl[log] <- TRUE
+    else {xl[] <- grepl("x", log); yl[] <- grepl("y", log)}
+    for (i in if(row1attop) 1L:nc else nc:1L)
+        for (j in 1L:nc) {
+            l <- paste0(ifelse(xl[j], "x", ""), ifelse(yl[i], "y", ""))
+            localPlot(x[, j], x[, i], xlab = "", ylab = "",
+                      axes = FALSE, type = "n", ..., log = l)
+            if( i==j | (i < j && has.lower) || (i > j && has.upper) ) { 
+                if (i!=j) box()# YF: add i==j 
+                if(i == 1  && (!(j %% 2L) || !has.upper || !has.lower ))
+                    localAxis(1L + 2L*row1attop, x[, j], x[, i], ...)
+                if(i == nc && (  j %% 2L  || !has.upper || !has.lower ))
+                    localAxis(3L - 2L*row1attop, x[, j], x[, i], ...)
+                if(j == 1  && (!(i %% 2L) || !has.upper || !has.lower ))
+                    localAxis(2L, x[, j], x[, i], ...)
+                if(j == nc && (  i %% 2L  || !has.upper || !has.lower ))
+                    localAxis(4L, x[, j], x[, i], ...)
+                mfg <- par("mfg")
+                if(i == j) {
+                    if (has.diag) localDiagPanel(as.vector(x[, i]), ...)
+            if (doText) {
+                        par(usr = c(0, 1, 0, 1))
+                        if(is.null(cex.labels)) {
+                            l.wid <- strwidth(labels, "user")
+                            cex.labels <- max(0.8, min(2, .9 / max(l.wid)))
+                        }
+                        xlp <- if(xl[i]) 10^0.5 else 0.5
+                        ylp <- if(yl[j]) 10^label.pos else label.pos
+                        text.panel(xlp, ylp, labels[i],
+                                   cex = cex.labels, font = font.labels)
+                    }
+                } else if(i < j)
+                    localLowerPanel(as.vector(x[, j]), as.vector(x[, i]), ...)
+                else
+                    localUpperPanel(as.vector(x[, j]), as.vector(x[, i]), ...)
+                if (any(par("mfg") != mfg))
+                    stop("the 'panel' function made a new plot")
+            } else par(new = FALSE)
+    
+        }
+    if (!is.null(main)) {
+        font.main <- if("font.main" %in% nmdots) dots$font.main else par("font.main")
+        cex.main <- if("cex.main" %in% nmdots) dots$cex.main else par("cex.main")
+        mtext(main, 3, line.main, outer=TRUE, at = 0.5, cex = cex.main, font = font.main)
+    }
+    invisible(NULL)
 }
 
 
@@ -316,24 +468,24 @@ myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box
         if ("t" %in% test) {
             p.val=t.test(formula, data)$p.value
             pvals=c(pvals, Student=p.val)
-            sub=sub%+%" Student's t "%+%ifelse(length(test)==1,"p-val ","")%+%signif(p.val,2) 
+            sub=sub%.%" Student's t "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2) 
         }
         if ("w" %in% test) {
             p.val=suppressWarnings(wilcox.test(formula, data)$p.value)
             pvals=c(pvals, Wilcoxon=p.val)
-            sub=sub%+%" Wilcoxon "%+%ifelse(length(test)==1,"p-val ","")%+%signif(p.val,2)
+            sub=sub%.%" Wilcoxon "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2)
         }
         if ("k" %in% test) {
             p.val=kruskal.test(formula, data)$p.value
             pvals=c(pvals, Kruskal=p.val)
-            sub=sub%+%" Kruskal "%+%ifelse(length(test)==1,"p-val ","")%+%signif(p.val,2)
+            sub=sub%.%" Kruskal "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2)
         }
         if ("f" %in% test) {
             if (!is.null(friedman.test.formula)) {
             # if there is missing data, this won't work, try the else and supply reshape.formula and reshape.id
                 p.val=friedman.test(friedman.test.formula, data)$p.value
                 pvals=c(pvals, Friedman=p.val)
-                sub=sub%+%" Friedman "%+%ifelse(length(test)==1,"p-val ","")%+%signif(p.val,2)
+                sub=sub%.%" Friedman "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2)
             } else if (!is.null(reshape.formula) & !is.null(reshape.id)) {
                 dat.wide=myreshapewide (reshape.formula, data, idvar = reshape.id)
                 #str(dat.wide)# show this so that we know we are using the right data to do the test
@@ -341,7 +493,7 @@ myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box
                 if (!inherits(ftest,"try-error")) p.val=ftest$p.value else p.val=NA
                 pvals=c(pvals, Friedman=p.val)
                 if (add.interaction) my.interaction.plot(as.matrix(dat.wide[,-1]), add=T)
-                sub=sub%+%" Friedman "%+%ifelse(length(test)==1,"p-val ","")%+% ifelse (is.na(p.val), "NA", signif(p.val,2))
+                sub=sub%.%" Friedman "%.%ifelse(length(test)==1,"p-val ","")%.% ifelse (is.na(p.val), "NA", signif(p.val,2))
             } else warning("cannot perform Friedman test without friedman.test.formula or reshape.formula,reshape.id")
         }
         title(sub=sub)
@@ -427,8 +579,8 @@ corplot.formula=function(formula,data,main="",method=c("pearson","spearman"),col
         cor.=sapply (method, function (method) {
             cor(data[,vars[1]],data[,vars[2]],method=method,use="p")
         })
-        main=main%+%ifelse(main=="","",", ")
-        main=main%+%"cor: "%+%concatList(round(cor.,2),"|")
+        main=main%.%ifelse(main=="","",", ")
+        main=main%.%"cor: "%.%concatList(round(cor.,2),"|")
     }
 
     if (!add) {
@@ -511,9 +663,11 @@ abline.shade.2=function(x, col=c(0,1,0)){
     rect(x[1], usr[3], x[2], usr[4], col=rgb(red=col[1], blue=col[2], green=col[3], alpha=.5), border=NA) 
 }
 
+
 #abline.pt.slope(c(1,1), 1)
+# When impute.missing.for.line is TRUE, lines are drawn even when there are missing values in between two observations
 mymatplot=function(x, y, type="b", lty=c(1,2,1,2,1,2), pch=NULL, col=rep(c("darkgray","black"),each=3), xlab=NULL, ylab="", 
-    draw.x.axis=TRUE, bg=NA, lwd=1, at=NULL, make.legend=TRUE, legend=NULL, 
+    draw.x.axis=TRUE, bg=NA, lwd=1, at=NULL, make.legend=TRUE, legend=NULL, impute.missing.for.line=TRUE,
     legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, xaxt="s", ...) {
     
     missing.y=FALSE
@@ -523,9 +677,22 @@ mymatplot=function(x, y, type="b", lty=c(1,2,1,2,1,2), pch=NULL, col=rep(c("dark
         x=1:nrow(y)
     } 
     
+    # fill in missing values if necessary, i.e. when there are lines to draw
+    if (impute.missing.for.line & any(is.na(y)) & type %in% c("l","b")) {
+        y.imputed=zoo::na.approx(y, x=x, na.rm=FALSE); rownames(y.imputed)=rownames(y)
+        imputed=TRUE
+        cat("imputing data ...\n")
+    } else {
+        imputed=FALSE
+        y.imputed=y
+    }
+    
     if (is.null(xlab)) xlab=names(dimnames(y))[1]
     if (is.null(legend.title)) legend.title=names(dimnames(y))[2]
-    matplot(x, y, lty=lty, pch=pch, col=col, xlab=xlab, xaxt=xaxt, ylab=ylab, bg=bg, lwd=lwd, type=type, ...)
+    # draw line first, then points
+    if(type %in% c("l","b")) matplot(x, y.imputed, lty=lty, pch=pch, col=col, xlab=xlab, xaxt=xaxt, ylab=ylab, bg=bg, lwd=lwd, type="l", ...)
+    if(type %in% c("p","b")) matplot(x, y, lty=lty, pch=pch, col=col, xlab=xlab, xaxt=xaxt, ylab=ylab, bg=bg, lwd=lwd, type="p", add=type!="p", ...)
+    
     if (xaxt=="n") 
         if(missing.y & draw.x.axis) axis(side=1, at=x, labels=rownames(y)) else if (draw.x.axis) axis(side=1, at=x, labels=x)
     if (make.legend) {
@@ -562,3 +729,204 @@ plot.ellipse=function(x0,y0,a=1,b=1,theta=0,alpha=0,add=TRUE,...) {
 }
 
 add.mtext.label=function(text, cex=1.4, adj=-0.2) mtext(side=3, line=2, adj=adj, text=text, cex=cex, font=2, xpd=NA)
+
+
+# copied from DescTools, Andri Signorell
+# just for check not to bark!
+utils::globalVariables(c("hred","hblue"))
+
+lines.lm <- function (x, col = Pal()[1], lwd = 2, lty = "solid",
+                      type = "l", n = 100, conf.level = 0.95, args.cband = NULL,
+                      pred.level = NA, args.pband = NULL, ...) {
+    
+  mod <- x$model
+
+  # we take simply the second column of the model data.frame to identify the x variable
+  # this will crash, if there are several resps and yield nonsense if there is
+  # more than one pred,
+  # so check for a simple regression model y ~ x (just one resp, just one pred)
+
+  # Note:
+  # The following will not work, because predict does not correctly recognise the newdata data.frame:
+  # lines(lm(d.pizza$temperature ~ d.pizza$delivery_min), col=hred, lwd=3)
+  # see what happens to the data.frame colnames in: predict(x, newdata=data.frame("d.pizza$delivery_min"=1:20))
+  # this predict won't work.
+  # always provide data:    y ~ x, data
+
+  # thiss is not a really new problem:
+  # http://faustusnotes.wordpress.com/2012/02/16/problems-with-out-of-sample-prediction-using-r/
+
+  # we would only plot lines if there's only one predictor
+
+  pred <- all.vars(formula(x)[[3]])
+  if(length(pred) > 1) {
+    stop("Can't plot a linear model with more than 1 predictor.")
+  }
+
+  # the values of the predictor
+  xpred <- x$model[, pred] # modified by YF
+  #xpred <- eval(x$call$data)[, pred]
+
+  newx <- data.frame(seq(from = min(xpred, na.rm = TRUE),
+                         to = max(xpred, na.rm = TRUE), length = n))
+
+  colnames(newx) <- pred
+  fit <- predict(x, newdata = newx)
+
+  if (!(is.na(pred.level) || identical(args.pband, NA)) ) {
+    args.pband1 <- list(col = SetAlpha(col, 0.12), border = NA)
+    if (!is.null(args.pband))
+      args.pband1[names(args.pband)] <- args.pband
+
+    ci <- predict(x, interval="prediction", newdata=newx, level=pred.level) # Vorhersageband
+    do.call("DrawBand", c(args.pband1, list(x = c(unlist(newx), rev(unlist(newx)))),
+                          list(y = c(ci[,2], rev(ci[,3])))))
+  }
+
+  if (!(is.na(conf.level) || identical(args.cband, NA)) ) {
+    args.cband1 <- list(col = SetAlpha(col, .2), border = NA)# modified by YF
+    if (!is.null(args.cband))
+      args.cband1[names(args.cband)] <- args.cband
+
+    ci <- predict(x, interval="confidence", newdata=newx, level=conf.level) # Vertrauensband
+    do.call("DrawBand", c(args.cband1, list(x = c(unlist(newx), rev(unlist(newx)))),
+                          list(y = c(ci[,2], rev(ci[,3])))))
+  }
+
+  lines(y = fit, x = unlist(newx), col = col, lwd = lwd, lty = lty,
+        type = type)
+}
+DrawBand <- function(x, y, col = SetAlpha("grey", 0.5), border = NA) {
+
+  # accept matrices but then only n x y
+  if(!identical(dim(y), dim(x))){
+    x <- as.matrix(x)
+    y <- as.matrix(y)
+
+    if(dim(x)[2] == 1 && dim(y)[2] == 2)
+      x <- x[, c(1,1)]
+    else if(dim(x)[2] == 2 && dim(y)[2] == 1)
+      y <- y[, c(1,1)]
+    else
+      stop("incompatible dimensions for matrices x and y")
+
+    x <- c(x[,1], rev(x[,2]))
+    y <- c(y[,1], rev(y[,2]))
+
+  }
+
+  # adds a band to a plot, normally used for plotting confidence bands
+  polygon(x=x, y=y, col = col, border = border)
+}
+SetAlpha <- function(col, alpha=0.5) {
+
+  if (length(alpha) < length(col)) alpha <- rep(alpha, length.out = length(col))
+  if (length(col) < length(alpha)) col <- rep(col, length.out = length(alpha))
+
+  acol <- substr(ColToHex(col), 1, 7)
+  acol[!is.na(alpha)] <- paste(acol[!is.na(alpha)], DecToHex(round(alpha[!is.na(alpha)]*255,0)), sep="")
+  acol[is.na(col)] <- NA
+  return(acol)
+}
+DecToHex <- function(x) as.hexmode(as.numeric(x))
+ColToHex <- function(col, alpha=1) {
+  col.rgb <- col2rgb(col)
+  col <- apply( col.rgb, 2, function(x) sprintf("#%02X%02X%02X", x[1], x[2], x[3]) )
+  if(alpha != 1 ) col <- paste( col, DecToHex( round( alpha * 255, 0)), sep="")
+  return(col)
+  # old: sprintf("#%02X%02X%02X", col.rgb[1], col.rgb[2], col.rgb[3])
+}
+Pal <- function(pal, n=100, alpha=1) {
+
+  if(missing(pal)) {
+    res <- getOption("palette", default = structure(Pal("Helsana")[c(6,1:5,7:10)] ,
+                     name = "Helsana", class = c("palette", "character")) )
+
+  } else {
+
+    palnames <- c("RedToBlack","RedBlackGreen","SteeblueWhite","RedWhiteGreen",
+                  "RedWhiteBlue0","RedWhiteBlue1","RedWhiteBlue2","RedWhiteBlue3","Helsana","Tibco","RedGreen1",
+                  "Spring","Soap","Maiden","Dark","Accent","Pastel","Fragile","Big","Long","Night","Dawn","Noon","Light")
+
+    if(is.numeric(pal)){
+      pal <- palnames[pal]
+    }
+    big <- c("#800000", "#C00000", "#FF0000", "#FFC0C0",
+            "#008000","#00C000","#00FF00","#C0FFC0",
+            "#000080","#0000C0", "#0000FF","#C0C0FF",
+            "#808000","#C0C000","#FFFF00","#FFFFC0",
+            "#008080","#00C0C0","#00FFFF","#C0FFFF",
+            "#800080","#C000C0","#FF00FF","#FFC0FF",
+            "#C39004","#FF8000","#FFA858","#FFDCA8")
+
+    switch(pal
+           , RedToBlack    = res <- colorRampPalette(c("red","yellow","green","blue","black"), space = "rgb")(n)
+           , RedBlackGreen = res <- colorRampPalette(c("red", "black", "green"), space = "rgb")(n)
+           , SteeblueWhite = res <- colorRampPalette(c("steelblue","white"), space = "rgb")(n)
+           , RedWhiteGreen = res <- colorRampPalette(c("red", "white", "green"), space = "rgb")(n)
+           , RedWhiteBlue0 = res <- colorRampPalette(c("red", "white", "blue"))(n)
+           , RedWhiteBlue1 = res <- colorRampPalette(c("#67001F", "#B2182B", "#D6604D", "#F4A582", "#FDDBC7",
+                                              "#FFFFFF", "#D1E5F0", "#92C5DE", "#4393C3", "#2166AC", "#053061"))(n)
+           , RedWhiteBlue2 = res <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))(n)
+           , RedWhiteBlue3 = res <- colorRampPalette(c(hred, "white", hblue))(n)
+           , Helsana       = res <- c("rot"="#9A0941", "orange"="#F08100", "gelb"="#FED037"
+                                       , "ecru"="#CAB790", "hellrot"="#D35186", "hellblau"="#8296C4", "hellgruen"="#B3BA12"
+                                       , "hellgrau"="#CCCCCC", "dunkelgrau"="#666666", "weiss"="#FFFFFF")
+           , Tibco         =  res <- apply( mcol <- matrix(c(
+                                       0,91,0, 0,157,69, 253,1,97, 60,120,177,
+                           156,205,36, 244,198,7, 254,130,1,
+                           96,138,138, 178,113,60
+                            ), ncol=3, byrow=TRUE), 1, function(x) rgb(x[1], x[2], x[3], maxColorValue=255))
+           , RedGreen1 =  res <- c(rgb(227,0,11, maxColorValue=255), rgb(227,0,11, maxColorValue=255),
+                                  rgb(230,56,8, maxColorValue=255), rgb(234,89,1, maxColorValue=255),
+                       rgb(236,103,0, maxColorValue=255), rgb(241,132,0, maxColorValue=255),
+                       rgb(245,158,0, maxColorValue=255), rgb(251,184,0, maxColorValue=255),
+                       rgb(253,195,0, maxColorValue=255), rgb(255,217,0, maxColorValue=255),
+                       rgb(203,198,57, maxColorValue=255), rgb(150,172,98, maxColorValue=255),
+                       rgb(118,147,108, maxColorValue=255))
+
+           , Spring =  res <- c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3","#FF7F00", "#FFFF33", "#A65628", "#F781BF", "#999999")
+           , Soap =  res <- c("#66C2A5", "#FC8D62", "#8DA0CB", "#E78AC3","#A6D854", "#FFD92F", "#E5C494", "#B3B3B3")
+           , Maiden =  res <- c("#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072","#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5", "#D9D9D9","#BC80BD","#CCEBC5")
+           , Dark =  res <- c("#1B9E77", "#D95F02", "#7570B3", "#E7298A","#66A61E", "#E6AB02", "#A6761D", "#666666")
+           , Accent =  res <- c("#7FC97F", "#BEAED4", "#FDC086", "#FFFF99","#386CB0", "#F0027F", "#BF5B17", "#666666")
+           , Pastel =  res <- c("#FBB4AE", "#B3CDE3", "#CCEBC5", "#DECBE4","#FED9A6", "#FFFFCC", "#E5D8BD", "#FDDAEC", "#F2F2F2")
+           , Fragile =  res <- c("#B3E2CD", "#FDCDAC", "#CBD5E8", "#F4CAE4","#E6F5C9", "#FFF2AE", "#F1E2CC", "#CCCCCC")
+           , Big =  res <- big
+           , Long =  res <- big[c(12,16,25,24,
+                         2,11,6,15,18,26,23,
+                         3,10,7,14,19,27,22,
+                         4,8,20,28)]
+           , Night =  res <- big[seq(1, 28, by=4)]
+           , Dawn =  res <- big[seq(2, 28, by=4)]
+           , Noon =  res <- big[seq(3, 28, by=4)]
+           , Light = res <- big[seq(4, 28, by=4)]
+
+           , GrandBudapest = res < c("#F1BB7B", "#FD6467", "#5B1A18", "#D67236")
+           , Moonrise1 = res <- c("#F3DF6C", "#CEAB07", "#D5D5D3", "#24281A")
+           , Royal1 = res <- c("#899DA4", "#C93312", "#FAEFD1", "#DC863B")
+           , Moonrise2 = res <- c("#798E87","#C27D38", "#CCC591", "#29211F")
+           , Cavalcanti = res <- c("#D8B70A", "#02401B","#A2A475", "#81A88D", "#972D15")
+           , Royal2 = res <- c("#9A8822", "#F5CDB4", "#F8AFA8", "#FDDDA0", "#74A089")
+           , GrandBudapest2 = res <- c("#E6A0C4", "#C6CDF7", "#D8A499", "#7294D4")
+           , Moonrise3 = res <- c("#85D4E3", "#F4B5BD", "#9C964A", "#CDC08C", "#FAD77B")
+           , Chevalier = res <- c("#446455", "#FDD262", "#D3DDDC", "#C7B19C")
+           , Zissou = res <- c("#3B9AB2", "#78B7C5", "#EBCC2A", "#E1AF00", "#F21A00")
+           , FantasticFox = res <- c("#DD8D29", "#E2D200", "#46ACC8", "#E58601", "#B40F20")
+           , Darjeeling = res <- c("#FF0000", "#00A08A", "#F2AD00", "#F98400", "#5BBCD6")
+           , Rushmore = res <- c("#E1BD6D", "#EABE94", "#0B775E", "#35274A", "#F2300F")
+           , BottleRocket = res <- c("#A42820", "#5F5647", "#9B110E", "#3F5151", "#4E2A1E", "#550307", "#0C1707")
+           , Darjeeling2 = res <- c("#ECCBAE", "#046C9A", "#D69C4E", "#ABDDDE",  "#000000")
+    )
+
+    attr(res, "name") <- pal
+    class(res) <- append(class(res), "palette")
+
+  }
+
+  if(alpha != 1)
+    res <- SetAlpha(res, alpha = alpha)
+
+  return(res)
+
+}

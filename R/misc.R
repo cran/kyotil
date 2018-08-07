@@ -1,3 +1,6 @@
+# replace empty strings with NAs
+empty2na=function(x) {x[x==""]=NA; x = as.factor(as.character(x))}
+
 ##  From the R-help e-mail by Ted Harding: http://tolstoy.newcastle.edu.au/R/e2/help/07/03/12853.html
 ##  See also http://tolstoy.newcastle.edu.au/R/help/05/05/4254.html
 pava <- function(x, wt = rep(1, length(x)))
@@ -89,11 +92,11 @@ covariability=function(x,y){
 # ws: vector of weights
 write.svm.input=function(y, z, file.name="svm_input", ws=NULL){
     rows=sapply(1:length(y), function(i){
-        paste(c(ifelse(y[i]==1,"+1","-1"),(1:ncol(z))%+%":"%+%z[i,]), collapse=" ")
+        paste(c(ifelse(y[i]==1,"+1","-1"),(1:ncol(z))%.%":"%.%z[i,]), collapse=" ")
     })
-    write(paste(rows,collapse="\n"), file = file.name%+%".dat", append = FALSE, sep = " ")        
+    write(paste(rows,collapse="\n"), file = file.name%.%".dat", append = FALSE, sep = " ")        
     # write weight file
-    if (!is.null(ws)) write(paste(ws,collapse="\n"), file = file.name%+%".wgt", append = FALSE, sep = " ")    
+    if (!is.null(ws)) write(paste(ws,collapse="\n"), file = file.name%.%".wgt", append = FALSE, sep = " ")    
 }
 
 # m is data frame or matrix, each row is an observation
@@ -188,7 +191,7 @@ get.sim.res = function(dir, res.name="res", verbose=TRUE) {
         # no files yet
         stop ("no files\n")
     } else {
-        fileNames = dir %+%"/"%+%tmp
+        fileNames = dir %.%"/"%.%tmp
     }
     
     ## read files
@@ -207,37 +210,25 @@ get.sim.res = function(dir, res.name="res", verbose=TRUE) {
     if(verbose) str(res.all)
     
     if(verbose>=2) {
-        cat("number of files: "%+%length(fileNames),"\n")
+        cat("number of files: "%.%length(fileNames),"\n")
         print(dimnames(res.all)[[1]])
     }
     
     res.all    
 }
 
-MCsummary=function(dir, res.name="res", verbose=TRUE){
+MCsummary=function(dir, res.name="res", exclude.some=TRUE, exclude.col=1, verbose=TRUE){
     
     if(verbose) cat("\nsummarizing simulation results from ",dir,"\n",sep="")
     res.all=get.sim.res(dir,res.name,verbose=verbose)
     
-#    # some subsetting
-#    if(exclude.some) {
-##            # remove those with NA sd.smooth.chngpt
-##            vcov.na=is.na(res.all["sd.smooth.chngpt",])
-##            myprint(mean(vcov.na))
-##            res.all=res.all[,!vcov.na]
-#        
-#        #
-#        q.1=0.05
-#        subset=res.all["sd.robust.(x-chngpt)+",]>quantile(res.all["sd.robust.(x-chngpt)+",],1-q.1,na.rm=T) |
-#               res.all["sd.robust.chngpt",]>quantile(res.all["sd.robust.chngpt",],1-q.1,na.rm=T) |
-#               res.all["sd.robust.z",]>quantile(res.all["sd.robust.z",],1-q.1,na.rm=T) #|
-#               # the distribution of res.all["(x-chngpt)+",] is very skewed. One implication is that quadratic_norm_segmented_n500 MC sd is much bigger than Model se, but we will explain it in the text
-#               #res.all["(x-chngpt)+",]>quantile(res.all["(x-chngpt)+",],1-q.1,na.rm=T) |
-#               #res.all["(x-chngpt)+",]<quantile(res.all["(x-chngpt)+",],q.1/2,na.rm=T)
-#        myprint(mean(subset)) # percent to be excluded
-#        res.all=res.all[,!subset]
-#    }
-    
+    # exclude extreme values
+    if(exclude.some) {
+        q.1=0.05
+        subset=res.all[exclude.col,1,]>quantile(res.all[exclude.col,1,],1-q.1,na.rm=T) 
+        myprint(mean(subset)) # percent to be excluded
+        res.all=res.all[,,!subset]
+    }    
         
     mean.=      apply(res.all, 1:(length(dim(res.all))-1), function(x) mean(x, trim=0, na.rm=T))
     median.=    apply(res.all, 1:(length(dim(res.all))-1), function(x) median(x, na.rm=T)) 
@@ -255,17 +246,22 @@ MCsummary=function(dir, res.name="res", verbose=TRUE){
         
 }
 
+# even if some of the n in nn have not results, it will result a row with NA for that n
 # sum.sd determines whether we take mean of sd or median of sd, e.g. when computing summary of CI width
 #exclude.some=T; verbose=T; coef.0=NULL; digit1=2; sum.est="mean"; sum.sd="median"; style=1; keep.intercept=FALSE
-getFormattedMCSummary=function(path, sim, nn, fit.method, exclude.some=T, verbose=T, coef.0=NULL, digit1=2, sum.est=c("mean","median"), sum.sd=c("median","mean"),style=1, keep.intercept=FALSE) {
+getFormattedMCSummary=function(path, sim, nn, fit.method, exclude.some=TRUE, exclude.col=1, verbose=TRUE, coef.0=NULL, digit1=2, sum.est=c("mean","median"), sum.sd=c("median","mean"),style=1, keep.intercept=FALSE) {
   
     sum.est<-match.arg(sum.est)    
     sum.sd<-match.arg(sum.sd)    
     names(nn)=nn
     stats=lapply(nn, function(n) {
-        dir=path%+%"/"%+% sim%+%"_"%+%n%+%"_"%+%fit.method    
-        MCsummary(dir, verbose=verbose)
-    })    
+        dir=path%.%"/"%.% sim%.%"_"%.%n%.%"_"%.%fit.method    
+        try(MCsummary(dir, exclude.some=exclude.some, exclude.col=exclude.col, verbose=verbose))
+    })
+    subset.=!sapply(stats, function(x) inherits(x,"try-error"))
+    stats=stats[subset.]
+    nn=nn[subset.]    
+    
     stat.names=last(dimnames(stats[[1]]$mean))[[1]] 
     sd.methods=sub("sd.","",stat.names[startsWith(stat.names,"sd.")  ])
     if (verbose) myprint(sd.methods)        
@@ -300,25 +296,24 @@ getFormattedMCSummary=function(path, sim, nn, fit.method, exclude.some=T, verbos
     
     # ro-oder the rows such that stats from different parameters are stacked one upon another    
     tab.2=apply(tab.1, 2, function(x) t(matrix(x,nrow=p)))
-    rownames(tab.2)=rep(nn,p)
+    
+    #if (verbose) print(tab.2)
     
     if(style==1) {
         out=cbind(
               "$n$"=          c(rep(nn,p))
-            , "est"=          c(formatDouble(tab.2[,sum.est%+%".est"] ,digit1))
-            , "est(\\%bias)"= c(formatDouble( tab.2[,sum.est%+%".est"] ,digit1)%+%"("%+%round( tab.2[,"rel."%+%sum.est%+%"bias"] *100)%+%")")
-            , "range"=        c(formatDouble( tab.2[,"mcwdth.est"],digit1))
+            , "est"=          c(formatDouble(tab.2[,sum.est%.%".est"] ,digit1))
+            , "est(\\%bias)"= c(formatDouble(tab.2[,sum.est%.%".est"] ,digit1)%.%"("%.%round( tab.2[,"rel."%.%sum.est%.%"bias"] *100)%.%")")
+            , "range"=        c(formatDouble(tab.2[,"mcwdth.est"],digit1))
             # put width and coverage prob together, e.g. 0.17(93)
-            ,                 matrix(formatDouble(tab.2[,startsWith(colnames(tab.2),"wdth.")],digit1) %+% ifelse (is.nan(tab.2[,startsWith(colnames(tab.2),"covered.")]),"", "("%+%round( tab.2[,startsWith(colnames(tab.2),"covered.")] *100)%+%")"), 
+            ,                 matrix(formatDouble(tab.2[,startsWith(colnames(tab.2),"wdth.")],digit1) %.% ifelse (is.nan(tab.2[,startsWith(colnames(tab.2),"covered.")]),"", "("%.%round( tab.2[,startsWith(colnames(tab.2),"covered.")] *100)%.%")"), 
                                   nrow=p*length(nn), dimnames=list(NULL,sd.methods))
         ) 
+        rownames(out)=outer(nn, names(coef.0), paste)
         if(!keep.intercept) out=out[-(1:length(nn)),] 
+    
     } else stop("style not supported")
     
     out
         
 }
-
-
-# replace empty strings with NAs
-empty2na=function(x) {x[x==""]=NA; x = as.factor(as.character(x))}

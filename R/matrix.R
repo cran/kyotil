@@ -2,7 +2,7 @@ concatList = function (lis, sep=""){
     out=lis[[1]]
     i=2
     while (i<=length(lis)){
-        out=out%+%sep%+%lis[[i]]
+        out=out%.%sep%.%lis[[i]]
         i=i+1
     }
     out

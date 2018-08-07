@@ -5,7 +5,7 @@ export(as.binary, binom.coef, expit, H, mutual.info, info.cor, l.measure, logDif
 export(concatList, AR1, EXCH, fill.jagged.array, getMidPoints, getUpperRight, last, mix, rep.data.frame, rep.matrix, 
     rep.matrix.block, shift.left, shift.right, thin.rows, ThinRows, tr, cbinduneven, skew)
 
-export("%+%", concatList, contain, escapeUnderline, fileStem, firstIndex, getExt, getFileStem, getStem, 
+export("%+%", "%.%", concatList, contain, escapeUnderline, fileStem, firstIndex, getExt, getFileStem, getStem, 
     lastIndex, myprint, myprint.default, remove.prefix, VEplot, VEplot.glm, VEplot.cox.zph, myplot.cox.zph, age_calc)
 
 export(binary, binary2, f2c, ftoi, keepWarnings, meanmed, methods4, myaggregate, myreshapelong, myreshapewide, mysapply, myscale, 
@@ -13,7 +13,7 @@ export(binary, binary2, f2c, ftoi, keepWarnings, meanmed, methods4, myaggregate,
 
 export(abline.shade, abline.shade.2, abline.pt.slope, abline.pts, butterfly.plot, empty.plot, getMfrow, myforestplot, my.interaction.plot, 
     myboxplot, myboxplot.formula, myboxplot.list, myboxplot.data.frame, mylegend, mymatplot, mypairs, mypdf, mypng, mytiff, mypostscript, panel.cor, myhist, mydev.off, myfigure, wtd.hist,
-    panel.hist, panel.nothing, corplot, corplot.default, corplot.formula)
+    panel.hist, panel.nothing, corplot, corplot.default, corplot.formula, mycor)
 
 export(formatInt, formatDouble, make.latex.coef.table, mytex, mytex.begin, mytex.end, mywrite, mywrite.csv, roundup)
 
@@ -105,3 +105,5 @@ importFrom("methods", "getAllSuperClasses", "getClass", "getGenerics",
 importFrom("utils", "capture.output", "read.csv", "tail", "write.csv", "str")
 importFrom("grDevices", "dev.control", "dev.copy", "dev.off",
            "nclass.FD", "nclass.Sturges", "nclass.scott", "tiff")
+importFrom("grDevices", "col2rgb", "dev.flush", "dev.hold")
+importFrom("grDevices", "colorRampPalette")

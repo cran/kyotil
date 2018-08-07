@@ -40,8 +40,6 @@ mypostscript and mypdf sets the width and height based on mfrow input.
 }
 \usage{
 
-%+%(a, b)
-
 abline.pt.slope(pt1, slope, x2=NULL, ...)
 
 abline.pts(pt1, pt2 = NULL)
@@ -78,16 +76,17 @@ abline.shade(pt, quadrant=c(1,2,3,4), col=c(0,1,0), alpha=0.3)
 
 \method{VEplot}{glm}(object, X1, X2, x, ...)
 add.mtext.label (text, cex = 1.4, adj = -0.2) 
-mydev.off(file="temp", ext = c("png","pdf","tiff","eps"), res = 200, mydev=NULL)
+mydev.off(file="temp", ext = c("png,pdf"), res = 200, mydev=NULL)
 
 mylegend(legend, x, y=NULL, lty = NULL, bty = "n", ...)
 
 mymatplot(x, y, type="b", lty=c(1,2,1,2,1,2), pch=NULL, 
     col=rep(c("darkgray","black"),each=3), xlab=NULL, ylab="", 
     draw.x.axis=TRUE, bg=NA, lwd=1, at=NULL, make.legend=TRUE, legend=NULL, 
+    impute.missing.for.line=TRUE,
     legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, xaxt="s", ...) 
                  
-mypairs(dat, ...)
+mypairs(dat, ladder = FALSE, ...)
 
 wtd.hist (x, breaks = "Sturges", freq = NULL, probability = !freq, 
     include.lowest = TRUE, right = TRUE, density = NULL, angle = 45, 
@@ -138,6 +137,9 @@ col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FAL
   \item{pt1}{
 %%     ~~Describe \code{pt1} here~~
 }
+  \item{ladder}{
+%%     ~~Describe \code{slope} here~~
+}
   \item{slope}{
 %%     ~~Describe \code{slope} here~~
 }
@@ -145,6 +147,9 @@ col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FAL
 %%     ~~Describe \code{slope} here~~
 }
   \item{reshape.id}{
+%%     ~~Describe \code{slope} here~~
+}
+  \item{impute.missing.for.line}{
 %%     ~~Describe \code{slope} here~~
 }
   \item{cor.}{
@@ -459,6 +464,8 @@ If order is TRUE, the rows are ordered by the first column of dat. descreasing c
 corplot.formula uses MethComp::Deming by Bendix Carstensen to fit Deming regression.
 
 wtd.hist is copied from weights package, author: Josh Pasek.
+
+mymatplot will use na.approx (zoo) to fill in NA before plotting in order to draw continuous lines. The filled-in values will not be shown as points.
 }
 
 \examples{

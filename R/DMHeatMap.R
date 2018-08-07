@@ -20,6 +20,8 @@ function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
     xlab = NULL, ylab = NULL, lmat = NULL, lhei = NULL, lwid = NULL, lower.left.only=TRUE,
     ...) 
 {
+    usr <- par("usr"); on.exit(par(usr))
+
       scale01 <- function(x, low = min(x), high = max(x)) {
         x <- (x - low)/(high - low)
         x

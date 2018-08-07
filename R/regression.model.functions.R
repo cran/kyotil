@@ -1,27 +1,34 @@
 # type 3 and 7 do not give the right output for glm fits
 # robust can be passed as part of .... Sometimes robust=T generates errors
 # trim: get rid of white space in confidence intervals for alignment
-getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, random=FALSE, VE=FALSE, to.trim=FALSE, rows=NULL, ...){
+getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, random=FALSE, VE=FALSE, to.trim=FALSE, rows=NULL, coef.direct=FALSE, ...){
     
     res = sapply(fits, simplify="array", function (fit) {
-        if (random) {
-            tmp = getVarComponent (fit)
-            if (class(fit)=="mer" & type!=1) {
-                warning ("only point estimate is available for variance components from lmer fit, forcing type to 1")
-                type=1
-            }
+    
+        if(coef.direct) {
+            tmp=fit
         } else {
-            tmp = getFixedEf (fit, robust=robust, ...)
+            if (random) {
+                tmp = getVarComponent (fit)
+                if (class(fit)=="mer" & type!=1) {
+                    warning ("only point estimate is available for variance components from lmer fit, forcing type to 1")
+                    type=1
+                }
+            } else {
+                tmp = getFixedEf (fit, robust=robust, ...)
+            }
+            # tmp should be: est, se, lb, ub, pvalue 
+            
+            if (VE) {
+                tmp[,1]=1-tmp[,1]
+                # reverse lb and ub
+                tmpv=tmp[,4]
+                tmp[,4]=1-tmp[,3]
+                tmp[,3]=1-tmpv
+            }
         }
-        # tmp should be: est, se, lb, ub, pvalue 
         
-        if (VE) {
-            tmp[,1]=1-tmp[,1]
-            # reverse lb and ub
-            tmpv=tmp[,4]
-            tmp[,4]=1-tmp[,3]
-            tmp[,3]=1-tmpv
-        }
+        
         p.val.col=which(startsWith(tolower(colnames(tmp)),"p"))
         lb=formatDouble(tmp[,3,drop=FALSE], est.digits) 
         if(to.trim) lb=trim(lb)
@@ -40,51 +47,62 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
             out=drop(est. )
         else if (type==2)
             # est (se)
-            out=est. %+% " (" %+% 
-                format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE) %+% ")" %+%
+            out=est. %.% " (" %.% 
+                format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE) %.% ")" %.%
                 ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==3) {
             # est (lb, up)
-            out=est. %+% " (" %+% 
-                lb %+% ", " %+% ub %+% ")" 
+            out=est. %.% " (" %.% 
+                lb %.% ", " %.% ub %.% ")" 
         }
         else if (type==4)
             # a space is inserted between est and se, they could be post-processed in swp
-            out=est. %+% " " %+% 
+            out=est. %.% " " %.% 
                 format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE)
         else if (type==5)
             # est **
-            out=est. %+%
+            out=est. %.%
                 ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==6)
             # est (pval)*
-            out=est. %+% " (" %+% 
-                format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %+% ")" %+%
+            out=est. %.% " (" %.% 
+                format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %.% ")" %.%
                 ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==7)
             # (lb, up)
-            out=" (" %+% lb %+% ", " %+% ub %+% ")" 
+            out=" (" %.% lb %.% ", " %.% ub %.% ")" 
         else if (type==8)
             # est (p value #)
-            out=est. %+% " (p value " %+% 
-                format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %+% ")" 
+            out=est. %.% " (p value " %.% 
+                format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %.% ")" 
         else if (type==9)
             # est (pval)*
-            out=est. %+% " (" %+% 
-                format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %+% ")" 
+            out=est. %.% " (" %.% format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %.% ")" 
         else if (type==10)
             # pval
             out=format(round(tmp[,p.val.col,drop=TRUE], 3), nsmall=3, scientific=FALSE) 
+        else if (type==11)
+            # adj pval
+            out=format(round(p.adjust(tmp[,p.val.col,drop=TRUE], method="fdr"), 3), nsmall=3, scientific=FALSE) 
+        else if (type==12)
+            # est (pval)* (lb, up)
+            out=est. %.% " (" %.% 
+                format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %.% ")" %.%
+                ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"") %.%
+                " (" %.% lb %.% ", " %.% ub %.% ")" 
         else 
-            stop ("getFormattedSummaries(). type not supported: "%+%type)
+            stop ("getFormattedSummaries(). type not supported: "%.%type)
             
         names(out)=rownames(tmp)
+        out=gsub("NA","",out)
+        out=gsub("\\( +\\)","",out)
         out
     })
     #str(res)
         
     if (is.list(res)) {
     # if the fits have different number of parameters, we need this
+        str(res)
         res=cbinduneven(li=lapply(res, function (x) as.matrix(x, ncol=1)))
         colnames(res)=names(fits)
     } else if (!is.matrix(res)) {
@@ -92,7 +110,7 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
         res=matrix(res, nrow=1)
         colnames(res)=names(fits)
     }
-            
+    
     res
 }
 
@@ -107,7 +125,8 @@ getVarComponent <- function(object, ...) UseMethod("getVarComponent")
 # if ret.robcov TRUE, then returns robust variance-covariance matrix
 # infjack.glm defined later in this file
 getFixedEf.glm = function (object, exp=FALSE, robust=TRUE, ret.robcov=FALSE, ...) {
-    out=summary(object)$coef
+    x=summary(object)
+    out=x$coef
     if (robust | ret.robcov) {
         V=infjack.glm(object, 1:nrow(object$model)) # object$data may have NAs
         if (ret.robcov) return (V)
@@ -122,6 +141,16 @@ getFixedEf.glm = function (object, exp=FALSE, robust=TRUE, ret.robcov=FALSE, ...
         out[,c(1,3,4)]=exp(out[,c(1,3,4)])
         colnames(out)[1]="OR"
     }
+    
+    # sometimes some coef are null, we may want to preserve, modified from print.summary.glm
+    if(!is.null(aliased <- x$aliased) && any(aliased)) {
+        cn <- names(aliased)
+        coefs <- matrix(NA, length(aliased), ncol(out),
+                        dimnames=list(cn, colnames(out)))
+        coefs[!aliased, ] <- out
+        out = coefs
+    }
+    
     out
 }
 
@@ -139,7 +168,14 @@ getFixedEf.gee = function (object,exp=FALSE,  ...) {
 }
 
 getFixedEf.MIresult=function(object, ...) {
-    cbind(coef(object), sqrt(diag(vcov(object))))
+    capture.output({
+        tmp=summary(object)
+    }, type="output") # type = message captures stderr, type=output is for stdout
+    
+    tmp=tmp[,names(tmp)!=-"missInfo"] # MIresult has this string column  #tmp=subset(tmp, select=-missInfo) fails check
+    tmp=as.matrix(tmp)# data frame fails in format and formatDouble
+    
+    cbind(tmp, "p.val"=2*pt(abs(tmp[,1]/tmp[,2]), df=object$df, lower.tail = FALSE))
 }
 
 #get estimates, variances, sd from lmer fit
@@ -240,11 +276,11 @@ inla.getMeanSd=function (marginal, f="identity") {
     lower.boundary = rle(cumsum(pmf)>.025)$lengths[1]+1
     upper.boundary = rle(cumsum(pmf)>.975)$lengths[1]+1
 #    if (pmf[lower.boundary]>.04) {
-#        #stop ("getMeanSd(): pmf too large at lower boundary: "%+%pmf[lower.boundary])
+#        #stop ("getMeanSd(): pmf too large at lower boundary: "%.%pmf[lower.boundary])
 #        return (rep(NA, 4))
 #    }
 #    if (pmf[upper.boundary]>.04) {
-#        stop ("getMeanSd(): pmf too large at upper boundary"%+%pmf[upper.boundary])
+#        stop ("getMeanSd(): pmf too large at upper boundary"%.%pmf[upper.boundary])
 #        return (rep(NA, 4))
 #    }
     
@@ -255,7 +291,7 @@ inla.getMeanSd=function (marginal, f="identity") {
     } else if (f=="inversesqrt") {
         func=function(x) { exp(x)**-.5 }
     } else 
-        stop ("getMeanSd(): function not supported "%+%f)
+        stop ("getMeanSd(): function not supported "%.%f)
     
     mu = sum( pmf * func(x))
     stdev = (sum( pmf * func(x)**2 ) - mu**2) ** .5
@@ -278,10 +314,10 @@ getVarComponent.hyperpar.inla = function (object, transformation=NULL, ...) {
         } else if (startsWith(names(marginals)[i],"Rho")) {
             object$summary[i, c(1,2,3,5)]
         } else {
-            stop ("don't know what to do with this names(marginals)[i]: "%+% names(marginals)[i] )
+            stop ("don't know what to do with this names(marginals)[i]: "%.% names(marginals)[i] )
         }
     })
-    dimnames (out)[[1]]="sigma.or.rho."%+%dimnames (out)[[1]]
+    dimnames (out)[[1]]="sigma.or.rho."%.%dimnames (out)[[1]]
     out
 }
 
@@ -349,7 +385,7 @@ vcov.tps = function  (object, robust, ...) {
 getFixedEf.tps = function (object, exp=FALSE, robust=TRUE, ...) {
     res = summary(object)$coef
     idx=ifelse(robust,"Emp ","Mod ")
-    res = cbind(res[,c("Value",idx%+%"SE")], "lower bound"=res[,"Value"]-1.96*res[,idx%+%"SE"], "upper bound"=res[,1]+1.96*res[,idx%+%"SE"], "p value"=res[,idx%+%"p"])
+    res = cbind(res[,c("Value",idx%.%"SE")], "lower bound"=res[,"Value"]-1.96*res[,idx%.%"SE"], "upper bound"=res[,1]+1.96*res[,idx%.%"SE"], "p value"=res[,idx%.%"p"])
     if (exp) res[,c(1,3,4)] = exp(res[,c(1,3,4)])
     colnames(res)=c(ifelse(exp,"OR","est"), "se(est)", "(lower", "upper)", "p.value")
     res
@@ -376,8 +412,8 @@ interaction.table=function(fit, v1, v2, v1.type="continuous", v2.type="continuou
     var.names=names(coef.)
     v1.ind = match(v1, var.names)
     v2.ind = match(v2, var.names)
-    itxn.ind = match(v1%+%":"%+%v2, var.names)
-    if(is.na(itxn.ind)) itxn.ind = match(v2%+%":"%+%v1, var.names)
+    itxn.ind = match(v1%.%":"%.%v2, var.names)
+    if(is.na(itxn.ind)) itxn.ind = match(v2%.%":"%.%v1, var.names)
     if (any(is.na(c(v1.ind, v2.ind, itxn.ind)))) {
         stop("v1, v2, or interaction not found in var.names")
     }
@@ -430,7 +466,7 @@ interaction.table=function(fit, v1, v2, v1.type="continuous", v2.type="continuou
         ret[[i]]=res 
     }    
     
-    names(ret) = "Effect of increasing "%+%c(v1,v2) %+% " by 1 at selected values of " %+% c(v2,v1)
+    names(ret) = "Effect of increasing "%.%c(v1,v2) %.% " by 1 at selected values of " %.% c(v2,v1)
     ret
        
 }

@@ -3,8 +3,7 @@
 
 2014-4-1 Youyi Fong
 	* change .C to .Call
-	
-	
+
 2014-7-1 Krisztian Sebestyen
     * fixed the weighted hamming and ibs kernel code both in R and C (typo in the paper) 
 	* separate .Call from native C code in kernels.c/h and matrix.c/h so that C code may be included in other packages without having to include
@@ -14,5 +13,10 @@
 	* updated runit.kernel.R since ibs() has changed
 	* added rrbind(),rcbind(),upper.trap(),lower.trap() to matrix2.R
 	* with .Call I can pass a NULL pointer to C hence I can use more natural 'NULL' logic in C in many functions
-	
-	
+
+2018.07.01
+	* Add %.% and deprecate %+% because %+% is also defined in ggplot2 for
+	adding a comment to plot
+
+2018.07.01
+	* Replace %+% by %.% throughout	

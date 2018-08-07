@@ -39,8 +39,9 @@ getFormattedSummary prints a table of regression coefficient estimates and stand
 }
 \usage{
 
-getFormattedSummary(fits, type=2, est.digits=2, se.digits=2, robust, random=FALSE, 
-VE=FALSE, to.trim=FALSE, rows=NULL, ...)
+getFormattedSummary(fits, type = 2, est.digits = 2, se.digits = 2, robust,
+         random = FALSE, VE = FALSE, to.trim = FALSE, rows =
+         NULL, coef.direct = FALSE, ...)
 
 getVarComponent(object, ...)
 
@@ -107,6 +108,9 @@ logistic.regression = TRUE)
 }
 
   \item{fit}{
+%%     ~~Describe \code{fit} here~~
+}
+  \item{coef.direct}{
 %%     ~~Describe \code{fit} here~~
 }
   \item{robust}{Boolean, whether to return robust variance estimate

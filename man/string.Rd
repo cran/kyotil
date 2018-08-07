@@ -1,6 +1,7 @@
 \name{string.functions}
 \alias{string.functions}
 \alias{\%+\%}
+\alias{\%.\%}
 \alias{contain}
 \alias{escapeUnderline}
 \alias{fileStem}
@@ -18,6 +19,8 @@
 \usage{
 
 a \%+\% b
+
+a \%.\% b
 
 contain(s1, s2)
 trim (x, trim.trailing=TRUE, trim.leading=TRUE)  
@@ -110,6 +113,6 @@ remove.prefix(s, sep = "_")
 \examples{
 
 x=1
-x \%+\% "b" \%+\% "c"
+x \%.\% "b" \%.\% "c"
 
 }

@@ -5,21 +5,23 @@ cbinduneven=function(li) {
     #nams = allnames[[which.max(alllen)]]
     nams = allnames[[1]]# so that the rows are added consecutively
     nams= c(nams, setdiff(unique(unlist(allnames)), nams)) # append additional names
-    if (any(nams=="")) stop("cbinduneven: empty rownames are not allowed:\n"%+%concatList(nams,"|"))
+    if (any(nams=="")) stop("cbinduneven: empty rownames are not allowed:\n"%.%concatList(nams,"|"))
     #myprint(nams)
     
     res=NULL
-    for (a in li){
+    for (i in 1:length(li)){
+        a=li[[i]]
         p=ncol(a)
         toadd = matrix(NA, nrow=length(nams), ncol=p, dimnames=list(nams,colnames(a)))
         toadd[rownames(a),]=as.matrix(a)
-        if (is.null(res)) {
-            res=as.data.frame(toadd, stringsAsFactors=FALSE) # if stringsAsFactors is here in cbind, it won't work, that is why we have to do a if on is.null(res)
+        tmp=as.data.frame(toadd, stringsAsFactors=FALSE)
+        if(ncol(tmp)==1) names(tmp)=names(li)[i] else names(tmp)=names(li)[i]%.%names(tmp) 
+        if (i==1) {
+            res=tmp # cbind NULL and tmp doesn't work
         } else {
-            res=as.data.frame(cbind(res,toadd, stringsAsFactors=FALSE))
+            res=cbind(res,tmp)
         }
     }
-    colnames(res)=names(li)
     res
 }
 
@@ -62,7 +64,7 @@ ftoi = function (f) {
 # in the output, each row corresponds to one element of X, instead of each column
 mysapply=function (X, FUN, ..., simplify = TRUE, USE.NAMES = TRUE, ret.mat=TRUE) 
 {
-    if (is.null(names(X)) & is.numeric(X)) names(X)=X%+%""
+    if (is.null(names(X)) & is.numeric(X)) names(X)=X%.%""
     FUN <- match.fun(FUN)
     answer <- lapply(X, FUN, ...)
     if (USE.NAMES && is.character(X) && is.null(names(answer))) 
@@ -271,7 +273,7 @@ keepWarnings <- function(expr) {
 
 # make table that shows both counts/frequency and proportions
 # style 1: count only; 2: count + percentage; 3: percentage only
-table.prop=function (x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE,useNA="ifany",add.perc=FALSE) {
+table.prop=function (x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE,useNA="ifany",add.perc=FALSE, add.total.column=FALSE) {
     if (is.null(y)) {
         tbl=table(x,useNA=useNA)
         whole.table.add.to.1=TRUE  # to trick the computation of prop
@@ -280,19 +282,25 @@ table.prop=function (x,y=NULL,digit=1,style=2,whole.table.add.to.1=FALSE,useNA="
     }
     if (whole.table.add.to.1) prop = tbl/sum(tbl) else prop = apply (tbl, 2, prop.table)
     if (style==2) {
-        res = tbl %+% " (" %+% round(prop*100,digit) %+%ifelse(add.perc,"%","")%+% ")"
+        res = tbl %.% " (" %.% round(prop*100,digit) %.%ifelse(add.perc,"%","")%.% ")"
     } else if (style==3) {
         res = prop*100 # no need to do formating here
     } else if (style==4) {
-        res = tbl %+% " (" %+% round(prop*100,digit) %+% "%)"
+        res = tbl %.% " (" %.% round(prop*100,digit) %.% "%)"
     } else if (style==5) {
-        res = round(prop*100,digit)%+%"%" # no need to do formating here
+        res = round(prop*100,digit)%.%"%" # no need to do formating here
     } else res=tbl
     res=matrix(res, nrow=nrow(tbl))    
     dimnames(res)=dimnames(tbl)
     names(dimnames(res))=NULL
     
     if (is.null(y)) res=res[,1]
+    
+    # add a total column 
+    if (!is.null(y) & add.total.column) {
+        tab2=table.prop (x,y=NULL,digit=digit,style=style,whole.table.add.to.1=whole.table.add.to.1,useNA=useNA,add.perc=add.perc) 
+        res=cbind(" "=tab2, res)
+    }
     
     res
 }
@@ -304,7 +312,7 @@ table.cases=function (case,group,include.all=TRUE,desc="cases") {
 #    tab=binom::binom.confint(x=c(tbl[2,],if(include.all) sum(tbl[2,])), n=c(colSums(tbl),if(include.all) sum(tbl)), alpha=0.05, method=c("wilson"))[,-1] # remove method column
     tab=Hmisc::binconf(x=c(tbl[2,],if(include.all) sum(tbl[2,])), n=c(colSums(tbl),if(include.all) sum(tbl)), alpha=0.05, method=c("wilson"), include.x=TRUE, include.n=TRUE)
     tab[,3:5]=tab[,3:5]*100 # get percentage
-    colnames(tab)=c("# "%+%desc,"# total","% "%+%desc,"lb","ub")
+    colnames(tab)=c("# "%.%desc,"# total","% "%.%desc,"lb","ub")
     rownames(tab)=c(colnames(tbl),if(include.all) "all")
     tab
 }
@@ -321,7 +329,7 @@ table.cases.3=function(case,group1,group2){
     n.y=length(table(group2))
     tab=table(group1, group2, case)
     #print(tab);str(tab);print(rownames(tab));print(colnames(tab))
-    res=matrix(round(100*tab[,,2]/(tab[,,1]+tab[,,2])) %+%  "% (" %+% tab[,,2] %+% "/" %+%(tab[,,1]+tab[,,2])%+% ")",nrow=n.x)
+    res=matrix(round(100*tab[,,2]/(tab[,,1]+tab[,,2])) %.%  "% (" %.% tab[,,2] %.% "/" %.%(tab[,,1]+tab[,,2])%.% ")",nrow=n.x)
     if (!is.null(rownames(tab))) rownames(res)=rownames(tab)# if(n.x==2) c("low","high") else c("low","medium","high")
     if (!is.null(colnames(tab))) colnames(res)=colnames(tab)# if(n.y==2) c("low","high") else c("low","medium","high")
     res
@@ -344,4 +352,34 @@ interpolate=function(pt1, pt2, x){
     slope=(pt2-pt1)[2]/(pt2-pt1)[1]
     intercept = pt1[2]-slope*pt1[1]
     intercept + slope * x    
+}
+
+# x is a data frame or matrix. correlation between columns and p values are returned.
+mycor=function(x, use = "everything", method = c("pearson", "kendall", "spearman"), 
+    alternative = c("two.sided", "less", "greater"), exact = NULL, conf.level = 0.95, continuity = FALSE, 
+    digits.coef=2, digits.pval=3,
+    ...) {
+    
+    na.method <- pmatch(use, c("all.obs", "complete.obs", "pairwise.complete.obs", "everything", "na.or.complete"))
+    if (is.na(na.method)) stop("invalid 'use' argument")
+    method <- match.arg(method)
+    alternative <- match.arg(alternative)
+
+    cor.coef=cor(x, y = NULL, use = use, method = method)
+    
+    cor.pval=diag(ncol(cor.coef))
+    for (i in 1:ncol(x))
+    for (j in 2:ncol(x)) {
+        cor.pval[i,j]<-cor.pval[j,i]<-suppressWarnings(cor.test(x[,i], x[,j], alternative = alternative, method = method, exact = exact, conf.level = conf.level, continuity = continuity, ...)$p.value)
+    }
+    
+    name=if (is.data.frame(x)) names(x) else colnames(x)
+    out=matrix(NA,nrow=nrow(cor.coef),ncol=ncol(cor.coef), dimnames=list(name,name))
+    for (i in 2:nrow(cor.coef))
+    for (j in 1:(i-1)) {
+        out[i,j]=formatDouble(cor.coef[i,j], digits.coef) %.% " (" %.% formatDouble(cor.pval[i,j], digits.pval) %.% ")" %.%
+            ifelse (round(cor.pval[i,j],2)<=0.05,ifelse (cor.pval[i,j]<0.01,  ifelse (cor.pval[i,j]<0.01,"***","**")  ,"*"),"")
+    }
+    #out[-1,-ncol(out)]
+    out
 }

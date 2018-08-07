@@ -10,10 +10,13 @@ Go through a folder and read all files and combine the results into a multidimen
 }
 \usage{
 get.sim.res (dir, res.name="res", verbose=TRUE)
-MCsummary (dir, res.name="res", verbose=TRUE)
-getFormattedMCSummary (path, sim, nn, fit.method, exclude.some=T, 
-    verbose=T, coef.0=NULL, digit1=2, sum.est=c("mean","median"), 
-    sum.sd=c("median","mean"), style=1, keep.intercept=FALSE) 
+MCsummary (dir, res.name = "res", exclude.some = TRUE,
+                 exclude.col = 1, verbose = TRUE)
+getFormattedMCSummary (path, sim, nn, fit.method, exclude.some = TRUE,
+                 exclude.col = 1, verbose = TRUE, coef.0 = NULL, digit1
+                 = 2, sum.est = c("mean", "median"), sum.sd =
+                 c("median", "mean"), style = 1, keep.intercept =
+                 FALSE)
 }
 \arguments{
   \item{dir}{directory of MC result files}
@@ -23,6 +26,7 @@ getFormattedMCSummary (path, sim, nn, fit.method, exclude.some=T,
   \item{sim}{a string to denote simulation setting}
   \item{nn}{a vector of sample sizes}
   \item{fit.method}{a string to denote fitting method. sim, nn and fit.method together forms the name of the directory containing MC result files}
+  \item{exclude.col}{column number}
   \item{exclude.some}{whether to exclude MC results that are extreme}
   \item{coef.0}{simulation truth}
   \item{digit1}{digits}

@@ -7,24 +7,24 @@ mytex=function(dat=NULL, file.name="temp",
     add.to.row=NULL, 
     sanitize.text.function = NULL, #function(x) x,
     append=FALSE, preamble="", stand.alone=TRUE, 
-    caption=NULL, label=file.name, table.placement="h!",
+    caption=NULL, label=paste("tab",last(strsplit(file.name, "/")[[1]]),sep=" "), table.placement="h!",
     verbose=FALSE,
 ...) {
         
 #    if(exists("tablePath") && file.exists(tablePath)) {
-#        file.name=tablePath%+%"/"%+%file.name
+#        file.name=tablePath%.%"/"%.%file.name
 #    } else {
 #        file.name=file.name
 #    }    
-    
+        
     if (endsWith(file.name,".tex")) file.name=substr(file.name, 1, nchar(file.name)-4)
     if (stand.alone) {
         # create two files, one stand alone and one not, to facilitate debugging latex code
         tmp=strsplit(file.name, split="/")[[1]]
         if (length(tmp)==1) path="./" else path=concatList(tmp[-length(tmp)], "/")
-        foldername=path%+%"/input"
+        foldername=path%.%"/input"
         if(!file.exists(foldername)) dir.create(foldername) 
-        file.name.2=foldername%+%"/"%+%tmp[length(tmp)]
+        file.name.2=foldername%.%"/"%.%tmp[length(tmp)]
         file.name=file.name
     }
     
@@ -34,10 +34,10 @@ mytex=function(dat=NULL, file.name="temp",
     
     if (!append) { #start a new file
         #document tag, preamble etc
-        mytex.begin(file.name%+%".tex", preamble)
+        mytex.begin(file.name%.%".tex", preamble)
         if (stand.alone) {
             #empty file
-            cat ("", file=file.name.2%+%".tex", append=FALSE)
+            cat ("", file=file.name.2%.%".tex", append=FALSE)
         }
     } 
     
@@ -53,8 +53,8 @@ mytex=function(dat=NULL, file.name="temp",
          
         # character only 
         if (!is.matrix(dat1) & is.character(dat1)) {
-            cat (dat1%+%"\n\n\n", file=file.name%+%".tex", append=TRUE)
-            if(stand.alone) cat (dat1%+%"\n\n\n", file=file.name.2%+%".tex", append=TRUE)
+            cat (dat1%.%"\n\n\n", file=file.name%.%".tex", append=TRUE)
+            if(stand.alone) cat (dat1%.%"\n\n\n", file=file.name.2%.%".tex", append=TRUE)
             next
         }
             
@@ -92,7 +92,7 @@ mytex=function(dat=NULL, file.name="temp",
         if(!is.null(dimnam) & is.null(col.headers)) {
             if(!is.na(dimnam[2]))
               if(trim(dimnam[2])!="")
-                col.headers="\\hline\n  "%+%ifelse(include.rownames,dimnam[1]%+%"&","")%+%"  \\multicolumn{"%+% ncol(dat1) %+%"}{c}{"%+%dimnam[2]%+%"}   \\\\  \n"
+                col.headers="\\hline\n  "%.%ifelse(include.rownames,dimnam[1]%.%"&","")%.%"  \\multicolumn{"%.% ncol(dat1) %.%"}{c}{"%.%dimnam[2]%.%"}   \\\\  \n"
         }
         if (!is.null(col.headers)) top=col.headers else top="\\hline  "
         
@@ -101,16 +101,16 @@ mytex=function(dat=NULL, file.name="temp",
             coln=if(!is.null(sanitize.text.function)) sanitize.text.function(colnames(dat1)) else sanitize.text(sanitize.numbers(colnames(dat1)))
             align.1=align[-1]
             align.1=gsub("[lr]","c",align.1)
-            top.1=concatList(" \\multicolumn{1}{"%+%align.1%+%"}{"%+%coln%+%"} ", sep="&") %+% "\\\\ \n"%+% # center aligned column titles
+            top.1=concatList(" \\multicolumn{1}{"%.%align.1%.%"}{"%.%coln%.%"} ", sep="&") %.% "\\\\ \n"%.% # center aligned column titles
                 "\\hline\n" # insert at the beginning of table, "\n" is added so that there is no need to keep it in col.title
             #print(coln);print(top.1);print(align.1);print(align)
             
             # add a column for rownames, which may include names of rownames
             if(include.rownames) {
-                top.1="&" %+% top.1
-                if (!is.null(dimnam)) if (is.na(dimnam[2])) top.1=dimnam[1] %+% top.1 else if (trim(dimnam[2])=="") top.1=dimnam[1] %+% top.1
+                top.1="&" %.% top.1
+                if (!is.null(dimnam)) if (is.na(dimnam[2])) top.1=dimnam[1] %.% top.1 else if (trim(dimnam[2])=="") top.1=dimnam[1] %.% top.1
             }
-            top=top%+%top.1
+            top=top%.%top.1
             #print(coln);print(top.1);print(align.1)
         }
             
@@ -125,8 +125,8 @@ mytex=function(dat=NULL, file.name="temp",
         #print(add.to.row)
         
         if (length(dat)>1) {
-            cat ("\\vspace{20pt}"%+%names(dat)[i]%+%"\n\n", file=file.name%+%".tex", append=TRUE)
-            cat ("\\vspace{20pt}"%+%names(dat)[i]%+%"\n\n", file=file.name.2%+%".tex", append=TRUE)
+            cat ("\\vspace{20pt}"%.%names(dat)[i]%.%"\n\n", file=file.name%.%".tex", append=TRUE)
+            cat ("\\vspace{20pt}"%.%names(dat)[i]%.%"\n\n", file=file.name.2%.%".tex", append=TRUE)
         }
         
         #if (!is.null(attr(dat1,"caption"))) caption=attr(dat1,"caption") else caption=NULL
@@ -142,28 +142,28 @@ mytex=function(dat=NULL, file.name="temp",
                 digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
                 display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
                 align=align, caption=caption, label=label, ...), 
-            hline.after=hline.after, type = "latex", file = file.name%+%".tex", append = TRUE, floating = floating, table.placement=table.placement, 
+            hline.after=hline.after, type = "latex", file = file.name%.%".tex", append = TRUE, floating = floating, table.placement=table.placement, 
             include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
             add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
         if (stand.alone) print(..., xtable::xtable(dat1, 
                 digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
                 display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
                 align=align, caption=caption, label=label, ...), 
-            hline.after=hline.after, type = "latex", file = file.name.2%+%".tex", append = TRUE, floating = floating, table.placement=table.placement, 
+            hline.after=hline.after, type = "latex", file = file.name.2%.%".tex", append = TRUE, floating = floating, table.placement=table.placement, 
             include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
             add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
         
-        cat ("\n", file=file.name%+%".tex", append=TRUE)
-        if(stand.alone) cat ("\n", file=file.name.2%+%".tex", append=TRUE)
+        cat ("\n", file=file.name%.%".tex", append=TRUE)
+        if(stand.alone) cat ("\n", file=file.name.2%.%".tex", append=TRUE)
         # restore some variables that have changed in this function
         add.to.row=add.to.row.0
         include.colnames=include.colnames.0
     }
     
     if(!append) {
-        mytex.end(file.name%+%".tex")
+        mytex.end(file.name%.%".tex")
     }
-    cat ("Writing table to "%+%getwd()%+%"/"%+%file.name%+%"\n")
+    cat ("Writing table to "%.%getwd()%.%"/"%.%file.name%.%"\n")
 }
 #x=matrix(0,2,2,dimnames=list(a=1:2, b=1:2));  mytex(x)
 #x=matrix(0,2,2,dimnames=list(a=1:2, 1:2));  mytex(x)
@@ -176,11 +176,11 @@ mytex=function(dat=NULL, file.name="temp",
 # default arguments: file.name="temp"; digits=NULL; display=NULL; align="r"; append=FALSE; preamble=""; keep.row.names=TRUE
 mytex.begin=function(file.name,preamble=""){
 #    if(exists("tablePath") && file.exists(tablePath)) {
-#        file.name=tablePath%+%"/"%+%file.name
+#        file.name=tablePath%.%"/"%.%file.name
 #    } else {
 #        file.name=file.name
 #    }    
-    if (!endsWith(file.name,".tex")) file.name=file.name%+%".tex"
+    if (!endsWith(file.name,".tex")) file.name=file.name%.%".tex"
     cat ("\\documentclass{article}\n", file=file.name, append=FALSE)
     cat (preamble, file=file.name, append=TRUE)
     cat("\n\\usepackage{geometry}\n", file=file.name, append=TRUE)    
@@ -188,11 +188,11 @@ mytex.begin=function(file.name,preamble=""){
 }
 mytex.end=function(file.name){
 #    if(exists("tablePath") && file.exists(tablePath)) {
-#        file.name=tablePath%+%"/"%+%file.name
+#        file.name=tablePath%.%"/"%.%file.name
 #    } else {
 #        file.name=file.name
 #    }    
-    if (!endsWith(file.name,".tex")) file.name=file.name%+%".tex"
+    if (!endsWith(file.name,".tex")) file.name=file.name%.%".tex"
     cat ("\n\\end{document}", file=file.name, append=TRUE)
 }
 
@@ -290,8 +290,8 @@ mywrite.csv = function(x, file="tmp", row.names=FALSE, digits=NULL, ...) {
             }                
         }
     }
-    cat("Writing table to "%+%getwd()%+%"/"%+%file%+%".csv\n")
-    write.csv(x, file=file%+%".csv", row.names=row.names, ...)
+    cat("Writing table to "%.%getwd()%.%"/"%.%file%.%".csv\n")
+    write.csv(x, file=file%.%".csv", row.names=row.names, ...)
 }
 
 
@@ -313,7 +313,7 @@ myprint.default = function (..., newline=TRUE, digits=3) {
         if (contain(tmpname, "\"") | contain(tmpname, "\\")) {
             for (a in x[[i]]) cat(a)
         } else {
-            cat (tmpname %+% " = ")
+            cat (tmpname %.% " = ")
             for (a in x[[i]]) cat(a,"") # by putting "" there, a space is introduced b/c cat prints a sep
             if (i!=length(x)) cat ("; ")
         }
