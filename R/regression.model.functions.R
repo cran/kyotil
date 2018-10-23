@@ -40,44 +40,39 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
         
         est.=tmp[,1,drop=FALSE]
         # replace large values
-        est.=ifelse(est.>100,">100",format(round(est., est.digits), nsmall=est.digits, scientific=FALSE))
+        
+        # find a round that takes multipled digits!
+        est.=ifelse(est.>100,">100",formatDouble(est., est.digits))
         
         if (type==1)
             # est only
             out=drop(est. )
         else if (type==2)
             # est (se)
-            out=est. %.% " (" %.% 
-                format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE) %.% ")" %.%
-                ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
-        else if (type==3) {
+            out=est. %.% " (" %.% formatDouble(tmp[,2,drop=FALSE], est.digits) %.% ")" %.% ifelse (round(tmp[,p.val.col],2)<=0.05, ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
+        else if (type==3) 
             # est (lb, up)
-            out=est. %.% " (" %.% 
-                lb %.% ", " %.% ub %.% ")" 
-        }
+            out=est. %.% " (" %.% lb %.% ", " %.% ub %.% ")" 
         else if (type==4)
             # a space is inserted between est and se, they could be post-processed in swp
-            out=est. %.% " " %.% 
-                format(round(tmp[,2,drop=FALSE], est.digits), nsmall=se.digits, scientific=FALSE)
+            out=est. %.% " " %.% formatDouble(tmp[,2,drop=FALSE], est.digits)
         else if (type==5)
             # est **
             out=est. %.%
                 ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==6)
             # est (pval)*
-            out=est. %.% " (" %.% 
-                format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %.% ")" %.%
-                ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
+            out=est. %.% " (" %.% formatDouble(tmp[,p.val.col,drop=FALSE], 3) %.% ")" %.% ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==7)
             # (lb, up)
             out=" (" %.% lb %.% ", " %.% ub %.% ")" 
         else if (type==8)
             # est (p value #)
             out=est. %.% " (p value " %.% 
-                format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %.% ")" 
+                formatDouble(tmp[,p.val.col,drop=FALSE], 3) %.% ")" 
         else if (type==9)
             # est (pval)*
-            out=est. %.% " (" %.% format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %.% ")" 
+            out=est. %.% " (" %.% formatDouble(tmp[,p.val.col,drop=FALSE], 3) %.% ")" 
         else if (type==10)
             # pval
             out=format(round(tmp[,p.val.col,drop=TRUE], 3), nsmall=3, scientific=FALSE) 
@@ -87,8 +82,7 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
         else if (type==12)
             # est (pval)* (lb, up)
             out=est. %.% " (" %.% 
-                format(round(tmp[,p.val.col,drop=FALSE], 3), nsmall=3, scientific=FALSE) %.% ")" %.%
-                ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"") %.%
+                formatDouble(tmp[,p.val.col,drop=FALSE], 3) %.% ")" %.% ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"") %.%
                 " (" %.% lb %.% ", " %.% ub %.% ")" 
         else 
             stop ("getFormattedSummaries(). type not supported: "%.%type)

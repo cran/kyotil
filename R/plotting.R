@@ -236,6 +236,7 @@ panel.ladder=function (x, y, col = par("col"), bg = NA,
 #            col = col.smooth, ...)
 }
 # when log="xy" is passed in, diag and upper panels do not print properly
+# cex.labels controls the cex of diagonal panels text size
 mypairs=function(dat, ladder=FALSE, ...){
     if(ladder) { # ladder plot
         .pairs(dat, lower.panel=panel.ladder, upper.panel=NULL, diag.panel=NULL, xaxt="n", yaxt="n", gap=0, ...)
@@ -668,7 +669,7 @@ abline.shade.2=function(x, col=c(0,1,0)){
 # When impute.missing.for.line is TRUE, lines are drawn even when there are missing values in between two observations
 mymatplot=function(x, y, type="b", lty=c(1,2,1,2,1,2), pch=NULL, col=rep(c("darkgray","black"),each=3), xlab=NULL, ylab="", 
     draw.x.axis=TRUE, bg=NA, lwd=1, at=NULL, make.legend=TRUE, legend=NULL, impute.missing.for.line=TRUE,
-    legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, xaxt="s", ...) {
+    legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, xaxt="s", y.intersp=1.5, x.intersp=0.3, ...) {
     
     missing.y=FALSE
     if (missing(y)) {
@@ -698,9 +699,9 @@ mymatplot=function(x, y, type="b", lty=c(1,2,1,2,1,2), pch=NULL, col=rep(c("dark
     if (make.legend) {
         if (is.null(legend)) legend=colnames(y)
         if (length(unique(pch))>1) {
-            mylegend(legend, x=legend.x, lty=lty, title=legend.title, col=col, pt.bg=bg, cex=legend.cex, lwd=lwd, inset=legend.inset, pch=pch)
+            mylegend(legend, x=legend.x, lty=lty, title=legend.title, col=col, pt.bg=bg, cex=legend.cex, lwd=lwd, inset=legend.inset, pch=pch, y.intersp=y.intersp, x.intersp=x.intersp)
         } else {
-            mylegend(legend, x=legend.x, lty=lty, title=legend.title, col=col, pt.bg=bg, cex=legend.cex, lwd=lwd, inset=legend.inset)
+            mylegend(legend, x=legend.x, lty=lty, title=legend.title, col=col, pt.bg=bg, cex=legend.cex, lwd=lwd, inset=legend.inset, y.intersp=y.intersp, x.intersp=x.intersp)
         }
     }
 }

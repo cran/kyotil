@@ -198,10 +198,12 @@ get.sim.res = function(dir, res.name="res", verbose=TRUE) {
     res=lapply(fileNames, function(x) {load(file=x); get(res.name)})
     # check dimension
     dims=lapply(res, dim)
-    dim.same=sapply(dims, function(x) x==dims[[1]])
-    if(!all(dim.same)) {
-        print(dims)
-        stop("not all files have the same dimensional results")
+    if (!is.null(dims[[1]])) {
+        dim.same=sapply(dims, function(x) x==dims[[1]])
+        if(!all(dim.same)) {
+            print(dims)
+            stop("not all files have the same dimensional results")
+        }
     }
     
     res.all = do.call(abind::abind, res)

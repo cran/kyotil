@@ -17,6 +17,12 @@
 2018.07.01
 	* Add %.% and deprecate %+% because %+% is also defined in ggplot2 for
 	adding a comment to plot
-
-2018.07.01
 	* Replace %+% by %.% throughout	
+
+2018.10.17
+	* Modify get.sim.res to handle the case when the file contains a single
+	value
+	* Fix a bug in mytex that happens when saving to the current directory
+	* Make getFormattedSummary more flexible by allowing different paramemters
+	to be printed with different number of significant digits
+	* Update mypairs to generate a ladder plot

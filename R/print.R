@@ -18,16 +18,19 @@ mytex=function(dat=NULL, file.name="temp",
 #    }    
         
     if (endsWith(file.name,".tex")) file.name=substr(file.name, 1, nchar(file.name)-4)
-    if (stand.alone) {
-        # create two files, one stand alone and one not, to facilitate debugging latex code
-        tmp=strsplit(file.name, split="/")[[1]]
-        if (length(tmp)==1) path="./" else path=concatList(tmp[-length(tmp)], "/")
-        foldername=path%.%"/input"
-        if(!file.exists(foldername)) dir.create(foldername) 
-        file.name.2=foldername%.%"/"%.%tmp[length(tmp)]
-        file.name=file.name
-    }
     
+    tmp=strsplit(file.name, split="/")[[1]]
+    # add ./ in front of file name if there is no folder name in the file name, otherwise won't be able to find files :(
+    if (length(tmp)==3) stop("Cannot handle nested folders yet") 
+    if (length(tmp)==1) file.name="./"%.%file.name
+
+    # if we also want to create a standalone copy 
+    if (stand.alone) {
+        tmp=strsplit(file.name, split="/")[[1]] # this needed again b/c file.name may have changed the last line
+        input.foldername=concatList(tmp[-length(tmp)], "/")%.%"/input"
+        if(!file.exists(input.foldername)) dir.create(input.foldername) 
+        file.name.2=input.foldername%.%"/"%.%tmp[length(tmp)]
+    }
     
     if(is.data.frame(dat)) dat=list(dat)
     if (!is.list(dat)) dat=list(dat)
@@ -123,12 +126,11 @@ mytex=function(dat=NULL, file.name="temp",
             add.to.row=list(c(list(0), add.to.row[[1]]), c(top, add.to.row[[2]]))
         }
         #print(add.to.row)
-        
+ 
         if (length(dat)>1) {
             cat ("\\vspace{20pt}"%.%names(dat)[i]%.%"\n\n", file=file.name%.%".tex", append=TRUE)
             cat ("\\vspace{20pt}"%.%names(dat)[i]%.%"\n\n", file=file.name.2%.%".tex", append=TRUE)
         }
-        
         #if (!is.null(attr(dat1,"caption"))) caption=attr(dat1,"caption") else caption=NULL
         
         if (is.null(hline.after)) {
@@ -136,7 +138,7 @@ mytex=function(dat=NULL, file.name="temp",
             if (!include.colnames) hline.after=hline.after[-(1:2)]
         }
         #print(hline.after)
-        
+
         if(!include.rownames) rownames(dat1)=1:nrow(dat1)# otherwise there will be a warning from xtable
         print(..., xtable::xtable(dat1, 
                 digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
@@ -145,6 +147,7 @@ mytex=function(dat=NULL, file.name="temp",
             hline.after=hline.after, type = "latex", file = file.name%.%".tex", append = TRUE, floating = floating, table.placement=table.placement, 
             include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
             add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
+
         if (stand.alone) print(..., xtable::xtable(dat1, 
                 digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
                 display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
@@ -262,13 +265,20 @@ make.latex.coef.table = function (models, model.names=NULL, row.major=FALSE, rou
 
 
 roundup=function (value, digits, na.to.empty=TRUE) {
-    out=format(round(value, digits), nsmall=digits, scientific=FALSE) 
+    if (length(digits)==1) {
+        out=format(round(value, digits), nsmall=digits, scientific=FALSE) 
+    } else {
+        if (length(digits)!=length(value)) stop("length of value and length of values different")
+        out = sapply(1:length(digits), function (i) roundup (value[i], digits[i], na.to.empty))
+    }
     if(na.to.empty) sub("NA|NaN","",out) else out
 }
 formatInt=function (x, digits, fill="0", ...) {
     formatC(x, format="d", flag=fill, width=digits) 
 }
 formatDouble=roundup
+# test
+#formatDouble(c(1,2,3.12344), 1:3)
 
 # don't have to transpose x
 mywrite=function(x, ...){

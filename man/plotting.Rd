@@ -80,12 +80,15 @@ mydev.off(file="temp", ext = c("png,pdf"), res = 200, mydev=NULL)
 
 mylegend(legend, x, y=NULL, lty = NULL, bty = "n", ...)
 
-mymatplot(x, y, type="b", lty=c(1,2,1,2,1,2), pch=NULL, 
-    col=rep(c("darkgray","black"),each=3), xlab=NULL, ylab="", 
-    draw.x.axis=TRUE, bg=NA, lwd=1, at=NULL, make.legend=TRUE, legend=NULL, 
-    impute.missing.for.line=TRUE,
-    legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, xaxt="s", ...) 
-                 
+mymatplot(x, y, type = "b", lty = c(1, 2, 1, 2, 1, 2), pch =
+         NULL, col = rep(c("darkgray", "black"), each = 3),
+         xlab = NULL, ylab = "", draw.x.axis = TRUE, bg = NA,
+         lwd = 1, at = NULL, make.legend = TRUE, legend = NULL,
+         impute.missing.for.line = TRUE, legend.x = 9,
+         legend.title = NULL, legend.cex = 1, legend.inset = 0,
+         xaxt = "s", y.intersp = 1.5, x.intersp = 0.3, ...)
+         
+                          
 mypairs(dat, ladder = FALSE, ...)
 
 wtd.hist (x, breaks = "Sturges", freq = NULL, probability = !freq, 
@@ -234,6 +237,12 @@ col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FAL
 }
   \item{lwd}{
 line width.
+}
+  \item{x.intersp}{
+controls the look of legend.
+}
+  \item{y.intersp}{
+controls the look of legend.
 }
   \item{res}{
 resolution.
