@@ -1,28 +1,40 @@
 2013-12-5 Youyi Fong and Krisz Sebestyen
-	* create package
+    * create package
 
 2014-4-1 Youyi Fong
-	* change .C to .Call
+    * change .C to .Call
 
 2014-7-1 Krisztian Sebestyen
     * fixed the weighted hamming and ibs kernel code both in R and C (typo in the paper) 
-	* separate .Call from native C code in kernels.c/h and matrix.c/h so that C code may be included in other packages without having to include
-	Rinternals.h library (i.e. SEXP stuff)
-	  - created files Call_kernels.c and Call_matrix.c
-	  - renamed all C functions called via .Call to 'Call_funcname'
-	* updated runit.kernel.R since ibs() has changed
-	* added rrbind(),rcbind(),upper.trap(),lower.trap() to matrix2.R
-	* with .Call I can pass a NULL pointer to C hence I can use more natural 'NULL' logic in C in many functions
+    * separate .Call from native C code in kernels.c/h and matrix.c/h so that C code may be included in other packages without having to include
+    Rinternals.h library (i.e. SEXP stuff)
+      - created files Call_kernels.c and Call_matrix.c
+      - renamed all C functions called via .Call to 'Call_funcname'
+    * updated runit.kernel.R since ibs() has changed
+    * added rrbind(),rcbind(),upper.trap(),lower.trap() to matrix2.R
+    * with .Call I can pass a NULL pointer to C hence I can use more natural 'NULL' logic in C in many functions
 
 2018.07.01
-	* Add %.% and deprecate %+% because %+% is also defined in ggplot2 for
-	adding a comment to plot
-	* Replace %+% by %.% throughout	
+    * Add %.% and deprecate %+% because %+% is also defined in ggplot2 for
+    adding a comment to plot
+    * Replace %+% by %.% throughout 
 
 2018.10.17
-	* Modify get.sim.res to handle the case when the file contains a single
-	value
-	* Fix a bug in mytex that happens when saving to the current directory
-	* Make getFormattedSummary more flexible by allowing different paramemters
-	to be printed with different number of significant digits
-	* Update mypairs to generate a ladder plot
+    * Modify get.sim.res to handle the case when the file contains a single
+    value
+    * Fix a bug in mytex that happens when saving to the current directory
+    * Make getFormattedSummary more flexible by allowing different paramemters
+    to be printed with different number of significant digits
+    * Update mypairs to generate a ladder plot
+
+2019.01.18
+    * Fix an error in fixedef.lm
+
+2019.08.02  
+    * Print dir if get.sim.res throws an error due to empty dir
+
+2019.10.14
+    * Fix a bug in mytex that occurs when writing a list of tables and the row names have duplicates
+
+2019.11.13
+    * add paired option to myboxplot.list to allow paired Wilcox test

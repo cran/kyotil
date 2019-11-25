@@ -17,7 +17,8 @@ function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
     key = TRUE, keysize = 1.5, density.info = c("histogram", 
         "density", "none"), denscol = tracecol, symkey = min(x < 
         0, na.rm = TRUE) || symbreaks, densadj = 0.25, main = NULL, 
-    xlab = NULL, ylab = NULL, lmat = NULL, lhei = NULL, lwid = NULL, lower.left.only=TRUE,
+    xlab = NULL, ylab = NULL, lmat = NULL, lhei = NULL, lwid = NULL, lower.left.only=TRUE, legend=TRUE,
+    legend.x="topright",
     ...) 
 {
     usr <- par("usr"); on.exit(par(usr))
@@ -250,6 +251,9 @@ function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
       breaksImage = c(-5,breaks)
       colImage = c("white",col)
     
+    str(breaks)
+    str(colImage)
+    
       image(1:nc, 1:nr, xImage, xlim = 0.5 + c(0, nc), ylim = 0.5 + 
         c(0, nr), axes = FALSE, xlab = "", ylab = "", col = colImage, 
         breaks = breaksImage, ...)
@@ -277,9 +281,9 @@ function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
         axis(1, 1:(nc), labels = labCol, las = 2, line = -0.5, tick = 0, 
              cex.axis = cexCol)
       }
-      if(TRUE) {
+      if(legend) {
         ltext = rev(paste("[",breaks[-length(breaks)], ",", breaks[-1],")",sep=""))
-        legend("topright",fill=rev(col),legend=ltext,bty="n")
+        legend(legend.x,fill=rev(col),legend=ltext,bty="n")
       }
       if (!is.null(xlab)) 
         mtext(xlab, side = 1, line = margins[1] - 1.25)

@@ -189,13 +189,24 @@ get.sim.res = function(dir, res.name="res", verbose=TRUE) {
     tmp=list.files(path=dir, pattern="batch[0-9]+.*.Rdata")
     if (length(tmp)==0) {
         # no files yet
-        stop ("no files\n")
+        stop (paste0("no files in ",dir,"\n"))
     } else {
         fileNames = dir %.%"/"%.%tmp
     }
     
+    # remove empty files, which sometimes appear, e.g. when disk is full
+    empty.files=NULL
+    for (x in fileNames) {
+        if(file.info(x)$size==0) empty.files=c(empty.files, x)
+    }
+    fileNames=setdiff(fileNames, empty.files)
+    
     ## read files
-    res=lapply(fileNames, function(x) {load(file=x); get(res.name)})
+    res=lapply(fileNames, function(x) {
+        if(verbose>=2) print(x); 
+        load(file=x); 
+        get(res.name)
+    })
     # check dimension
     dims=lapply(res, dim)
     if (!is.null(dims[[1]])) {
@@ -318,4 +329,34 @@ getFormattedMCSummary=function(path, sim, nn, fit.method, exclude.some=TRUE, exc
     
     out
         
+}
+
+
+#Need to re-implement this more efficiently!!!
+#    library(maptools)
+nearestPointOnSegment=function (s, p) {
+    ap = c(p[1] - s[1, 1], p[2] - s[1, 2])
+    ab = c(s[2, 1] - s[1, 1], s[2, 2] - s[1, 2])
+    t = sum(ap * ab)/sum(ab * ab)
+    t = ifelse(t < 0, 0, ifelse(t > 1, 1, t))
+    x = s[1, 1] + ab[1] * t
+    y = s[1, 2] + ab[2] * t
+    result = c(x, y, sqrt((x - p[1])^2 + (y - p[2])^2))
+    names(result) = c("X", "Y", "distance")
+    result
+}
+
+
+# neither project_to_curve or earlier version of get.lam works correctly to project,  nor pcurve package works
+predict.pcc=function(object, newdat, ...) {
+    s=object$s[object[["ord"]],]
+    res=sapply (1:nrow(newdat), function(i) {
+        tmp=sapply (2:nrow(s), function(j) {
+            fit=nearestPointOnSegment(s[(j-1):j,], newdat[i,])
+        })
+        fit=tmp[,which.min(tmp[3,])]
+        #segments(newdat[i,1], newdat[i,2], fit[1], fit[2])
+    })
+    #sum(res["distance",])
+    res
 }

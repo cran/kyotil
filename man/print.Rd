@@ -23,14 +23,15 @@ formatInt(x, digits, fill = "0", ...)
 make.latex.coef.table(models, model.names = NULL, row.major = FALSE, round.digits = NULL)
 
 mytex (dat = NULL, file.name = "temp", digits = NULL, display
-                 = NULL, align = "r", include.rownames = TRUE,
-                 include.colnames = TRUE, col.headers = NULL, comment =
-                 FALSE, floating = FALSE, lines = TRUE, hline.after =
-                 NULL, add.to.row = NULL, sanitize.text.function =
-                 NULL, append = FALSE, preamble = "", stand.alone =
-                 TRUE, caption = NULL, label = paste("tab",
-                 last(strsplit(file.name, "/")[[1]]), sep = " "),
-                 table.placement = "h!", verbose = FALSE, ...)
+ = NULL, align = "r", include.rownames = TRUE,
+ include.colnames = TRUE, col.headers = NULL, comment =
+ FALSE, floating = FALSE, lines = TRUE, hline.after =
+ NULL, add.to.row = NULL, sanitize.text.function =
+ NULL, append = FALSE, preamble = "", stand.alone =
+ TRUE, caption = NULL, label = paste("tab",
+ last(strsplit(file.name, "/")[[1]]), sep = " "),
+ table.placement = "h!", add.clear.page.between.tables
+ = FALSE, verbose = FALSE, ...)
 
 mytex.begin(file.name, preamble = "")
 
@@ -137,6 +138,9 @@ formatDouble(value, digits, na.to.empty=TRUE)
 %%     ~~Describe \code{row.names} here~~
 }
 
+  \item{add.clear.page.between.tables}{
+%%     ~~Describe \code{row.names} here~~
+}
 }
 \examples{
 

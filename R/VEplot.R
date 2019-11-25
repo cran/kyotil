@@ -8,19 +8,19 @@
 VEplot <- function(object, ...) UseMethod("VEplot")
  
 VEplot.cox.zph = function (object, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var, ylab="VE", xlab="Time", xaxt="s", cex.axis=1, ...) {
-    myplot.cox.zph (x=object, resid=resid, se = se, df = df, nsmo = nsmo, var = var, 
+    myplot.cox.zph (object=object, resid=resid, se = se, df = df, nsmo = nsmo, var = var, 
     coef.transform=function(x) 1-exp(x), # this is the only parameter provided in VEplot.cox.zph
     ylab=ylab, xlab=xlab, xaxt=xaxt, cex.axis=cex.axis, ...)        
 }
 
-myplot.cox.zph=function (x, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var, 
+myplot.cox.zph=function (object, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var, 
     # parameters not part of plot.cox.zph
     coef.transform=NULL, # a function to transform the coefficients
     ylab=NULL, xlab="Time", xaxt="s", cex.axis=1,
     ...) 
 {
-    xx <- x$x
-    yy <- x$y
+    xx <- object$x
+    yy <- object$y
     d <- nrow(yy)
     df <- max(df)
     nvar <- ncol(yy)
@@ -52,11 +52,11 @@ myplot.cox.zph=function (x, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var,
             1) 
             stop("Invalid variable requested")
     }
-    if (x$transform == "log") {
+    if (object$transform == "log") {
         xx <- exp(xx)
         pred.x <- exp(pred.x)
     }
-    else if (x$transform != "identity") {
+    else if (object$transform != "identity") {
         xtime <- as.numeric(dimnames(yy)[[1]])
         indx <- !duplicated(xx)
         apr1 <- approx(xx[indx], xtime[indx], seq(min(xx), max(xx), 
@@ -74,7 +74,7 @@ myplot.cox.zph=function (x, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var,
             yr <- range(yhat, y)
         else yr <- range(yhat)
         if (se) {
-            temp <- 2 * sqrt(x$var[i, i] * seval)
+            temp <- 2 * sqrt(object$var[i, i] * seval)
             yup <- yhat + temp
             ylow <- yhat - temp
             yr <- range(yr, yup, ylow)
@@ -96,12 +96,12 @@ myplot.cox.zph=function (x, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var,
             }
         }
     
-        if (x$transform == "identity") 
+        if (object$transform == "identity") 
             plot(range(xx), yr, type = "n", xlab = xlab, ylab = ylab[i], xaxt=xaxt, cex.axis=cex.axis,
                 ...)
-        else if (x$transform == "log") 
+        else if (object$transform == "log") 
             plot(range(xx), yr, type = "n", xlab = xlab, ylab = ylab[i], xaxt=xaxt, cex.axis=cex.axis, 
-                log = "x", ...)
+                log = "object", ...)
         else {
             plot(range(xx), yr, type = "n", xlab = xlab, ylab = ylab[i], axes = FALSE, ...)
             if (xaxt!="n") {

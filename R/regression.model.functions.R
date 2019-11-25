@@ -1,10 +1,16 @@
 # type 3 and 7 do not give the right output for glm fits
 # robust can be passed as part of .... Sometimes robust=T generates errors
 # trim: get rid of white space in confidence intervals for alignment
-getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, random=FALSE, VE=FALSE, to.trim=FALSE, rows=NULL, coef.direct=FALSE, ...){
+getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, random=FALSE, VE=FALSE, to.trim=FALSE, rows=NULL, coef.direct=FALSE, trunc.large.est=TRUE, scale.factor=1, ...){
     
-    res = sapply(fits, simplify="array", function (fit) {
+    if(is.null(names(fits))) names(fits)=seq_along(fits)
+    idxes=seq_along(fits); names(idxes)=names(fits)
     
+    if(length(robust)==1) robust=rep(robust,length(fits)) else if (length(robust)!=length(fits)) stop("length of robust needs to match length of fits")    
+    
+    res = sapply(idxes, simplify="array", function (fit.idx) {
+        
+        fit=fits[[fit.idx]]
         if(coef.direct) {
             tmp=fit
         } else {
@@ -15,9 +21,8 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
                     type=1
                 }
             } else {
-                tmp = getFixedEf (fit, robust=robust, ...)
+                tmp = getFixedEf (fit, robust=robust[fit.idx], ...)
             }
-            # tmp should be: est, se, lb, ub, pvalue 
             
             if (VE) {
                 tmp[,1]=1-tmp[,1]
@@ -28,6 +33,9 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
             }
         }
         
+        # tmp should be: est, se, lb, ub, pvalue 
+        tmp[,1]=tmp[,1]*scale.factor        
+        tmp[,2]=tmp[,2]*scale.factor        
         
         p.val.col=which(startsWith(tolower(colnames(tmp)),"p"))
         lb=formatDouble(tmp[,3,drop=FALSE], est.digits) 
@@ -42,14 +50,16 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
         # replace large values
         
         # find a round that takes multipled digits!
-        est.=ifelse(est.>100,">100",formatDouble(est., est.digits))
+        # trim is necessary here
+        est.=ifelse(trunc.large.est & est.>100,">100",trim(formatDouble(est., est.digits)))
+        
         
         if (type==1)
             # est only
             out=drop(est. )
         else if (type==2)
             # est (se)
-            out=est. %.% " (" %.% formatDouble(tmp[,2,drop=FALSE], est.digits) %.% ")" %.% ifelse (round(tmp[,p.val.col],2)<=0.05, ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
+            out=est. %.% " (" %.% formatDouble(tmp[,2,drop=FALSE], se.digits) %.% ")" %.% ifelse (round(tmp[,p.val.col],2)<=0.05, ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==3) 
             # est (lb, up)
             out=est. %.% " (" %.% lb %.% ", " %.% ub %.% ")" 
@@ -81,9 +91,9 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
             out=format(round(p.adjust(tmp[,p.val.col,drop=TRUE], method="fdr"), 3), nsmall=3, scientific=FALSE) 
         else if (type==12)
             # est (pval)* (lb, up)
-            out=est. %.% " (" %.% 
+            out=est. %.% "(" %.% 
                 formatDouble(tmp[,p.val.col,drop=FALSE], 3) %.% ")" %.% ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"") %.%
-                " (" %.% lb %.% ", " %.% ub %.% ")" 
+                "(" %.% lb %.% "," %.% ub %.% ")" 
         else 
             stop ("getFormattedSummaries(). type not supported: "%.%type)
             
@@ -96,7 +106,6 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
         
     if (is.list(res)) {
     # if the fits have different number of parameters, we need this
-        str(res)
         res=cbinduneven(li=lapply(res, function (x) as.matrix(x, ncol=1)))
         colnames(res)=names(fits)
     } else if (!is.matrix(res)) {
@@ -166,7 +175,7 @@ getFixedEf.MIresult=function(object, ...) {
         tmp=summary(object)
     }, type="output") # type = message captures stderr, type=output is for stdout
     
-    tmp=tmp[,names(tmp)!=-"missInfo"] # MIresult has this string column  #tmp=subset(tmp, select=-missInfo) fails check
+    tmp=tmp[,names(tmp)!="missInfo"] # MIresult has this string column  #tmp=subset(tmp, select=-missInfo) fails check
     tmp=as.matrix(tmp)# data frame fails in format and formatDouble
     
     cbind(tmp, "p.val"=2*pt(abs(tmp[,1]/tmp[,2]), df=object$df, lower.tail = FALSE))
@@ -230,7 +239,9 @@ getFixedEf.gam = function (object, ...) {
 
 getFixedEf.lm = function (object, ...) {
     out=summary(object)$coef
-    colnames(out)[4]="p-val"
+    ci=confint(object)    
+    out=cbind(out[,1:2], ci, out[,4])
+    colnames(out)[5]="p-val"
     out
 }
 

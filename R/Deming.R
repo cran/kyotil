@@ -1,4 +1,4 @@
-# copied from MethComp
+# modified from MethComp
 Deming <- function( x, y, vr=sdr^2, sdr=sqrt(vr), boot=TRUE, keep.boot=FALSE, alpha=0.05 ) {
 
     if( missing( vr ) & missing( sdr ) ) var.ratio <- 1
@@ -25,6 +25,8 @@ Deming <- function( x, y, vr=sdr^2, sdr=sqrt(vr), boot=TRUE, keep.boot=FALSE, al
                            sum( (y-alpha-beta*ksi)^2 ) ) /
     # The ML-estiamtes requires 2*n at this point bu we do not think we have that
     # many observations so we stick to (n-2). Any corroboation from litterature?
+    
+    # YF: See Seber and Wild (2003) page 495 for justification 
                ( (n-2)*var.ratio )
     sigma.y <- var.ratio*sigma.x
     sigma.x <- sqrt( sigma.x )

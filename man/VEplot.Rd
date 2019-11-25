@@ -14,7 +14,7 @@ VEplot (object, ...)
 \method{VEplot}{cox.zph} (object, resid = TRUE, se = TRUE, df = 4, nsmo = 40, 
     var, ylab="VE", xlab="Time", xaxt="s", cex.axis=1, ...) 
 
-myplot.cox.zph (x, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var, 
+\method{myplot}{cox.zph} (object, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var, 
     coef.transform=NULL, 
     ylab=NULL, 
     xlab="Time", xaxt="s", cex.axis=1, 
@@ -25,7 +25,6 @@ myplot.cox.zph (x, resid = TRUE, se = TRUE, df = 4, nsmo = 40, var,
 \arguments{
 
   \item{object}{An object}
-  \item{x}{An object of type cox.zph}
   \item{resid}{Boolean, whether to plot residuals}
   \item{se}{Boolean, whether to plot confidence band}
   \item{df}{degrees of freedom}

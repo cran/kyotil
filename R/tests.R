@@ -79,3 +79,22 @@ hosmerlem = function(y, yhat, g=10) {
   P = 1 - pchisq(chisq, g - 2)
   return(list(chisq=chisq,p.value=P))
 }
+
+# x is a matrix or dataframe
+mycor.test=function(x, method = c("pearson", "kendall", "spearman"), idx=NULL) {
+    p=ncol(x)
+    out=matrix(NA,p,p)
+    if (is.null(idx)) {
+        for (j in 1:(p-1)) 
+            for (i in (j+1):p) 
+                out[i,j] <- out[j,i] <- suppressWarnings(cor.test(x[,i], x[,j], method=method))$p.value
+                
+    } else {
+        stopifnot(length(idx)==2)
+        for (j in idx[[2]]) 
+            for (i in idx[[1]]) 
+                out[i,j] <- suppressWarnings(cor.test(x[,i], x[,j], method=method))$p.value
+        
+    }
+    out
+}

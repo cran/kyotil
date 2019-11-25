@@ -3,6 +3,7 @@
 \alias{summ}
 \alias{sample.for.cv}
 \alias{empty2na}
+\alias{predict.pcc}
 \title{
 Misc Functions
 }
@@ -15,6 +16,7 @@ pava (x, wt = rep(1, length(x)))
 summ(x)
 sample.for.cv (dat, v, seed)
 empty2na(x) 
+\method{predict}{pcc}(object, newdat, ...)
 
 }
 \arguments{
@@ -26,6 +28,15 @@ empty2na(x)
     %%     ~~Describe \code{x} here~~
     }
   \item{wt}{
+    %%     ~~Describe \code{var.equal} here~~
+    }
+  \item{object}{
+    %%     ~~Describe \code{var.equal} here~~
+    }
+  \item{newdat}{
+    %%     ~~Describe \code{var.equal} here~~
+    }
+  \item{...}{
     %%     ~~Describe \code{var.equal} here~~
     }
 }

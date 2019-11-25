@@ -1,6 +1,5 @@
 \name{string.functions}
 \alias{string.functions}
-\alias{\%+\%}
 \alias{\%.\%}
 \alias{contain}
 \alias{escapeUnderline}
@@ -18,7 +17,6 @@
 \description{ \%+\% concatenates its arguments and returns a string.}
 \usage{
 
-a \%+\% b
 
 a \%.\% b
 

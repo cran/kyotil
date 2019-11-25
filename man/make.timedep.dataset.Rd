@@ -42,7 +42,6 @@ Returns a data frame with the following columns added:  tstart, tstop, .timedep.
 }
 \references{
 Therneau, T. and Crowson, C. Using Time Dependent Covariates and Time Dependent Coefficients in the Cox Model. A vignette from the R package surival.
-Fong, Y. and Halloran, M.E. Time-varying Age Group Analysis in Vaccine Efficacy Trials. In prep.
 }
 \author{
 Youyi Fong

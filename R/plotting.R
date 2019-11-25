@@ -1,3 +1,10 @@
+myplot <- function(object, ...) UseMethod("myplot") 
+
+# plot x versus fitted
+myplot.loess = function(object, xlab="x", ylab="fitted", ...) {
+    plot(object$x[order(object$x)], object$fitted[order(object$x)], xlab=xlab, ylab=ylab, ...)    
+} 
+
 # one issue with myfigure/mydev.off is that positioning of legend depends on the graphical window size in R
 # bg is needed b/c by default the bg is transparent
 myfigure=function (mfrow=c(1,1), mfcol=NULL, width=NULL, height=NULL, oma=NULL, mar=NULL, main.outer=FALSE, bg=NULL) {        
@@ -22,7 +29,7 @@ myfigure=function (mfrow=c(1,1), mfcol=NULL, width=NULL, height=NULL, oma=NULL, 
     }    
     if(!is.null(bg)) par(bg=bg)
 }
-mydev.off=function(file="temp", ext=c("png,pdf"), res=200, mydev=NULL) {        
+mydev.off=function(file="temp", ext=c("pdf"), res=200, mydev=NULL) {        
     if (!is.null(mydev)) .mydev=mydev
     exts=strsplit(ext, ",")[[1]]
     tmp=strsplit(file,"/")[[1]]
@@ -50,6 +57,14 @@ mydev.off=function(file="temp", ext=c("png,pdf"), res=200, mydev=NULL) {
         }
         dev.off()
     }
+    # this resets all pars, important when myfigure contains oma or mar
+    resetPar <- function() {
+        dev.new()
+        op <- par(no.readonly = TRUE)
+        dev.off()
+        op
+    }    
+    par(resetPar())
 }
 
 get.width.height=function(nrow,ncol){
@@ -97,7 +112,7 @@ get.width.height=function(nrow,ncol){
 
     } else if (nrow==8 & ncol==5) {width=10; height=16
     } else {
-        warning ("nrow x ncol not supported: "%.%nrow%.%" x "%.%ncol %.% ". Default to 10x10")
+        print ("nrow x ncol not supported: "%.%nrow%.%" x "%.%ncol %.% ". Default to width 10, height 10")
         width=10; height=10
     }
     return(c(width,height))
@@ -194,6 +209,7 @@ panel.cor <- function(x, y, digits=2, prefix="", cex.cor, cor., ...)
     r <- cor(x, y, method=ifelse(missing(cor.), "spearman", cor.), use="pairwise.complete.obs")
     txt <- format(c(r, 0.123456789), digits=digits)[1]
     txt <- paste(prefix, txt, sep="")
+    txt = sub("0","",txt)
     if(missing(cex.cor)) cex.cor <- 2.5
     #text(0.5, 0.5, txt, cex = cex.cor) # do this if we don't want cex to depend on correlations
     text(0.5, 0.5, txt, cex = ifelse(r<0,cex.cor*sqrt(-r), cex.cor * sqrt(r)) )
@@ -207,28 +223,38 @@ panel.hist <- function(x, ...)
     h <- hist(x, plot = FALSE)
     breaks <- h$breaks; nB <- length(breaks)
     y <- h$counts; y <- y/max(y)
-    rect(breaks[-nB], 0, breaks[-1], y, col="cyan", ...)
+    rect(breaks[-nB], 0, breaks[-1], y, col="white", ...)
 #    abline(v=1e3)
 #    abline(h=.5)
 }
+panel.smooth.only=function (x, y, col = par("col"), bg = NA, pch = par("pch"), 
+    cex = 1, col.smooth = "red", span = 2/3, iter = 3, ...) 
+{
+    #points(x, y, pch = pch, col = col, bg = bg, cex = cex)
+    ok <- is.finite(x) & is.finite(y)
+    if (any(ok)) 
+        lines(stats::lowess(x[ok], y[ok], f = span, iter = iter), 
+            col = col.smooth, ...)
+}
+
 panel.nothing=function(x, ...) {}
 # panel.ladder is a copy of panel.smooth with modifications
 panel.ladder=function (x, y, col = par("col"), bg = NA, 
     cex = 1, col.smooth = "red", span = 2/3, iter = 3, cex.text=1.2, cex.star=2,
-    cor.,  ...) 
+    cor., add.line=T, add.text=T, ...) 
 {
     points(x, y, pch = 20, col = col, bg = bg, cex = cex)
     dxy=as.data.frame(cbind(x,y)); dxy=dxy[complete.cases(dxy),]
     r.lm=lm(y~x, dxy) 
-    lines(r.lm, col="1", pred.level=NA)#, args.pband=list(col=SetAlpha("blue",1)) )# 
+    if(add.line) lines(r.lm, col="1", pred.level=NA)#, args.pband=list(col=SetAlpha("blue",1)) )# 
         
     r <- cor(x, y, method=ifelse(missing(cor.), "spearman", cor.), use="pairwise.complete.obs")
     x.1=(x-min(x,na.rm=T))/(max(x,na.rm=T)-min(x,na.rm=T))
     y.1=(y-min(y,na.rm=T))/(max(y,na.rm=T)-min(y,na.rm=T))
     p=suppressWarnings(cor.test(x,y, method = ifelse(missing(cor.), "spearman", cor.))$p.value)
     sig=ifelse (round(p,2)<=0.05,ifelse (p<0.01,  ifelse (p<0.01,"***","**")  ,"*"),"")
-    text(0*(max(x,na.rm=T)-min(x,na.rm=T))+min(x,na.rm=T), y = 1*(max(y,na.rm=T)-min(y,na.rm=T))+min(y,na.rm=T), labels = "r = "%.%round(r,2), adj = c(0,1), pos = NULL, offset = 0.5, vfont = NULL, cex = cex.text, col = 2, font = 2)
-    text(1*(max(x,na.rm=T)-min(x,na.rm=T))+min(x,na.rm=T), y = 1*(max(y,na.rm=T)-min(y,na.rm=T))+min(y,na.rm=T), labels = sig,                 adj = c(1,1), pos = NULL, offset = 0.5, vfont = NULL, cex = cex.star, col = 2, font = 2)
+    if(add.text) text(0*(max(x,na.rm=T)-min(x,na.rm=T))+min(x,na.rm=T), y = 1*(max(y,na.rm=T)-min(y,na.rm=T))+min(y,na.rm=T), labels = "r = "%.%round(r,2), adj = c(0,1), pos = NULL, offset = 0.5, vfont = NULL, cex = cex.text, col = 2, font = 2)
+    if(add.text) text(1*(max(x,na.rm=T)-min(x,na.rm=T))+min(x,na.rm=T), y = 1*(max(y,na.rm=T)-min(y,na.rm=T))+min(y,na.rm=T), labels = sig,                 adj = c(1,1), pos = NULL, offset = 0.5, vfont = NULL, cex = cex.star, col = 2, font = 2)
 
 #    ok <- is.finite(x) & is.finite(y)
 #    if (any(ok)) 
@@ -237,11 +263,11 @@ panel.ladder=function (x, y, col = par("col"), bg = NA,
 }
 # when log="xy" is passed in, diag and upper panels do not print properly
 # cex.labels controls the cex of diagonal panels text size
-mypairs=function(dat, ladder=FALSE, ...){
+mypairs=function(dat, ladder=FALSE, show.data.cloud=TRUE, ladder.add.line=T, ladder.add.text=T, ...){
     if(ladder) { # ladder plot
-        .pairs(dat, lower.panel=panel.ladder, upper.panel=NULL, diag.panel=NULL, xaxt="n", yaxt="n", gap=0, ...)
+        .pairs(dat, lower.panel=panel.ladder, upper.panel=NULL, diag.panel=NULL, xaxt="n", yaxt="n", gap=0, add.line=ladder.add.line, add.text=ladder.add.text)
     } else {
-        .pairs(dat, lower.panel=panel.smooth, upper.panel=panel.cor, diag.panel=panel.hist, ...)
+        .pairs(dat, lower.panel=if (show.data.cloud) panel.smooth else panel.smooth.only, upper.panel=panel.cor, diag.panel=panel.hist, ...)
     }    
 }
 # a copy of pairs with only one change that is needed to not draw boxes long the diagonal line
@@ -313,6 +339,7 @@ mypairs=function(dat, ladder=FALSE, ...){
     if (is.null(oma))
     oma <- c(4, 4, if(!is.null(main)) 6 else 4, 4)
     opar <- par(mfrow = c(nc, nc), mar = rep.int(gap/2, 4), oma = oma)
+    #myprint(oma,gap)
     on.exit(par(opar))
     dev.hold(); on.exit(dev.flush(), add = TRUE)
     
@@ -422,15 +449,15 @@ myboxplot <- function(object, ...) UseMethod("myboxplot")
 # myboxplot.formula and myboxplot.list make a boxplot with data points and do inferences for two group comparions. 
 # cex=.5; ylab=""; xlab=""; main=""; box=FALSE; highlight.list=NULL; at=NULL;pch=1;col=1;
 # friedman.test.formula is of the form a ~ b | c
-myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box=TRUE, at=NULL, na.action=NULL,
-    pch=1, col=1, test="", friedman.test.formula=NULL, reshape.formula=NULL, reshape.id=NULL, jitter=TRUE, add.interaction=FALSE,  drop.unused.levels = TRUE, bg.pt=NULL, add=FALSE, ...){
+myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box=TRUE, at=NULL, na.action=NULL, p.val=NULL,
+    pch=1, col=1, test="", friedman.test.formula=NULL, reshape.formula=NULL, reshape.id=NULL, jitter=TRUE, add.interaction=FALSE,  drop.unused.levels = TRUE, bg.pt=NULL, add=FALSE, seed=1, ...){
     
     save.seed <- try(get(".Random.seed", .GlobalEnv), silent=TRUE) 
     if (class(save.seed)=="try-error") {        
         set.seed(1)
         save.seed <- get(".Random.seed", .GlobalEnv)
     }                        
-    set.seed(1)
+    set.seed(seed)
     
      # removes empty groups formed through model.frame
      mf=model.frame(formula, data)
@@ -462,36 +489,37 @@ myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box
     assign(".Random.seed", save.seed, .GlobalEnv)     
     
     # inference
+    # if p.val is passed in, then use that p.val
     x.unique=unique(dat.tmp[[2]])
     if (length(test)>0) {
         sub=""
         pvals=NULL
         if ("t" %in% test) {
-            p.val=t.test(formula, data)$p.value
+            if (is.null(p.val)) p.val=t.test(formula, data)$p.value
             pvals=c(pvals, Student=p.val)
             sub=sub%.%" Student's t "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2) 
         }
         if ("w" %in% test) {
-            p.val=suppressWarnings(wilcox.test(formula, data)$p.value)
+            if (is.null(p.val)) p.val=suppressWarnings(wilcox.test(formula, data)$p.value)
             pvals=c(pvals, Wilcoxon=p.val)
             sub=sub%.%" Wilcoxon "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2)
         }
         if ("k" %in% test) {
-            p.val=kruskal.test(formula, data)$p.value
+            if (is.null(p.val)) p.val=kruskal.test(formula, data)$p.value
             pvals=c(pvals, Kruskal=p.val)
             sub=sub%.%" Kruskal "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2)
         }
         if ("f" %in% test) {
             if (!is.null(friedman.test.formula)) {
             # if there is missing data, this won't work, try the else and supply reshape.formula and reshape.id
-                p.val=friedman.test(friedman.test.formula, data)$p.value
+                if (is.null(p.val)) p.val=friedman.test(friedman.test.formula, data)$p.value
                 pvals=c(pvals, Friedman=p.val)
                 sub=sub%.%" Friedman "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2)
             } else if (!is.null(reshape.formula) & !is.null(reshape.id)) {
                 dat.wide=myreshapewide (reshape.formula, data, idvar = reshape.id)
                 #str(dat.wide)# show this so that we know we are using the right data to do the test
                 ftest = try(friedman.test (as.matrix(dat.wide[,-(1)])),silent=T)
-                if (!inherits(ftest,"try-error")) p.val=ftest$p.value else p.val=NA
+                if (is.null(p.val)) if (!inherits(ftest,"try-error")) p.val=ftest$p.value else p.val=NA
                 pvals=c(pvals, Friedman=p.val)
                 if (add.interaction) my.interaction.plot(as.matrix(dat.wide[,-1]), add=T)
                 sub=sub%.%" Friedman "%.%ifelse(length(test)==1,"p-val ","")%.% ifelse (is.na(p.val), "NA", signif(p.val,2))
@@ -505,14 +533,14 @@ myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box
     
 }
 
-myboxplot.data.frame=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test="", ...){
+myboxplot.data.frame=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test="", paired=FALSE, ...){
     myboxplot.list(as.list(object), cex=cex, ylab=ylab, xlab=xlab, main=main, box=box, at=at, pch=pch, col=col, test=test, ...)
 }
-myboxplot.matrix=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test="", ...){
+myboxplot.matrix=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test="", paired=FALSE, ...){
     myboxplot.list(as.list(as.data.frame(object)), cex=cex, ylab=ylab, xlab=xlab, main=main, box=box, at=at, pch=pch, col=col, test=test, ...)
 }
 
-myboxplot.list=function(object, ...){
+myboxplot.list=function(object, paired=FALSE, ...){
     
     # make a dataframe out of list object
     dat=NULL
@@ -520,7 +548,17 @@ myboxplot.list=function(object, ...){
     for (i in 1:length(object)) {
         dat=rbind(dat,data.frame(y=object[[i]], x=names(object)[i]))
     }
-    myboxplot(y~x, dat, ...)
+    
+    p.val=NULL
+    if (paired) {
+        if(length(object)==2) {
+            p.val = wilcox.test(object[[1]], object[[2]], paired=TRUE)$p.value
+        } else {
+            stop("when it is paired, we expect a list of two")
+        }
+    }
+        
+    myboxplot(y~x, dat, p.val=p.val, ...)
     
 }
 
@@ -602,7 +640,7 @@ corplot.formula=function(formula,data,main="",method=c("pearson","spearman"),col
     if(add.deming.fit) {
         # this implementation is faster than the one by Therneau, Terry M.
         fit=Deming(model.frame(formula, data)[[2]], model.frame(formula, data)[[1]]) # this function is in Deming.R copied from MethComp package by Bendix Carstensen
-        abline(fit["Intercept"], fit["Slope"], untf=log=="xy", col=col.deming)   
+        abline(coef(fit)["Intercept"], coef(fit)["Slope"], untf=log=="xy", col=col.deming)   
         # Therneau, Terry M.'s implementation in a loose R file that is in 3software folder, slower than Deming, but may be more generalized?
         #fit <- deming(model.frame(formula, data)[[2]], model.frame(formula, data)[[1]], xstd=c(1,0), ystd=c(1,0))
         #abline(fit, untf=log=="xy", col=col.deming)        
@@ -930,4 +968,14 @@ Pal <- function(pal, n=100, alpha=1) {
 
   return(res)
 
+}
+
+mylines=function(x, y, ...) {    
+    plot.xy(xy.coords(x[order(x)], y[order(x)]), type = "l", ...)
+}
+
+
+# from princurve
+whiskers <- function(x, s, ...) {
+  graphics::segments(x[, 1], x[, 2], s[, 1], s[, 2], ...)
 }

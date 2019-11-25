@@ -8,24 +8,37 @@ Better Heatmap Function
 Makes a heatmap representation of correaltion coefficients easier.
 }
 \usage{
-DMHeatMap(x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE, distfun = dist, 
-    hclustfun = hclust, dendrogram = c("both", "row", "column", "none"), 
-    symm = FALSE, scale = c("none", "row", "column"), na.rm = TRUE, 
-    revC = identical(Colv, "Rowv"), add.expr, breaks, 
-    symbreaks = min(x < 0, na.rm = TRUE) || scale != "none", col="heat.colors", colsep,
-    rowsep, sepcolor = "white", sepwidth = c(0.05, 0.05), cellnote, notecex = 1, 
-    notecol = "cyan", na.color = par("bg"), trace = c("column", "row", "both", "none"), 
-    tracecol = "cyan", hline = median(breaks), vline = median(breaks), linecol=tracecol, 
-    margins = c(5, 5), ColSideColors, RowSideColors, cexRow = 0.2 + 1/log10(nr), 
-    cexCol = 0.2 + 1/log10(nc), labRow = NULL, labCol = NULL, labColor = NULL, key =TRUE,
-    keysize = 1.5, density.info = c("histogram", "density", "none"), denscol = tracecol, 
-    symkey = min(x < 0, na.rm = TRUE) || symbreaks, densadj = 0.25, main = NULL, 
-    xlab = NULL, ylab = NULL, lmat = NULL, lhei = NULL, lwid =NULL, lower.left.only=TRUE,
-    ...)
+DMHeatMap(x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
+ distfun = dist, hclustfun = hclust, dendrogram =
+ c("both", "row", "column", "none"), symm = FALSE,
+ scale = c("none", "row", "column"), na.rm = TRUE, revC
+ = identical(Colv, "Rowv"), add.expr, breaks, symbreaks
+ = min(x < 0, na.rm = TRUE) || scale != "none", col =
+ "heat.colors", colsep, rowsep, sepcolor = "white",
+ sepwidth = c(0.05, 0.05), cellnote, notecex = 1,
+ notecol = "cyan", na.color = par("bg"), trace =
+ c("column", "row", "both", "none"), tracecol = "cyan",
+ hline = median(breaks), vline = median(breaks),
+ linecol = tracecol, margins = c(5, 5), ColSideColors,
+ RowSideColors, cexRow = 0.2 + 1/log10(nr), cexCol =
+ 0.2 + 1/log10(nc), labRow = NULL, labCol = NULL,
+ labColor = NULL, key = TRUE, keysize = 1.5,
+ density.info = c("histogram", "density", "none"),
+ denscol = tracecol, symkey = min(x < 0, na.rm = TRUE)
+ || symbreaks, densadj = 0.25, main = NULL, xlab =
+ NULL, ylab = NULL, lmat = NULL, lhei = NULL, lwid =
+ NULL, lower.left.only = TRUE, legend = TRUE, legend.x
+ = "topright", ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
+%%     ~~Describe \code{x} here~~
+}
+  \item{legend.x}{
+%%     ~~Describe \code{x} here~~
+}
+  \item{legend}{
 %%     ~~Describe \code{x} here~~
 }
   \item{Rowv}{

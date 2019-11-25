@@ -7,9 +7,11 @@
 \alias{butterfly.plot}
 \alias{empty.plot}
 \alias{getMfrow}
+\alias{whiskers}
 \alias{myforestplot}
 \alias{my.interaction.plot}
 \alias{myboxplot}
+\alias{myplot}
 \alias{myboxplot.formula}
 \alias{myboxplot.data.frame}
 \alias{myboxplot.list}
@@ -30,7 +32,9 @@
 \alias{add.mtext.label}
 \alias{mydev.off}
 \alias{myfigure}
+\alias{mylines}
 \alias{mytiff}
+\alias{myplot.loess}
 
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
@@ -39,6 +43,12 @@ Plotting Functions}
 mypostscript and mypdf sets the width and height based on mfrow input. 
 }
 \usage{
+
+myplot (object, ...) 
+
+\method{myplot}{loess}(object, xlab="x", ylab="fitted", ...)
+
+whiskers (x, s, ...) 
 
 abline.pt.slope(pt1, slope, x2=NULL, ...)
 
@@ -61,22 +71,27 @@ my.interaction.plot(dat, x.ori = 0, xaxislabels = rep("", 2), cex.axis = 1, add 
 
 myboxplot(object, ...)
 
-\method{myboxplot}{formula}(formula, data, cex=.5, xlab="", ylab="", main="", box=TRUE, 
-at=NULL, na.action=NULL, pch=1, col=1, test="", friedman.test.formula=NULL, 
-reshape.formula=NULL, reshape.id=NULL, jitter=TRUE, add.interaction=FALSE,  
-drop.unused.levels = TRUE, bg.pt=NULL, add=FALSE, ...)
+\method{myboxplot}{formula}(formula, data, cex = 0.5, xlab = "", ylab = "", main =
+ "", box = TRUE, at = NULL, na.action = NULL, p.val =
+ NULL, pch = 1, col = 1, test = "",
+ friedman.test.formula = NULL, reshape.formula = NULL,
+ reshape.id = NULL, jitter = TRUE, add.interaction =
+ FALSE, drop.unused.levels = TRUE, bg.pt = NULL, add =
+ FALSE, seed = 1, ...)
     
-\method{myboxplot}{data.frame}(object, cex = 0.5, ylab = "", xlab = "", main = "", box = TRUE,
-    at = NULL, pch = 1, col = 1, test = "", ...)
+\method{myboxplot}{data.frame}(object, cex = 0.5, ylab = "", xlab = "", main = "",
+ box = TRUE, at = NULL, pch = 1, col = 1, test = "",
+ paired = FALSE, ...)
 
-\method{myboxplot}{list}(object, ...)
+\method{myboxplot}{list}(object, paired = FALSE, ...)
 
 abline.shade.2(x, col=c(0,1,0))
 abline.shade(pt, quadrant=c(1,2,3,4), col=c(0,1,0), alpha=0.3)
 
 \method{VEplot}{glm}(object, X1, X2, x, ...)
 add.mtext.label (text, cex = 1.4, adj = -0.2) 
-mydev.off(file="temp", ext = c("png,pdf"), res = 200, mydev=NULL)
+mydev.off(file = "temp", ext = c("pdf"), res = 200, mydev =
+ NULL)
 
 mylegend(legend, x, y=NULL, lty = NULL, bty = "n", ...)
 
@@ -89,7 +104,8 @@ mymatplot(x, y, type = "b", lty = c(1, 2, 1, 2, 1, 2), pch =
          xaxt = "s", y.intersp = 1.5, x.intersp = 0.3, ...)
          
                           
-mypairs(dat, ladder = FALSE, ...)
+mypairs(dat, ladder = FALSE, show.data.cloud = TRUE,
+ ladder.add.line = T, ladder.add.text = T, ...)
 
 wtd.hist (x, breaks = "Sturges", freq = NULL, probability = !freq, 
     include.lowest = TRUE, right = TRUE, density = NULL, angle = 45, 
@@ -98,7 +114,7 @@ wtd.hist (x, breaks = "Sturges", freq = NULL, probability = !freq,
     plot = TRUE, labels = FALSE, nclass = NULL, weight = NULL, 
     ...) 
 
-
+mylines(x, y, ...)
 
 myfigure(mfrow = c(1, 1), mfcol = NULL, width = NULL, 
     height = NULL, oma = NULL, mar = NULL, main.outer = FALSE, bg=NULL) 
@@ -139,6 +155,9 @@ col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FAL
   \item{col.norm}{string, color of added normal density line}
   \item{pt1}{
 %%     ~~Describe \code{pt1} here~~
+}
+  \item{s}{
+%%     ~~Describe \code{slope} here~~
 }
   \item{ladder}{
 %%     ~~Describe \code{slope} here~~
@@ -460,6 +479,28 @@ string. For example, "t","w","f","k", "tw"
   \item{drop.unused.levels}{
 %%     ~~Describe \code{add.diagonal.line} here~~
 }
+
+
+  \item{p.val}{
+%%     ~~Describe \code{x} here~~
+}
+  \item{seed}{
+%%     ~~Describe \code{x} here~~
+}
+  \item{paired}{
+%%     ~~Describe \code{x} here~~
+}
+  \item{show.data.cloud}{
+%%     ~~Describe \code{x} here~~
+}
+  \item{ladder.add.line}{
+%%     ~~Describe \code{x} here~~
+}
+  \item{ladder.add.text}{
+%%     ~~Describe \code{x} here~~
+}
+
+
 }
 
 \details{
@@ -478,15 +519,25 @@ mymatplot will use na.approx (zoo) to fill in NA before plotting in order to dra
 }
 
 \examples{
-myfigure(mfrow=c(1,2))
-    plot(1:10)
-    plot(1:10)
-mydev.off(ext="png,pdf", file="tmp")
 
 set.seed(1)
 x=1:50+rnorm(50,0,4)
 y=1:50+rnorm(50,0,4)
 dat=data.frame(x, y)
 corplot(y~x,dat,add.lm.fit=TRUE,add.deming.fit=TRUE,col.lm="red",col.deming="blue")
+
+myboxplot(list(jitter(1:10), jitter(3:12)), test="w")
+myboxplot(list(jitter(1:10), jitter(3:12)), test="w", paired=TRUE)
+
+\dontrun{
+myfigure(mfrow=c(1,2))
+    plot(1:10)
+    plot(1:10)
+mydev.off(ext="png,pdf", file="tmp")
+}
+
+
+
+#myboxplot x axis may look weird if log="xy"
 
 }

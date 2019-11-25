@@ -40,8 +40,9 @@ getFormattedSummary prints a table of regression coefficient estimates and stand
 \usage{
 
 getFormattedSummary(fits, type = 2, est.digits = 2, se.digits = 2, robust,
-         random = FALSE, VE = FALSE, to.trim = FALSE, rows =
-         NULL, coef.direct = FALSE, ...)
+ random = FALSE, VE = FALSE, to.trim = FALSE, rows =
+ NULL, coef.direct = FALSE, trunc.large.est = TRUE,
+ scale.factor = 1, ...)
 
 getVarComponent(object, ...)
 
@@ -221,6 +222,12 @@ logistic.regression = TRUE)
 %%     ~~Describe \code{fit} here~~
 }
 
+  \item{trunc.large.est}{
+%%     ~~Describe \code{fit} here~~
+}
+  \item{scale.factor}{
+%%     ~~Describe \code{fit} here~~
+}
 
 
 }

@@ -8,6 +8,7 @@ mytex=function(dat=NULL, file.name="temp",
     sanitize.text.function = NULL, #function(x) x,
     append=FALSE, preamble="", stand.alone=TRUE, 
     caption=NULL, label=paste("tab",last(strsplit(file.name, "/")[[1]]),sep=" "), table.placement="h!",
+    add.clear.page.between.tables=FALSE,
     verbose=FALSE,
 ...) {
         
@@ -46,11 +47,16 @@ mytex=function(dat=NULL, file.name="temp",
     
     add.to.row.0=add.to.row
     include.colnames.0=include.colnames
+    include.rownames.0=include.rownames
+    align.0=align
     
     if (length(dat)==0) stop("length of dat is 0")
     names(dat)=gsub("_"," ",names(dat))
     for (i in 1:length(dat)) {
     
+        include.rownames=include.rownames.0
+        align=align.0
+        
         dat1 = dat[[i]]   
         if (is.null(dat1)) warning("some element of dat list is null")   
          
@@ -88,6 +94,7 @@ mytex=function(dat=NULL, file.name="temp",
             include.rownames=FALSE
             if (length(align)==ncol(dat1)) align=c("l",align) # need to extend align on the left
             .ncol=.ncol+1
+            str(align)
         } 
         
         if (is.null(digits)) if (is.integer(dat1)) digits=0
@@ -128,8 +135,8 @@ mytex=function(dat=NULL, file.name="temp",
         #print(add.to.row)
  
         if (length(dat)>1) {
-            cat ("\\vspace{20pt}"%.%names(dat)[i]%.%"\n\n", file=file.name%.%".tex", append=TRUE)
-            cat ("\\vspace{20pt}"%.%names(dat)[i]%.%"\n\n", file=file.name.2%.%".tex", append=TRUE)
+            cat (ifelse(add.clear.page.between.tables, "\\clearpage"%.%names(dat)[i]%.%"\n\n", "\\vspace{20pt}"%.%names(dat)[i]%.%"\n\n"), file=file.name%.%".tex", append=TRUE)
+            cat (ifelse(add.clear.page.between.tables, "\\clearpage"%.%names(dat)[i]%.%"\n\n", "\\vspace{20pt}"%.%names(dat)[i]%.%"\n\n"), file=file.name.2%.%".tex", append=TRUE)
         }
         #if (!is.null(attr(dat1,"caption"))) caption=attr(dat1,"caption") else caption=NULL
         
@@ -300,8 +307,9 @@ mywrite.csv = function(x, file="tmp", row.names=FALSE, digits=NULL, ...) {
             }                
         }
     }
-    cat("Writing table to "%.%getwd()%.%"/"%.%file%.%".csv\n")
+    x[is.na(x)]=""
     write.csv(x, file=file%.%".csv", row.names=row.names, ...)
+    cat("Writing table to "%.%getwd()%.%"/"%.%file%.%".csv\n")
 }
 
 
@@ -320,13 +328,15 @@ myprint.default = function (..., newline=TRUE, digits=3) {
         #str(gsub("\\\\","\\",gsub("\"", "", tmpname)))
         #str(x[[i]])
         #if (gsub("\\\\","\\",gsub("\"", "", tmpname))!=x[[i]]) {
-        if (contain(tmpname, "\"") | contain(tmpname, "\\")) {
-            for (a in x[[i]]) cat(a)
-        } else {
+        
+#        # the following line fails when I redefined contain using grepl
+#        if (contain(tmpname, "\"") | contain(tmpname, "\\")) {
+#            for (a in x[[i]]) cat(a)
+#        } else {
             cat (tmpname %.% " = ")
             for (a in x[[i]]) cat(a,"") # by putting "" there, a space is introduced b/c cat prints a sep
             if (i!=length(x)) cat ("; ")
-        }
+#        }
     }
     if (newline)  cat("\n")
     options(digits=digits.save)

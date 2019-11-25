@@ -1,11 +1,11 @@
 # paste two strings together
 # e.g. "a" %.% "b"
 
-"%+%" <- function (a, b) {
-    .Deprecated("%.%")
-    out=paste(a,b,sep="")
-    out
-}
+#"%+%" <- function (a, b) {
+#    .Deprecated("%.%")
+#    out=paste(a,b,sep="")
+#    out
+#}
 "%.%" <- function (a, b) {
     out=paste(a,b,sep="")
     out
@@ -81,18 +81,23 @@ lastIndex =function (s1, s2) {
 
 # return TRUE if s1 contains s2
 contain =function (s1, s2) {
-    sapply (s1, function (s) {
-        k=nchar (s2)
-        matched=0
-        for (i in 1:(nchar(s)-k+1) ) {
-            if (substr(s, i, i+k-1)==s2) {
-                matched=i
-                break
-            }
-        }
-        matched!=0
-    })
+    grepl(s2, s1)
+#    sapply (s1, function (s) {
+#        if (is.na(s)) return (NA)
+#        k=nchar (s2)
+#        matched=0
+#        for (i in 1:(nchar(s)-k+1) ) {
+#            if (substr(s, i, i+k-1)==s2) {
+#                matched=i
+#                break
+#            }
+#        }
+#        matched!=0
+#    })
 }
+## test
+#contain("abc","bc")
+#grepl("bc",c("abc","abc"))
 
 # copied from http://stackoverflow.com/questions/2261079/how-to-trim-leading-and-trailing-whitespace-in-r
 trim.leading <- function (x)  sub("^\\s+", "", x)

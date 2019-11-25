@@ -2,6 +2,7 @@
 \alias{hosmerlem}
 \alias{myfisher.test}
 \alias{quick.t.test}
+\alias{mycor.test}
 \alias{signtest}
 \alias{tukey.mtest}
 \alias{vector.t.test}
@@ -25,6 +26,10 @@ tukey.mtest(mu, ms, n)
 vector.t.test(mean.x, mean.y, var.x, var.y, n)
 
 myfisher.test(x,y,...)
+
+mycor.test(x, method = c("pearson", "kendall", "spearman"), idx =
+ NULL) 
+
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -49,6 +54,10 @@ myfisher.test(x,y,...)
 %%     ~~Describe \code{var.equal} here~~
 }
 
+  \item{method}{
+%%     ~~Describe \code{method} here~~
+}
+
 
   \item{mu}{
 %%     ~~Describe \code{mu} here~~
@@ -70,6 +79,9 @@ myfisher.test(x,y,...)
 %%     ~~Describe \code{var.x} here~~
 }
   \item{var.y}{
+%%     ~~Describe \code{var.y} here~~
+}
+  \item{idx}{
 %%     ~~Describe \code{var.y} here~~
 }
 }
