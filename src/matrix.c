@@ -535,6 +535,26 @@ void R_inv(int* _n,double* x,double* xinv,int* info){
 	free(work);
 }
 
+
+//// use dposv to invert positive symmetric matrix, still won't work
+//char uplo='U';
+//Matrix<> tmp=VV - VB * t(VB);
+//Matrix <double,Row,Concrete> B(2, 1); B=Vr;
+//F77_CALL(dposv)(&uplo, &_n, &_nrhs, tmp.getArray(), &_n, B.getArray(), &_n, &info); 
+//if (info==0) {
+//    //success
+//    crit= (t(Vr) * B) (0,0);
+//} else {
+//    crit=R_NegInf;
+//}           
+//
+//Matrix<> tmp=VV - VB * t(VB);
+//Matrix <double,Row,Concrete> tmpinv(2, 2);
+//R_inv(&_n, tmp.getArray(), tmpinv.getArray(), &info);
+//crit = (t(Vr) * (tmpinv * Vr))(0,0);   
+//
+
+
 // return generalized inverse of 'x' in 'xinv' and the singular values in 'sval' if not NULL
 // x = U_(m x m) * S_(m x n) * V'_(n x n)  
 // S = nonnegative at 1..min(M,N) diagonal

@@ -38,3 +38,16 @@
 
 2019.11.13
     * add paired option to myboxplot.list to allow paired Wilcox test
+
+2020.04.11
+    * Add INT and rank.inv.norm
+    * Enhance cbinduneven so that it works with list of outputs from table() of a single dimension
+
+2020.05.11
+    * return CI in VEplot as suggested by Betz
+
+2020.06.19
+    * implement myprint for matrix
+
+2020.08.22
+    * add marginal.risk

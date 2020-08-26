@@ -31,7 +31,7 @@ myfigure=function (mfrow=c(1,1), mfcol=NULL, width=NULL, height=NULL, oma=NULL, 
 }
 mydev.off=function(file="temp", ext=c("pdf"), res=200, mydev=NULL) {        
     if (!is.null(mydev)) .mydev=mydev
-    exts=strsplit(ext, ",")[[1]]
+    exts=unlist(strsplit(ext, ","))
     tmp=strsplit(file,"/")[[1]]
     for (ext in exts) {
         if (ext=="pdf") {
@@ -223,7 +223,7 @@ panel.hist <- function(x, ...)
     h <- hist(x, plot = FALSE)
     breaks <- h$breaks; nB <- length(breaks)
     y <- h$counts; y <- y/max(y)
-    rect(breaks[-nB], 0, breaks[-1], y, col="white", ...)
+    rect(breaks[-nB], 0, breaks[-1], y, col="cornflowerblue", ...)
 #    abline(v=1e3)
 #    abline(h=.5)
 }
@@ -280,7 +280,7 @@ mypairs=function(dat, ladder=FALSE, show.data.cloud=TRUE, ladder.add.line=T, lad
     if(doText <- missing(text.panel) || is.function(text.panel))
     textPanel <-
         function(x = 0.5, y = 0.5, txt, cex, font)
-        text(x, y, txt, cex = cex, font = font)
+        text(x, y, parse(text=txt), cex = cex, font = font)# parse(text=txt) allows us to print math
     
     localAxis <- function(side, x, y, xpd, bg, col=NULL, main, oma, ...) {
       ## Explicitly ignore any color argument passed in as
@@ -327,13 +327,16 @@ mypairs=function(dat, ladder=FALSE, show.data.cloud=TRUE, ladder.add.line=T, lad
     
     nc <- ncol(x)
     if (nc < 2) stop("only one column in the argument to 'pairs'")
+    
+    # names to print on the diagonal
     if(doText) {
-    if (missing(labels)) {
-        labels <- colnames(x)
-        if (is.null(labels)) labels <- paste("var", 1L:nc)
+        if (missing(labels)) {
+            labels <- colnames(x)
+            if (is.null(labels)) labels <- paste("var", 1L:nc)
+        }
+        else if(is.null(labels)) doText <- FALSE
     }
-    else if(is.null(labels)) doText <- FALSE
-    }
+    
     oma <- if("oma" %in% nmdots) dots$oma
     main <- if("main" %in% nmdots) dots$main
     if (is.null(oma))
@@ -425,13 +428,15 @@ empty.plot=function () {
 }
 
 # dat
-myforestplot=function(dat, xlim=NULL, xlab="", main="", col.1="red", col.2="blue",plot.labels=TRUE,order=FALSE,decreasing=FALSE, vline=TRUE,cols=NULL,log="") {
+myforestplot=function(dat, xlim=NULL, xlab="", main="", col.1="red", col.2="blue",plot.labels=TRUE,order=FALSE,decreasing=FALSE, vline=TRUE,cols=NULL,log="",null.val=NULL) {
     if (order) dat=dat[order(dat[,1],decreasing=decreasing),] 
     p=nrow(dat)    
     # makes no plot, but helps set the x axis later
     plot(c(dat[,2], dat[,3]),rep(1:p,2), xlim=xlim, yaxt="n", xaxt="s", xlab=xlab, ylab="", main="", type="n", cex.main=1.4, axes=F, log=log)
     mtext(side=3, line=3, adj=0, text=main, cex=1.4, font=2, xpd=NA)
-    if (range(dat[,2:3])[1]>0) null.val=1 else null.val=0 # if all values are greater than 0, 1 is probably the null, otherwise, 0 is probably the null
+    if(is.null(null.val)) {
+        if (range(dat[,2:3])[1]>0) null.val=1 else null.val=0 # if all values are greater than 0, 1 is probably the null, otherwise, 0 is probably the null
+    }
     if(vline) abline(v=null.val, col="gray")
     if(is.null(cols)) cols=ifelse(dat[,4]<0.05, col.1, col.2)
     points(dat[,1], nrow(dat):1, pch=19, col=cols)
@@ -450,7 +455,7 @@ myboxplot <- function(object, ...) UseMethod("myboxplot")
 # cex=.5; ylab=""; xlab=""; main=""; box=FALSE; highlight.list=NULL; at=NULL;pch=1;col=1;
 # friedman.test.formula is of the form a ~ b | c
 myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box=TRUE, at=NULL, na.action=NULL, p.val=NULL,
-    pch=1, col=1, test="", friedman.test.formula=NULL, reshape.formula=NULL, reshape.id=NULL, jitter=TRUE, add.interaction=FALSE,  drop.unused.levels = TRUE, bg.pt=NULL, add=FALSE, seed=1, ...){
+    pch=1, col=1, test="", friedman.test.formula=NULL, reshape.formula=NULL, reshape.id=NULL, jitter=TRUE, add.interaction=FALSE,  drop.unused.levels = TRUE, bg.pt=NULL, add=FALSE, seed=1, write.p.at.top=FALSE, ...){
     
     save.seed <- try(get(".Random.seed", .GlobalEnv), silent=TRUE) 
     if (class(save.seed)=="try-error") {        
@@ -497,24 +502,24 @@ myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box
         if ("t" %in% test) {
             if (is.null(p.val)) p.val=t.test(formula, data)$p.value
             pvals=c(pvals, Student=p.val)
-            sub=sub%.%" Student's t "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2) 
+            if (write.p.at.top) sub=paste0("p=",signif(p.val,2)) else sub=sub%.%" Student's t "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2) 
         }
         if ("w" %in% test) {
             if (is.null(p.val)) p.val=suppressWarnings(wilcox.test(formula, data)$p.value)
             pvals=c(pvals, Wilcoxon=p.val)
-            sub=sub%.%" Wilcoxon "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2)
+            if (write.p.at.top) sub=paste0("p=",signif(p.val,2)) else sub=sub%.%" Wilcoxon "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2)
         }
         if ("k" %in% test) {
             if (is.null(p.val)) p.val=kruskal.test(formula, data)$p.value
             pvals=c(pvals, Kruskal=p.val)
-            sub=sub%.%" Kruskal "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2)
+            if (write.p.at.top) sub=paste0("p=",signif(p.val,2)) else sub=sub%.%" Kruskal "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2)
         }
         if ("f" %in% test) {
             if (!is.null(friedman.test.formula)) {
             # if there is missing data, this won't work, try the else and supply reshape.formula and reshape.id
                 if (is.null(p.val)) p.val=friedman.test(friedman.test.formula, data)$p.value
                 pvals=c(pvals, Friedman=p.val)
-                sub=sub%.%" Friedman "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2)
+                if (write.p.at.top) sub=paste0("p=",signif(p.val,2)) else sub=sub%.%" Friedman "%.%ifelse(length(test)==1,"p-val ","")%.%signif(p.val,2)
             } else if (!is.null(reshape.formula) & !is.null(reshape.id)) {
                 dat.wide=myreshapewide (reshape.formula, data, idvar = reshape.id)
                 #str(dat.wide)# show this so that we know we are using the right data to do the test
@@ -522,10 +527,12 @@ myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box
                 if (is.null(p.val)) if (!inherits(ftest,"try-error")) p.val=ftest$p.value else p.val=NA
                 pvals=c(pvals, Friedman=p.val)
                 if (add.interaction) my.interaction.plot(as.matrix(dat.wide[,-1]), add=T)
-                sub=sub%.%" Friedman "%.%ifelse(length(test)==1,"p-val ","")%.% ifelse (is.na(p.val), "NA", signif(p.val,2))
+                if (write.p.at.top) sub=paste0("p=",signif(p.val,2)) else sub=sub%.%" Friedman "%.%ifelse(length(test)==1,"p-val ","")%.% ifelse (is.na(p.val), "NA", signif(p.val,2))
             } else warning("cannot perform Friedman test without friedman.test.formula or reshape.formula,reshape.id")
         }
-        title(sub=sub)
+        if (write.p.at.top) {
+            if (pvals[1]<0.05) title(main=sub, line=.5, font.main=3)
+        } else title(sub=sub)
         res$pvals=pvals
     }
     
@@ -558,6 +565,7 @@ myboxplot.list=function(object, paired=FALSE, ...){
         }
     }
         
+    dat$x=factor(dat$x, levels=names(object))
     myboxplot(y~x, dat, p.val=p.val, ...)
     
 }
@@ -618,7 +626,7 @@ corplot.formula=function(formula,data,main="",method=c("pearson","spearman"),col
         cor.=sapply (method, function (method) {
             cor(data[,vars[1]],data[,vars[2]],method=method,use="p")
         })
-        main=main%.%ifelse(main=="","",", ")
+        main=main%.%ifelse(main=="", "", ", ")
         main=main%.%"cor: "%.%concatList(round(cor.,2),"|")
     }
 
@@ -707,7 +715,7 @@ abline.shade.2=function(x, col=c(0,1,0)){
 # When impute.missing.for.line is TRUE, lines are drawn even when there are missing values in between two observations
 mymatplot=function(x, y, type="b", lty=c(1,2,1,2,1,2), pch=NULL, col=rep(c("darkgray","black"),each=3), xlab=NULL, ylab="", 
     draw.x.axis=TRUE, bg=NA, lwd=1, at=NULL, make.legend=TRUE, legend=NULL, impute.missing.for.line=TRUE,
-    legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, xaxt="s", y.intersp=1.5, x.intersp=0.3, ...) {
+    legend.x=9, legend.title=NULL, legend.cex=1, legend.inset=0, xaxt="s", y.intersp=1.5, x.intersp=0.3, text.width=NULL, add=FALSE, ...) {
     
     missing.y=FALSE
     if (missing(y)) {
@@ -729,17 +737,17 @@ mymatplot=function(x, y, type="b", lty=c(1,2,1,2,1,2), pch=NULL, col=rep(c("dark
     if (is.null(xlab)) xlab=names(dimnames(y))[1]
     if (is.null(legend.title)) legend.title=names(dimnames(y))[2]
     # draw line first, then points
-    if(type %in% c("l","b")) matplot(x, y.imputed, lty=lty, pch=pch, col=col, xlab=xlab, xaxt=xaxt, ylab=ylab, bg=bg, lwd=lwd, type="l", ...)
-    if(type %in% c("p","b")) matplot(x, y, lty=lty, pch=pch, col=col, xlab=xlab, xaxt=xaxt, ylab=ylab, bg=bg, lwd=lwd, type="p", add=type!="p", ...)
+    if(type %in% c("l","b")) matplot(x, y.imputed, lty=lty, pch=pch, col=col, xlab=xlab, xaxt=xaxt, ylab=ylab, bg=bg, lwd=lwd, type="l", add=add, ...)
+    if(type %in% c("p","b")) matplot(x, y, lty=lty, pch=pch, col=col, xlab=xlab, xaxt=xaxt, ylab=ylab, bg=bg, lwd=lwd, type="p", add=add | type!="p", ...)
     
     if (xaxt=="n") 
         if(missing.y & draw.x.axis) axis(side=1, at=x, labels=rownames(y)) else if (draw.x.axis) axis(side=1, at=x, labels=x)
     if (make.legend) {
         if (is.null(legend)) legend=colnames(y)
         if (length(unique(pch))>1) {
-            mylegend(legend, x=legend.x, lty=lty, title=legend.title, col=col, pt.bg=bg, cex=legend.cex, lwd=lwd, inset=legend.inset, pch=pch, y.intersp=y.intersp, x.intersp=x.intersp)
+            mylegend(legend, x=legend.x, lty=lty, title=legend.title, col=col, pt.bg=bg, cex=legend.cex, lwd=lwd, inset=legend.inset, y.intersp=y.intersp, x.intersp=x.intersp, text.width=text.width, pch=pch)
         } else {
-            mylegend(legend, x=legend.x, lty=lty, title=legend.title, col=col, pt.bg=bg, cex=legend.cex, lwd=lwd, inset=legend.inset, y.intersp=y.intersp, x.intersp=x.intersp)
+            mylegend(legend, x=legend.x, lty=lty, title=legend.title, col=col, pt.bg=bg, cex=legend.cex, lwd=lwd, inset=legend.inset, y.intersp=y.intersp, x.intersp=x.intersp, text.width=text.width)
         }
     }
 }

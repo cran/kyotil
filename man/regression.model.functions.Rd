@@ -10,8 +10,13 @@
 \alias{getFixedEf.glm}
 \alias{getFixedEf.inla}
 \alias{getFixedEf.lm}
-\alias{getFixedEf.lme}
+\alias{getFixedEf.glmerMod}
+\alias{getFixedEf.merMod}
+\alias{getVarComponent.glmerMod}
+\alias{getVarComponent.mer}
+\alias{getVarComponent.merMod}
 \alias{getFixedEf.lmerMod}
+\alias{getFixedEf.lme}
 \alias{getFixedEf.logistf}
 \alias{getFixedEf.matrix}
 \alias{getFixedEf.mer}
@@ -39,10 +44,10 @@ getFormattedSummary prints a table of regression coefficient estimates and stand
 }
 \usage{
 
-getFormattedSummary(fits, type = 2, est.digits = 2, se.digits = 2, robust,
- random = FALSE, VE = FALSE, to.trim = FALSE, rows =
- NULL, coef.direct = FALSE, trunc.large.est = TRUE,
- scale.factor = 1, ...)
+getFormattedSummary(fits, type = 12, est.digits = 2, se.digits = 2,
+ robust, random = FALSE, VE = FALSE, to.trim = FALSE,
+ rows = NULL, coef.direct = FALSE, trunc.large.est =
+ TRUE, scale.factor = 1, p.digits = 3, ...)
 
 getVarComponent(object, ...)
 
@@ -61,7 +66,7 @@ logistic.regression = TRUE)
 
 \method{getFixedEf}{gee}(object, exp = FALSE, ...)
 
-\method{getFixedEf}{geese}(object, ...)
+\method{getFixedEf}{geese}(object, robust = TRUE, ...)
 \method{getFixedEf}{tps}(object, exp=FALSE, robust=TRUE, ...)
 
 \method{getFixedEf}{glm} (object, exp = FALSE, robust = TRUE, ret.robcov = FALSE, 
@@ -144,6 +149,9 @@ logistic.regression = TRUE)
 %%     ~~Describe \code{est.digits} here~~
 }
   \item{se.digits}{
+%%     ~~Describe \code{se.digits} here~~
+}
+  \item{p.digits}{
 %%     ~~Describe \code{se.digits} here~~
 }
   \item{random}{

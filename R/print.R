@@ -6,7 +6,7 @@ mytex=function(dat=NULL, file.name="temp",
     lines=TRUE, hline.after=NULL, 
     add.to.row=NULL, 
     sanitize.text.function = NULL, #function(x) x,
-    append=FALSE, preamble="", stand.alone=TRUE, 
+    append=FALSE, preamble="", input.foldername=NULL,
     caption=NULL, label=paste("tab",last(strsplit(file.name, "/")[[1]]),sep=" "), table.placement="h!",
     add.clear.page.between.tables=FALSE,
     verbose=FALSE,
@@ -25,13 +25,11 @@ mytex=function(dat=NULL, file.name="temp",
     if (length(tmp)==3) stop("Cannot handle nested folders yet") 
     if (length(tmp)==1) file.name="./"%.%file.name
 
-    # if we also want to create a standalone copy 
-    if (stand.alone) {
-        tmp=strsplit(file.name, split="/")[[1]] # this needed again b/c file.name may have changed the last line
-        input.foldername=concatList(tmp[-length(tmp)], "/")%.%"/input"
-        if(!file.exists(input.foldername)) dir.create(input.foldername) 
-        file.name.2=input.foldername%.%"/"%.%tmp[length(tmp)]
-    }
+    # also create a copy just containing the latex fragment
+    tmp=strsplit(file.name, split="/")[[1]] # this needed again b/c file.name may have changed the last line
+    if(is.null(input.foldername)) input.foldername=concatList(tmp[-length(tmp)], "/")%.%"/input"
+    if(!file.exists(input.foldername)) dir.create(input.foldername) 
+    file.name.2=input.foldername%.%"/"%.%tmp[length(tmp)]
     
     if(is.data.frame(dat)) dat=list(dat)
     if (!is.list(dat)) dat=list(dat)
@@ -39,10 +37,8 @@ mytex=function(dat=NULL, file.name="temp",
     if (!append) { #start a new file
         #document tag, preamble etc
         mytex.begin(file.name%.%".tex", preamble)
-        if (stand.alone) {
-            #empty file
-            cat ("", file=file.name.2%.%".tex", append=FALSE)
-        }
+        #empty file
+        cat ("", file=file.name.2%.%".tex", append=FALSE)
     } 
     
     add.to.row.0=add.to.row
@@ -63,7 +59,7 @@ mytex=function(dat=NULL, file.name="temp",
         # character only 
         if (!is.matrix(dat1) & is.character(dat1)) {
             cat (dat1%.%"\n\n\n", file=file.name%.%".tex", append=TRUE)
-            if(stand.alone) cat (dat1%.%"\n\n\n", file=file.name.2%.%".tex", append=TRUE)
+            cat (dat1%.%"\n\n\n", file=file.name.2%.%".tex", append=TRUE)
             next
         }
             
@@ -108,10 +104,12 @@ mytex=function(dat=NULL, file.name="temp",
         
         if(include.colnames) {
             # to make border in the column names, but centrally aligned
-            coln=if(!is.null(sanitize.text.function)) sanitize.text.function(colnames(dat1)) else sanitize.text(sanitize.numbers(colnames(dat1)))
+            coln=if(!is.null(sanitize.text.function)) sanitize.text.function(colnames(dat1)) else mysanitize.text(mysanitize.numbers(colnames(dat1)))
             align.1=align[-1]
             align.1=gsub("[lr]","c",align.1)
-            top.1=concatList(" \\multicolumn{1}{"%.%align.1%.%"}{"%.%coln%.%"} ", sep="&") %.% "\\\\ \n"%.% # center aligned column titles
+            # multicolumn env makes sanitize.text result not compilable
+            top.1=concatList(coln, sep="& ") %.% "\\\\ \n"%.% # center aligned column titles
+#            top.1=concatList(" \\multicolumn{1}{"%.%align.1%.%"}{"%.%coln%.%"} ", sep="&") %.% "\\\\ \n"%.% # center aligned column titles
                 "\\hline\n" # insert at the beginning of table, "\n" is added so that there is no need to keep it in col.title
             #print(coln);print(top.1);print(align.1);print(align)
             
@@ -124,7 +122,7 @@ mytex=function(dat=NULL, file.name="temp",
             #print(coln);print(top.1);print(align.1)
         }
             
-        if (include.colnames & is.null(hline.after)) hline.after=c(nrow(dat1)) # cannot use default due to add.to.row    
+        if (include.colnames & (is.null(hline.after) | length(dat)>1) ) hline.after=c(nrow(dat1)) # cannot use default due to add.to.row    
         include.colnames=FALSE        
         
         if (is.null(add.to.row)) {
@@ -155,7 +153,7 @@ mytex=function(dat=NULL, file.name="temp",
             include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
             add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
 
-        if (stand.alone) print(..., xtable::xtable(dat1, 
+        print(..., xtable::xtable(dat1, 
                 digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
                 display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
                 align=align, caption=caption, label=label, ...), 
@@ -164,7 +162,7 @@ mytex=function(dat=NULL, file.name="temp",
             add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
         
         cat ("\n", file=file.name%.%".tex", append=TRUE)
-        if(stand.alone) cat ("\n", file=file.name.2%.%".tex", append=TRUE)
+        #cat ("\n", file=file.name.2%.%".tex", append=TRUE) # don't add this line since extra lines at the end will prevent two tabular from being put on the same line
         # restore some variables that have changed in this function
         add.to.row=add.to.row.0
         include.colnames=include.colnames.0
@@ -207,7 +205,7 @@ mytex.end=function(file.name){
 }
 
 # adapted from print.xtable.R
-sanitize.text <- function(str) {
+mysanitize.text <- function(str) {
     result <- str
     result <- gsub("\\\\", "SANITIZE.BACKSLASH", result)
     result <- gsub("$", "\\$", result, fixed = TRUE)
@@ -226,7 +224,7 @@ sanitize.text <- function(str) {
                    result, fixed = TRUE)
     return(result)
 }
-sanitize.numbers <- function(x) {
+mysanitize.numbers <- function(x) {
     result <- x
 #    if ( math.style.negative ) {
         ## Jake Bowers <jwbowers@illinois.edu> in e-mail
@@ -271,13 +269,14 @@ make.latex.coef.table = function (models, model.names=NULL, row.major=FALSE, rou
 }
 
 
-roundup=function (value, digits, na.to.empty=TRUE) {
+roundup=function (value, digits, na.to.empty=TRUE, remove.leading0=TRUE) {
     if (length(digits)==1) {
         out=format(round(value, digits), nsmall=digits, scientific=FALSE) 
     } else {
         if (length(digits)!=length(value)) stop("length of value and length of values different")
         out = sapply(1:length(digits), function (i) roundup (value[i], digits[i], na.to.empty))
     }
+    if(remove.leading0) out=sub("0\\.","\\.",out)
     if(na.to.empty) sub("NA|NaN","",out) else out
 }
 formatInt=function (x, digits, fill="0", ...) {
@@ -316,7 +315,7 @@ mywrite.csv = function(x, file="tmp", row.names=FALSE, digits=NULL, ...) {
 myprint <- function(object, ...) UseMethod("myprint") 
 
 # this function is placed at the bottom of the file because it contains "\""), which makes all the following line be miss-interpreted as being in quotes
-myprint.default = function (..., newline=TRUE, digits=3) {   
+myprint.default = function (..., newline=TRUE, digits=3, print.name=TRUE) {   
     digits.save=getOption("digits")
     options(digits=digits)
     object <- as.list(substitute(list(...)))[-1]
@@ -333,7 +332,7 @@ myprint.default = function (..., newline=TRUE, digits=3) {
 #        if (contain(tmpname, "\"") | contain(tmpname, "\\")) {
 #            for (a in x[[i]]) cat(a)
 #        } else {
-            cat (tmpname %.% " = ")
+            if(print.name) cat (tmpname %.% " = ")
             for (a in x[[i]]) cat(a,"") # by putting "" there, a space is introduced b/c cat prints a sep
             if (i!=length(x)) cat ("; ")
 #        }
@@ -342,3 +341,9 @@ myprint.default = function (..., newline=TRUE, digits=3) {
     options(digits=digits.save)
 }
 #a="hello"; b="you"; myprint (a, b); myprint ("test"); myprint.default ("\t")
+
+myprint.matrix=function(object, ...){
+    tmpname <- deparse(substitute(object))
+    cat(tmpname, "\n")
+    for (i in 1:nrow(object)) myprint(object[i,], print.name=FALSE, ...)
+}

@@ -28,7 +28,6 @@
 \alias{corplot}
 \alias{corplot.default}
 \alias{corplot.formula}
-\alias{VEplot.glm}
 \alias{add.mtext.label}
 \alias{mydev.off}
 \alias{myfigure}
@@ -59,12 +58,18 @@ butterfly.plot(dat, dat2 = NULL, add = FALSE, xaxislabels = rep("", 4), x.ori = 
 
 empty.plot()
 
+add.mtext.label (text, cex = 1.4, adj = -0.2) 
+mydev.off(file = "temp", ext = c("pdf"), res = 200, mydev =
+ NULL)
+
 getMfrow(len)
 
 myhist (x, add.norm=TRUE, col.norm="blue", ...)
 
-myforestplot(dat, xlim=NULL, xlab="", main="", col.1="red", col.2="blue",
- plot.labels=TRUE,order=FALSE,decreasing=FALSE, vline=TRUE,cols=NULL,log="")
+myforestplot(dat, xlim = NULL, xlab = "", main = "", col.1 = "red",
+ col.2 = "blue", plot.labels = TRUE, order = FALSE,
+ decreasing = FALSE, vline = TRUE, cols = NULL, log =
+ "", null.val = NULL)
 
 my.interaction.plot(dat, x.ori = 0, xaxislabels = rep("", 2), cex.axis = 1, add = FALSE,
     xlab = "", ylab = "", pcol = NULL, lcol = NULL, ...)
@@ -77,7 +82,7 @@ myboxplot(object, ...)
  friedman.test.formula = NULL, reshape.formula = NULL,
  reshape.id = NULL, jitter = TRUE, add.interaction =
  FALSE, drop.unused.levels = TRUE, bg.pt = NULL, add =
- FALSE, seed = 1, ...)
+ FALSE, seed = 1, write.p.at.top = FALSE, ...)
     
 \method{myboxplot}{data.frame}(object, cex = 0.5, ylab = "", xlab = "", main = "",
  box = TRUE, at = NULL, pch = 1, col = 1, test = "",
@@ -88,20 +93,17 @@ myboxplot(object, ...)
 abline.shade.2(x, col=c(0,1,0))
 abline.shade(pt, quadrant=c(1,2,3,4), col=c(0,1,0), alpha=0.3)
 
-\method{VEplot}{glm}(object, X1, X2, x, ...)
-add.mtext.label (text, cex = 1.4, adj = -0.2) 
-mydev.off(file = "temp", ext = c("pdf"), res = 200, mydev =
- NULL)
 
 mylegend(legend, x, y=NULL, lty = NULL, bty = "n", ...)
 
 mymatplot(x, y, type = "b", lty = c(1, 2, 1, 2, 1, 2), pch =
-         NULL, col = rep(c("darkgray", "black"), each = 3),
-         xlab = NULL, ylab = "", draw.x.axis = TRUE, bg = NA,
-         lwd = 1, at = NULL, make.legend = TRUE, legend = NULL,
-         impute.missing.for.line = TRUE, legend.x = 9,
-         legend.title = NULL, legend.cex = 1, legend.inset = 0,
-         xaxt = "s", y.intersp = 1.5, x.intersp = 0.3, ...)
+ NULL, col = rep(c("darkgray", "black"), each = 3),
+ xlab = NULL, ylab = "", draw.x.axis = TRUE, bg = NA,
+ lwd = 1, at = NULL, make.legend = TRUE, legend = NULL,
+ impute.missing.for.line = TRUE, legend.x = 9,
+ legend.title = NULL, legend.cex = 1, legend.inset = 0,
+ xaxt = "s", y.intersp = 1.5, x.intersp = 0.3,
+ text.width = NULL, add = FALSE, ...)
          
                           
 mypairs(dat, ladder = FALSE, show.data.cloud = TRUE,
@@ -150,6 +152,34 @@ col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FAL
 
 \arguments{
 
+  \item{null.val}{
+%%     ~~Describe \code{add} here~~
+}
+  \item{write.p.at.top}{
+%%     ~~Describe \code{add} here~~
+}
+  \item{text.width}{
+%%     ~~Describe \code{add} here~~
+}
+  \item{text}{
+%%     ~~Describe \code{add} here~~
+}
+  \item{cex}{
+%%     ~~Describe \code{cex} here~~
+}
+  \item{adj}{
+%%     ~~Describe \code{pt2} here~~
+}
+  \item{file}{
+%%     ~~Describe \code{file} here~~
+}
+  \item{ext}{
+%%     ~~Describe \code{ext} here~~
+}
+  \item{res}{
+resolution.
+}
+
 
   \item{add.norm}{Boolean, whether to add normal approximation density line}
   \item{col.norm}{string, color of added normal density line}
@@ -186,9 +216,6 @@ col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FAL
 %%     ~~Describe \code{\dots} here~~
 }
 
-  \item{adj}{
-%%     ~~Describe \code{pt2} here~~
-}
   \item{xaxt}{
 %%     ~~Describe \code{pt2} here~~
 }
@@ -263,9 +290,6 @@ controls the look of legend.
   \item{y.intersp}{
 controls the look of legend.
 }
-  \item{res}{
-resolution.
-}
   \item{legend.inset}{
 legend inset
 }
@@ -273,9 +297,6 @@ legend inset
 %%     ~~Describe \code{dat2} here~~
 }
   \item{add}{
-%%     ~~Describe \code{add} here~~
-}
-  \item{text}{
 %%     ~~Describe \code{add} here~~
 }
   \item{log}{
@@ -349,9 +370,6 @@ a formula object.
   \item{data}{
 %%     ~~Describe \code{data} here~~
 }
-  \item{cex}{
-%%     ~~Describe \code{cex} here~~
-}
   \item{box}{
 %%     ~~Describe \code{box} here~~
 }
@@ -373,12 +391,6 @@ string. For example, "t","w","f","k", "tw"
 %%     ~~Describe \code{legend} here~~
 }
   \item{x}{
-%%     ~~Describe \code{x} here~~
-}
-  \item{X1}{
-%%     ~~Describe \code{x} here~~
-}
-  \item{X2}{
 %%     ~~Describe \code{x} here~~
 }
   \item{lty}{
@@ -416,9 +428,6 @@ string. For example, "t","w","f","k", "tw"
 }
 
 
-  \item{file}{
-%%     ~~Describe \code{file} here~~
-}
   \item{mfrow}{
 %%     ~~Describe \code{mfrow} here~~
 }
@@ -430,9 +439,6 @@ string. For example, "t","w","f","k", "tw"
 }
   \item{height}{
 %%     ~~Describe \code{height} here~~
-}
-  \item{ext}{
-%%     ~~Describe \code{ext} here~~
 }
   \item{oma}{
 %%     ~~Describe \code{oma} here~~
@@ -525,6 +531,12 @@ x=1:50+rnorm(50,0,4)
 y=1:50+rnorm(50,0,4)
 dat=data.frame(x, y)
 corplot(y~x,dat,add.lm.fit=TRUE,add.deming.fit=TRUE,col.lm="red",col.deming="blue")
+
+dat=data.frame(y=c(1:10,2:11), x=rep(c("a","b"),each=10), ptid=c(1:10,1:10))
+par(mfrow=c(1,2))
+myboxplot(y~x, dat, test="w", jitter=FALSE)
+myboxplot(y~x, dat, test="f", add.interaction=TRUE, reshape.formula=y~x, reshape.id="ptid")
+
 
 myboxplot(list(jitter(1:10), jitter(3:12)), test="w")
 myboxplot(list(jitter(1:10), jitter(3:12)), test="w", paired=TRUE)

@@ -9,8 +9,6 @@
 \alias{getFileStem}
 \alias{getStem}
 \alias{lastIndex}
-\alias{myprint}
-\alias{myprint.default}
 \alias{remove.prefix}
 \alias{trim}
 \title{String Functions}
@@ -36,10 +34,6 @@ getFileStem(file.name)
 getStem(file.name)
 
 lastIndex(s1, s2)
-
-myprint(object, ...)
-
-\method{myprint}{default}(..., newline = TRUE, digits = 3)
 
 remove.prefix(s, sep = "_")
 
@@ -76,20 +70,6 @@ remove.prefix(s, sep = "_")
 
 
 
-
-  \item{object}{
-%%     ~~Describe \code{object} here~~
-}
-  \item{\dots}{
-%%     ~~Describe \code{\dots} here~~
-}
-
-  \item{newline}{
-%%     ~~Describe \code{newline} here~~
-}
-  \item{digits}{
-%%     ~~Describe \code{digits} here~~
-}
 
   \item{s}{
 %%     ~~Describe \code{s} here~~

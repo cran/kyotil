@@ -360,3 +360,12 @@ predict.pcc=function(object, newdat, ...) {
     #sum(res["distance",])
     res
 }
+
+
+# rank-based inverse normal transformation
+rank.inv.norm = function(x) {
+    qnorm(rank(x)/(1+length(x)))
+}
+
+INT=rank.inv.norm
+    

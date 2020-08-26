@@ -1,7 +1,7 @@
 # type 3 and 7 do not give the right output for glm fits
 # robust can be passed as part of .... Sometimes robust=T generates errors
 # trim: get rid of white space in confidence intervals for alignment
-getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, random=FALSE, VE=FALSE, to.trim=FALSE, rows=NULL, coef.direct=FALSE, trunc.large.est=TRUE, scale.factor=1, ...){
+getFormattedSummary=function(fits, type=12, est.digits=2, se.digits=2, robust, random=FALSE, VE=FALSE, to.trim=FALSE, rows=NULL, coef.direct=FALSE, trunc.large.est=TRUE, scale.factor=1, p.digits=3, ...){
     
     if(is.null(names(fits))) names(fits)=seq_along(fits)
     idxes=seq_along(fits); names(idxes)=names(fits)
@@ -33,33 +33,43 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
             }
         }
         
+        
         # tmp should be: est, se, lb, ub, pvalue 
         tmp[,1]=tmp[,1]*scale.factor        
-        tmp[,2]=tmp[,2]*scale.factor        
+        tmp[,2]=tmp[,2]*scale.factor   
         
-        p.val.col=which(startsWith(tolower(colnames(tmp)),"p"))
-        lb=formatDouble(tmp[,3,drop=FALSE], est.digits) 
-        if(to.trim) lb=trim(lb)
-        ub=formatDouble(tmp[,4,drop=FALSE], est.digits) 
-        if(to.trim) ub=trim(ub)
+        # take only some rows
+        if (!is.null(rows)) tmp=tmp[intersect(rows,1:nrow(tmp)),,drop=F]
+
+        est.=as.matrix(tmp[,1,drop=FALSE], ncol=1) # if do not cast into matrix, it will be a data frame, which leads to problems next
+        too.big=trunc.large.est & est.>100
         
-        if (!is.null(rows)) tmp=tmp[intersect(rows,1:nrow(tmp)),]# take only some rows
-        # str(lb); str(ub); str(est.) # make sure they are not data frames 
-        
-        est.=tmp[,1,drop=FALSE]
-        # replace large values
-        
+        # replace large values in est.
         # find a round that takes multipled digits!
         # trim is necessary here
-        est.=ifelse(trunc.large.est & est.>100,">100",trim(formatDouble(est., est.digits)))
+        est.=ifelse(too.big,">100",trim(formatDouble(est., est.digits)))
         
+        p.val.col=which(startsWith(tolower(colnames(tmp)),"p"))
+        
+        lb=tmp[,3,drop=FALSE]
+        lb[too.big]=NA
+        lb=formatDouble(lb, est.digits) 
+        if(to.trim) lb=trim(lb)
+        
+        ub=tmp[,4,drop=FALSE]
+        ub[too.big]=NA
+        ub=formatDouble(ub, est.digits) 
+        if(to.trim) ub=trim(ub)
+        
+        # str(lb); str(ub); str(est.) # make sure they are not data frames 
+
         
         if (type==1)
             # est only
             out=drop(est. )
         else if (type==2)
             # est (se)
-            out=est. %.% " (" %.% formatDouble(tmp[,2,drop=FALSE], se.digits) %.% ")" %.% ifelse (round(tmp[,p.val.col],2)<=0.05, ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
+            out=est. %.% " (" %.% formatDouble(tmp[,2,drop=FALSE], se.digits) %.% ")" %.% ifelse (round(tmp[,p.val.col],3)<=0.05, ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==3) 
             # est (lb, up)
             out=est. %.% " (" %.% lb %.% ", " %.% ub %.% ")" 
@@ -69,31 +79,32 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
         else if (type==5)
             # est **
             out=est. %.%
-                ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
+                ifelse (round(tmp[,p.val.col],3)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==6)
             # est (pval)*
-            out=est. %.% " (" %.% formatDouble(tmp[,p.val.col,drop=FALSE], 3) %.% ")" %.% ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
+            out=est. %.% " (" %.% formatDouble(tmp[,p.val.col,drop=FALSE], 3) %.% ")" %.% ifelse (round(tmp[,p.val.col],3)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==7)
             # (lb, up)
-            out=" (" %.% lb %.% ", " %.% ub %.% ")" 
+            out=ifelse(drop(too.big), rep("",nrow(lb)), " (" %.% lb %.% ", " %.% ub %.% ")")
         else if (type==8)
             # est (p value #)
             out=est. %.% " (p value " %.% 
                 formatDouble(tmp[,p.val.col,drop=FALSE], 3) %.% ")" 
         else if (type==9)
             # est (pval)*
-            out=est. %.% " (" %.% formatDouble(tmp[,p.val.col,drop=FALSE], 3) %.% ")" 
+            out=est. %.% " (" %.% formatDouble(tmp[,p.val.col,drop=FALSE], p.digits) %.% ")" 
         else if (type==10)
             # pval
             out=format(round(tmp[,p.val.col,drop=TRUE], 3), nsmall=3, scientific=FALSE) 
         else if (type==11)
             # adj pval
-            out=format(round(p.adjust(tmp[,p.val.col,drop=TRUE], method="fdr"), 3), nsmall=3, scientific=FALSE) 
+            out=format(round(p.adjust(tmp[,p.val.col,drop=TRUE], method="fdr"), p.digits), nsmall=3, scientific=FALSE) 
         else if (type==12)
-            # est (pval)* (lb, up)
-            out=est. %.% "(" %.% 
-                formatDouble(tmp[,p.val.col,drop=FALSE], 3) %.% ")" %.% ifelse (round(tmp[,p.val.col],2)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"") %.%
-                "(" %.% lb %.% "," %.% ub %.% ")" 
+            # est (lb, up, pval *)
+            out=est. %.% 
+                " (CI=" %.% lb %.% "," %.% ub %.% 
+                ", p=" %.% formatDouble(tmp[,p.val.col,drop=FALSE], 3) %.% ")" %.%
+                ifelse (round(tmp[,p.val.col],3)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"") 
         else 
             stop ("getFormattedSummaries(). type not supported: "%.%type)
             
@@ -102,7 +113,6 @@ getFormattedSummary=function(fits, type=2, est.digits=2, se.digits=2, robust, ra
         out=gsub("\\( +\\)","",out)
         out
     })
-    #str(res)
         
     if (is.list(res)) {
     # if the fits have different number of parameters, we need this
@@ -195,6 +205,22 @@ getVarComponent.mer = function (object, ...) {
     mysapply(tmp, function (comp) attr(comp, "stddev") )
 }
 
+#get estimates, variances, sd from lmer fit
+getFixedEf.glmerMod = function (object, exp=FALSE, ...) {
+    out=summary(object)$coefficients
+    out=cbind(est=out[,1], se=out[,2], lb=out[,1]-1.96*out[,2], ub=out[,1]+1.96*out[,2],"p"=out[,4])
+    if(exp) out[,c(1,3,4)]=exp(out[,c(1,3,4)])
+    out #est, se, lb, ub, pvalue 
+}
+getFixedEf.merMod=getFixedEf.glmerMod
+
+getVarComponent.glmerMod = function (object, ...) {
+    tmp=lme4::VarCorr(object)
+    mysapply(tmp, function (comp) attr(comp, "stddev") )
+}
+getVarComponent.merMod=getVarComponent.glmerMod
+
+
 #get estimates, variances, sd from lme fit
 getFixedEf.lme = function (object, ...) {
     betas <- object$coef$fixed
@@ -218,8 +244,11 @@ getVarComponent.lmerMod = function (object, ...) {
     as.matrix(vcov(object)) # otherwise will complain about S4 class convertibility problem
 }
 
-getFixedEf.geese = function (object, ...) {
-    summary(object)$mean
+getFixedEf.geese = function (object, robust=TRUE, ...) {
+    tmp=summary(object)$mean
+    # tmp is: estimate     san.se         wald            p
+    # tmp should be: est, se, lb, ub, pvalue 
+    as.matrix(cbind(tmp[,c(1, ifelse(robust,2,3))], confint(object), tmp[,4,drop=F])) # if leave as data.frame, formatDouble fails
 }
     
 getFixedEf.logistf = function (object, exp=FALSE, ...) {

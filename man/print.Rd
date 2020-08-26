@@ -1,4 +1,7 @@
 \name{print.functions}
+\alias{myprint}
+\alias{myprint.default}
+\alias{myprint.matrix}
 \alias{formatInt}
 \alias{formatDouble}
 \alias{make.latex.coef.table}
@@ -8,6 +11,8 @@
 \alias{mywrite}
 \alias{mywrite.csv}
 \alias{roundup}
+\alias{mysanitize.numbers}
+\alias{mysanitize.text}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Print Functions
@@ -18,17 +23,26 @@ formatInt prints a specified number of digits before decimal point even if 0s ar
 }
 \usage{
 
+myprint(object, ...)
+
+\method{myprint}{default}(..., newline = TRUE, digits = 3, print.name=TRUE)
+
+\method{myprint}{matrix}(object, ...)
+
 formatInt(x, digits, fill = "0", ...)
 
 make.latex.coef.table(models, model.names = NULL, row.major = FALSE, round.digits = NULL)
 
-mytex (dat = NULL, file.name = "temp", digits = NULL, display
+mysanitize.text(str) 
+mysanitize.numbers(x) 
+
+mytex(dat = NULL, file.name = "temp", digits = NULL, display
  = NULL, align = "r", include.rownames = TRUE,
  include.colnames = TRUE, col.headers = NULL, comment =
  FALSE, floating = FALSE, lines = TRUE, hline.after =
  NULL, add.to.row = NULL, sanitize.text.function =
- NULL, append = FALSE, preamble = "", stand.alone =
- TRUE, caption = NULL, label = paste("tab",
+ NULL, append = FALSE, preamble = "", input.foldername
+ = NULL, caption = NULL, label = paste("tab",
  last(strsplit(file.name, "/")[[1]]), sep = " "),
  table.placement = "h!", add.clear.page.between.tables
  = FALSE, verbose = FALSE, ...)
@@ -41,13 +55,27 @@ mywrite(x, ...)
 
 mywrite.csv(x, file = "tmp", row.names = FALSE, digits = NULL, ...)
 
-roundup (value, digits, na.to.empty=TRUE) 
+roundup (value, digits, na.to.empty=TRUE, remove.leading0=TRUE) 
 
-formatDouble(value, digits, na.to.empty=TRUE)
+formatDouble(value, digits, na.to.empty=TRUE, remove.leading0=TRUE)
 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+
+  \item{input.foldername}{
+%%     ~~Describe \code{newline} here~~
+}
+  \item{object}{
+%%     ~~Describe \code{newline} here~~
+}
+  \item{newline}{
+%%     ~~Describe \code{newline} here~~
+}
+  \item{print.name}{
+%%     ~~Describe \code{digits} here~~
+}
+
 
   \item{include.colnames}{Boolean}
   \item{col.headers}{string. Column headers}
@@ -55,8 +83,13 @@ formatDouble(value, digits, na.to.empty=TRUE)
   \item{hline.after}{vector}
   \item{add.to.row}{a list}
   \item{sanitize.text.function}{a function}
-  \item{stand.alone}{Boolean. If true, only one latex file that is stand alone file is made; otherwise both a file that is to be inputted and a standalone version are made}
 
+  \item{str}{
+%%     ~~Describe \code{value} here~~
+}
+  \item{remove.leading0}{
+%%     ~~Describe \code{value} here~~
+}
   \item{caption}{
 %%     ~~Describe \code{value} here~~
 }

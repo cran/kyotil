@@ -144,4 +144,6 @@ VEplot.glm=function (object, X1, X2, x, ...) {
     plot(x,ve, type="l", ...)    
     lines(x,1-CIs[1,],lty=2)
     lines(x,1-CIs[2,],lty=2)
+    
+    return(rbind(est=ve,lb=(1-CIs)[2,],ub=(1-CIs)[1,]))
 }

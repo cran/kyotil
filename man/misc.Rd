@@ -4,6 +4,8 @@
 \alias{sample.for.cv}
 \alias{empty2na}
 \alias{predict.pcc}
+\alias{rank.inv.norm}
+\alias{INT}
 \title{
 Misc Functions
 }
@@ -17,6 +19,8 @@ summ(x)
 sample.for.cv (dat, v, seed)
 empty2na(x) 
 \method{predict}{pcc}(object, newdat, ...)
+rank.inv.norm(x)
+INT(x)
 
 }
 \arguments{
@@ -47,4 +51,5 @@ empty2na(x)
 
 \details{
  sample.for.cv: case and controls are sampled separately.
+ rank.inv.norm: rank-based inverse normal/gaussian transformation
 }

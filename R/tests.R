@@ -98,3 +98,12 @@ mycor.test=function(x, method = c("pearson", "kendall", "spearman"), idx=NULL) {
     }
     out
 }
+
+# pop1 is the number of cases and controls in the first population
+# pop2 is the number of cases and controls in the second population
+mybarnard.test=function(pop1, pop2, method="z-pooled"){
+    # each row of tab is a population
+    tab=rbind(pop1, pop2)
+    test=Exact::exact.test(tab, npNumbers = 100, method = method, to.plot=F)
+    test    
+}

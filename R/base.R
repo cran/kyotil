@@ -11,6 +11,7 @@ cbinduneven=function(li) {
     res=NULL
     for (i in 1:length(li)){
         a=li[[i]]
+        if (is.table(a)) a=as.matrix(a,ncol=1)
         p=ncol(a)
         toadd = matrix(NA, nrow=length(nams), ncol=p, dimnames=list(nams,colnames(a)))
         toadd[rownames(a),]=as.matrix(a)
