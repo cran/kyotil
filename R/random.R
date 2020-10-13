@@ -74,13 +74,14 @@ rnorm.norm.gamma = function(n, mu.0, lambda, alpha, beta) {
     rnorm(n, mean=mu, sd=tao**-.5)
 }
 
-# simulate correlated normal random variables, correlation is sqrt(alpha)
-rnorm.cor = function (n, mu, sd, alpha) {
+# simulate autoregressive normal random variables, correlation is rho^d between x_1 and x_(1+d)
+# sd and rho are scalars
+rnorm.ar = function (n, sd, rho) {
     out=numeric(n)
-    out[1]=rnorm(1, mu, sd)
+    out[1]=rnorm(1, 0, sd)
     if (n>1) 
         for (i in 2:n) {
-            out[i]=sqrt(alpha)*out[i-1] + sqrt(1-alpha)*rnorm(1, mu, sd)
+            out[i]=rho*out[i-1] + sqrt(1-rho**2)*rnorm(1, 0, sd)
         }
     out
 }

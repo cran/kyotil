@@ -36,11 +36,11 @@ getFormattedSummary=function(fits, type=12, est.digits=2, se.digits=2, robust, r
         
         # tmp should be: est, se, lb, ub, pvalue 
         tmp[,1]=tmp[,1]*scale.factor        
-        tmp[,2]=tmp[,2]*scale.factor   
+        if(ncol(tmp)>1) tmp[,2]=tmp[,2]*scale.factor   
         
         # take only some rows
         if (!is.null(rows)) tmp=tmp[intersect(rows,1:nrow(tmp)),,drop=F]
-
+    
         est.=as.matrix(tmp[,1,drop=FALSE], ncol=1) # if do not cast into matrix, it will be a data frame, which leads to problems next
         too.big=trunc.large.est & est.>100
         
@@ -51,18 +51,19 @@ getFormattedSummary=function(fits, type=12, est.digits=2, se.digits=2, robust, r
         
         p.val.col=which(startsWith(tolower(colnames(tmp)),"p"))
         
-        lb=tmp[,3,drop=FALSE]
-        lb[too.big]=NA
-        lb=formatDouble(lb, est.digits) 
-        if(to.trim) lb=trim(lb)
-        
-        ub=tmp[,4,drop=FALSE]
-        ub[too.big]=NA
-        ub=formatDouble(ub, est.digits) 
-        if(to.trim) ub=trim(ub)
-        
+        if(ncol(tmp)>1) {
+            lb=tmp[,3,drop=FALSE]
+            lb[too.big]=NA
+            lb=formatDouble(lb, est.digits) 
+            if(to.trim) lb=trim(lb)
+            
+            ub=tmp[,4,drop=FALSE]
+            ub[too.big]=NA
+            ub=formatDouble(ub, est.digits) 
+            if(to.trim) ub=trim(ub)
+        }
+                
         # str(lb); str(ub); str(est.) # make sure they are not data frames 
-
         
         if (type==1)
             # est only
@@ -355,24 +356,66 @@ getVarComponent.hyperpar.inla = function (object, transformation=NULL, ...) {
     out
 }
 
+getFixedEf.svycoxph=function (object, exp=FALSE, robust=TRUE, ...){
+    if (!robust) warning("svycoxph variance estimate is always design-based, which is close to robust variance estimate. No model-based variance estimate is available")
+    hr=object$coefficients
+    se=sqrt(diag(object$var))
+    pval=pnorm(abs(hr/se), lower.tail=F)*2
+    out=cbind(HR=hr,
+            "se"=se,
+            "95% LL"=hr-qnorm(0.975)*se, 
+            "95% UL"=hr+qnorm(0.975)*se, 
+            "p-val"=pval
+        )
+    if (exp) out[,c(1,3,4)]=exp(out[,c(1,3,4)])
+    out
+#    round(sqrt(diag(attr(object$var,"phases")$phase1)),3)
+#    round(sqrt(diag(attr(object$var,"phases")$phase2)),3)    
+}
+
+
+getFixedEf.svyglm=function (object, exp=FALSE, robust=TRUE, ...){
+    if (!robust) warning("svyglm variance estimate is always design-based, which is close to robust variance estimate. No model-based variance estimate is available")
+    tmp=summary(object)$coefficients
+    or=tmp[,"Estimate"]
+    se=tmp[,"Std. Error"]
+    pval=tmp[,"Pr(>|t|)"]
+    out=cbind(HR=or,
+            "se"=se,
+            "95% LL"=or-qnorm(0.975)*se, 
+            "95% UL"=or+qnorm(0.975)*se, 
+            "p-val"=pval
+        )
+    if (exp) out[,c(1,3,4)]=exp(out[,c(1,3,4)])
+    out
+#    round(sqrt(diag(attr(object$var,"phases")$phase1)),3)
+#    round(sqrt(diag(attr(object$var,"phases")$phase2)),3)    
+}
 
 
 getFixedEf.coxph=function (object, exp=FALSE, robust=FALSE, ...){
-    capture.output(sum.fit<-summary(object))# summary.svycoxph prints some stuff, capture.output absorbs it
+    #capture.output()# summary.svycoxph prints some stuff, capture.output absorbs it
+    sum.fit<-summary(object)
     se.idx=ifelse(!robust,"se(coef)","robust se")
+    if(robust) {
+        pvals=sum.fit$coef[,"Pr(>|z|)"]
+    } else {
+        pvals=pnorm(abs(sum.fit$coef[,1]/sum.fit$coef[,"se(coef)"]), lower.tail=F)*2
+    }
+    
     if (!exp) {
         cbind(HR=sum.fit$coef[,1], 
             "se"=sum.fit$coef[,se.idx],
             "95% LL"=(sum.fit$coef[,1]-qnorm(0.975)*sum.fit$coef[,se.idx]), 
             "95% UL"=(sum.fit$coef[,1]+qnorm(0.975)*sum.fit$coef[,se.idx]), 
-            "p-val"=sum.fit$coef[,"Pr(>|z|)"]
+            "p-val"=pvals
         )
     } else {
         cbind(HR=sum.fit$coef[,2], 
             "se"=sum.fit$coef[,se.idx],
             "95% LL"=exp(sum.fit$coef[,1]-qnorm(0.975)*sum.fit$coef[,se.idx]), 
             "95% UL"=exp(sum.fit$coef[,1]+qnorm(0.975)*sum.fit$coef[,se.idx]), 
-            "p-val"=sum.fit$coef[,"Pr(>|z|)"]
+            "p-val"=pvals
         )
     }
 #    round(sqrt(diag(attr(object$var,"phases")$phase1)),3)

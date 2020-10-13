@@ -280,7 +280,8 @@ mypairs=function(dat, ladder=FALSE, show.data.cloud=TRUE, ladder.add.line=T, lad
     if(doText <- missing(text.panel) || is.function(text.panel))
     textPanel <-
         function(x = 0.5, y = 0.5, txt, cex, font)
-        text(x, y, parse(text=txt), cex = cex, font = font)# parse(text=txt) allows us to print math
+        text(x, y, txt, cex = cex, font = font)# replacing txt with parse(text=txt) allows us to print math, but it chokes at space
+        #text(x, y, parse(text=txt), cex = cex, font = font)# parse(text=txt) allows us to print math
     
     localAxis <- function(side, x, y, xpd, bg, col=NULL, main, oma, ...) {
       ## Explicitly ignore any color argument passed in as

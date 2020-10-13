@@ -22,17 +22,26 @@ DMHeatMap(x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
  linecol = tracecol, margins = c(5, 5), ColSideColors,
  RowSideColors, cexRow = 0.2 + 1/log10(nr), cexCol =
  0.2 + 1/log10(nc), labRow = NULL, labCol = NULL,
- labColor = NULL, key = TRUE, keysize = 1.5,
- density.info = c("histogram", "density", "none"),
- denscol = tracecol, symkey = min(x < 0, na.rm = TRUE)
- || symbreaks, densadj = 0.25, main = NULL, xlab =
- NULL, ylab = NULL, lmat = NULL, lhei = NULL, lwid =
- NULL, lower.left.only = TRUE, legend = TRUE, legend.x
- = "topright", ...)
+ labColor = NULL, axis = TRUE, heatmapOnly = FALSE, key
+ = TRUE, keysize = 1.5, density.info = c("histogram",
+ "density", "none"), denscol = tracecol, symkey = min(x
+ < 0, na.rm = TRUE) || symbreaks, densadj = 0.25, main
+ = NULL, xlab = NULL, ylab = NULL, lmat = NULL, lhei =
+ NULL, lwid = NULL, lower.left.only = TRUE, legend =
+ TRUE, legend.x = "topright", verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
+%%     ~~Describe \code{x} here~~
+}
+  \item{axis}{
+%%     ~~Describe \code{x} here~~
+}
+  \item{heatmapOnly}{
+%%     ~~Describe \code{x} here~~
+}
+  \item{verbose}{
 %%     ~~Describe \code{x} here~~
 }
   \item{legend.x}{

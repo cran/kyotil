@@ -6,7 +6,7 @@ mytex=function(dat=NULL, file.name="temp",
     lines=TRUE, hline.after=NULL, 
     add.to.row=NULL, 
     sanitize.text.function = NULL, #function(x) x,
-    append=FALSE, preamble="", input.foldername=NULL,
+    append=FALSE, preamble="", input.foldername=NULL, save2input.only=NULL,
     caption=NULL, label=paste("tab",last(strsplit(file.name, "/")[[1]]),sep=" "), table.placement="h!",
     add.clear.page.between.tables=FALSE,
     verbose=FALSE,
@@ -20,6 +20,8 @@ mytex=function(dat=NULL, file.name="temp",
         
     if (endsWith(file.name,".tex")) file.name=substr(file.name, 1, nchar(file.name)-4)
     
+    if(is.null(save2input.only)) save2input.only = !is.null(input.foldername)
+    
     tmp=strsplit(file.name, split="/")[[1]]
     # add ./ in front of file name if there is no folder name in the file name, otherwise won't be able to find files :(
     if (length(tmp)==3) stop("Cannot handle nested folders yet") 
@@ -28,7 +30,7 @@ mytex=function(dat=NULL, file.name="temp",
     # also create a copy just containing the latex fragment
     tmp=strsplit(file.name, split="/")[[1]] # this needed again b/c file.name may have changed the last line
     if(is.null(input.foldername)) input.foldername=concatList(tmp[-length(tmp)], "/")%.%"/input"
-    if(!file.exists(input.foldername)) dir.create(input.foldername) 
+    if(!dir.exists(input.foldername)) dir.create(input.foldername) 
     file.name.2=input.foldername%.%"/"%.%tmp[length(tmp)]
     
     if(is.data.frame(dat)) dat=list(dat)
@@ -36,7 +38,7 @@ mytex=function(dat=NULL, file.name="temp",
     
     if (!append) { #start a new file
         #document tag, preamble etc
-        mytex.begin(file.name%.%".tex", preamble)
+        if(!save2input.only) mytex.begin(file.name%.%".tex", preamble)
         #empty file
         cat ("", file=file.name.2%.%".tex", append=FALSE)
     } 
@@ -58,7 +60,7 @@ mytex=function(dat=NULL, file.name="temp",
          
         # character only 
         if (!is.matrix(dat1) & is.character(dat1)) {
-            cat (dat1%.%"\n\n\n", file=file.name%.%".tex", append=TRUE)
+            if(!save2input.only) cat (dat1%.%"\n\n\n", file=file.name%.%".tex", append=TRUE)
             cat (dat1%.%"\n\n\n", file=file.name.2%.%".tex", append=TRUE)
             next
         }
@@ -133,7 +135,7 @@ mytex=function(dat=NULL, file.name="temp",
         #print(add.to.row)
  
         if (length(dat)>1) {
-            cat (ifelse(add.clear.page.between.tables, "\\clearpage"%.%names(dat)[i]%.%"\n\n", "\\vspace{20pt}"%.%names(dat)[i]%.%"\n\n"), file=file.name%.%".tex", append=TRUE)
+            if(!save2input.only) cat (ifelse(add.clear.page.between.tables, "\\clearpage"%.%names(dat)[i]%.%"\n\n", "\\vspace{20pt}"%.%names(dat)[i]%.%"\n\n"), file=file.name%.%".tex", append=TRUE)
             cat (ifelse(add.clear.page.between.tables, "\\clearpage"%.%names(dat)[i]%.%"\n\n", "\\vspace{20pt}"%.%names(dat)[i]%.%"\n\n"), file=file.name.2%.%".tex", append=TRUE)
         }
         #if (!is.null(attr(dat1,"caption"))) caption=attr(dat1,"caption") else caption=NULL
@@ -145,7 +147,7 @@ mytex=function(dat=NULL, file.name="temp",
         #print(hline.after)
 
         if(!include.rownames) rownames(dat1)=1:nrow(dat1)# otherwise there will be a warning from xtable
-        print(..., xtable::xtable(dat1, 
+        if(!save2input.only) print(..., xtable::xtable(dat1, 
                 digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
                 display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
                 align=align, caption=caption, label=label, ...), 
@@ -161,7 +163,7 @@ mytex=function(dat=NULL, file.name="temp",
             include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
             add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
         
-        cat ("\n", file=file.name%.%".tex", append=TRUE)
+        if(!save2input.only) cat ("\n", file=file.name%.%".tex", append=TRUE)
         #cat ("\n", file=file.name.2%.%".tex", append=TRUE) # don't add this line since extra lines at the end will prevent two tabular from being put on the same line
         # restore some variables that have changed in this function
         add.to.row=add.to.row.0
@@ -169,9 +171,9 @@ mytex=function(dat=NULL, file.name="temp",
     }
     
     if(!append) {
-        mytex.end(file.name%.%".tex")
+        if(!save2input.only) mytex.end(file.name%.%".tex")
     }
-    cat ("Writing table to "%.%getwd()%.%"/"%.%file.name%.%"\n")
+    if(!save2input.only) cat ("Writing table to "%.%getwd()%.%"/"%.%file.name%.%"\n")
 }
 #x=matrix(0,2,2,dimnames=list(a=1:2, b=1:2));  mytex(x)
 #x=matrix(0,2,2,dimnames=list(a=1:2, 1:2));  mytex(x)
@@ -276,7 +278,7 @@ roundup=function (value, digits, na.to.empty=TRUE, remove.leading0=TRUE) {
         if (length(digits)!=length(value)) stop("length of value and length of values different")
         out = sapply(1:length(digits), function (i) roundup (value[i], digits[i], na.to.empty))
     }
-    if(remove.leading0) out=sub("0\\.","\\.",out)
+    if(remove.leading0) out=sub("^0\\.","\\.",out)
     if(na.to.empty) sub("NA|NaN","",out) else out
 }
 formatInt=function (x, digits, fill="0", ...) {

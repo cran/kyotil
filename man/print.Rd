@@ -42,10 +42,11 @@ mytex(dat = NULL, file.name = "temp", digits = NULL, display
  FALSE, floating = FALSE, lines = TRUE, hline.after =
  NULL, add.to.row = NULL, sanitize.text.function =
  NULL, append = FALSE, preamble = "", input.foldername
- = NULL, caption = NULL, label = paste("tab",
- last(strsplit(file.name, "/")[[1]]), sep = " "),
- table.placement = "h!", add.clear.page.between.tables
- = FALSE, verbose = FALSE, ...)
+ = NULL, save2input.only = NULL, caption = NULL, label
+ = paste("tab", last(strsplit(file.name, "/")[[1]]),
+ sep = " "), table.placement = "h!",
+ add.clear.page.between.tables = FALSE, verbose =
+ FALSE, ...)
 
 mytex.begin(file.name, preamble = "")
 
@@ -77,6 +78,7 @@ formatDouble(value, digits, na.to.empty=TRUE, remove.leading0=TRUE)
 }
 
 
+  \item{save2input.only}{Boolean}
   \item{include.colnames}{Boolean}
   \item{col.headers}{string. Column headers}
   \item{comment}{Boolean, whether to include the version and timestamp comment}

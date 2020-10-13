@@ -1,5 +1,5 @@
-##########################
-###  a change upon Daryl's change of heatmap
+#a change upon Daryl's change of heatmap
+# 
 DMHeatMap <- 
 function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE, 
     distfun = dist, hclustfun = hclust, dendrogram = c("both", 
@@ -13,15 +13,19 @@ function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
     vline = median(breaks), linecol = tracecol, margins = c(5, 
         5), ColSideColors, RowSideColors, cexRow = 0.2 + 1/log10(nr), 
     cexCol = 0.2 + 1/log10(nc), labRow = NULL, labCol = NULL, 
-    labColor = NULL,
+    labColor = NULL, axis=TRUE, heatmapOnly=FALSE,
     key = TRUE, keysize = 1.5, density.info = c("histogram", 
         "density", "none"), denscol = tracecol, symkey = min(x < 
         0, na.rm = TRUE) || symbreaks, densadj = 0.25, main = NULL, 
     xlab = NULL, ylab = NULL, lmat = NULL, lhei = NULL, lwid = NULL, lower.left.only=TRUE, legend=TRUE,
-    legend.x="topright",
+    legend.x="topright", verbose=FALSE,
     ...) 
 {
     usr <- par("usr"); on.exit(par(usr))
+    
+    if (heatmapOnly) {
+        lhei=c(1, 100); lwid=c(1, 100)
+    }
 
       scale01 <- function(x, low = min(x), high = max(x)) {
         x <- (x - low)/(high - low)
@@ -214,6 +218,7 @@ function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
         stop("lwid must have length = ncol(lmat) =", ncol(lmat))
       op <- par(no.readonly = TRUE)
       on.exit(par(op))
+      
       layout(lmat, widths = lwid, heights = lhei, respect = FALSE)
     
     # commented out by YF
@@ -251,13 +256,15 @@ function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
       breaksImage = c(-5,breaks)
       colImage = c("white",col)
     
-    str(breaks)
-    str(colImage)
+    if(verbose) myprint(breaks)
+    if(verbose) myprint(colImage)
     
       image(1:nc, 1:nr, xImage, xlim = 0.5 + c(0, nc), ylim = 0.5 + 
         c(0, nr), axes = FALSE, xlab = "", ylab = "", col = colImage, 
         breaks = breaksImage, ...)
       #ENDS HERE
+# a hack
+#    abline(v=cumsum(c(7,2,15,10))+.5)
     
       retval$carpet <- x
       if (exists("ddr")) 
@@ -272,15 +279,19 @@ function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
 #          col = na.color, add = TRUE)
 #      }
     #ALTERATION nc - 1
-      if(!is.null(labColor)) {
-        for(cc in 1:(nc)) {
-          axis(1, cc, labels = labCol[cc], las = 2, line = -0.5, tick = 0, 
-             cex.axis = cexCol,col.axis=labColor[cc])
-        }
-      } else {
-        axis(1, 1:(nc), labels = labCol, las = 2, line = -0.5, tick = 0, 
-             cex.axis = cexCol)
-      }
+    if(axis) {
+          if(!is.null(labColor)) {
+            for(cc in 1:(nc)) {
+              axis(1, cc, labels = labCol[cc], las = 2, line = -0.5, tick = 0, 
+                 cex.axis = cexCol,col.axis=labColor[cc])
+            }
+          } else {
+            axis(1, 1:(nc), labels = labCol, las = 2, line = -0.5, tick = 0, 
+                 cex.axis = cexCol)
+          }
+      axis(2, iy, labels = labRow, las = 2, line = -0.5, tick = 0, 
+        cex.axis = cexRow)
+    }
       if(legend) {
         ltext = rev(paste("[",breaks[-length(breaks)], ",", breaks[-1],")",sep=""))
         legend(legend.x,fill=rev(col),legend=ltext,bty="n")
@@ -288,8 +299,6 @@ function (x, Rowv = TRUE, Colv = if (symm) "Rowv" else TRUE,
       if (!is.null(xlab)) 
         mtext(xlab, side = 1, line = margins[1] - 1.25)
     #ALTERATION changed 4 to 2 below
-      axis(2, iy, labels = labRow, las = 2, line = -0.5, tick = 0, 
-        cex.axis = cexRow)
       if (!is.null(ylab)) 
         mtext(ylab, side = 4, line = margins[2] - 1.25)
       if (!missing(add.expr)) 

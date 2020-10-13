@@ -1,12 +1,14 @@
 useDynLib(kyotil, .registration = TRUE)
 
+export(iorw)
+
 export(as.binary, binom.coef, expit, H, mutual.info, info.cor, l.measure, logDiffExp, logit, logMeanExp, logSumExp, logSumExpFor2, permn, Stirling2, rbilogistic, rbigamma, rdoublexp,ddoublexp,pdoublexp,qdoublexp,rbidoublexp) 
 
 export(concatList, AR1, EXCH, fill.jagged.array, getMidPoints, getUpperRight, last, mix, rep.data.frame, rep.matrix, 
-    rep.matrix.block, shift.left, shift.right, thin.rows, ThinRows, tr, cbinduneven, skew, mysanitize.text, mysanitize.numbers)
+    rep.matrix.block, shift.left, shift.right, thin.rows, ThinRows, tr, cbinduneven, skew, mysanitize.text, mysanitize.numbers, binaryloess)
 
 export("%.%", concatList, contain, escapeUnderline, fileStem, firstIndex, getExt, getFileStem, getStem, 
-    lastIndex, myprint, myprint.default, myprint.matrix, remove.prefix, VEplot, VEplot.glm, VEplot.cox.zph, myplot.cox.zph, age_calc)
+    lastIndex, myprint, myprint.default, myprint.matrix, remove.prefix, VEplot, VEplot.glm, VEplot.cox.zph, myplot.cox.zph, age_calc, print.iorw)
 
 export(binary, binary2, f2c, ftoi, keepWarnings, meanmed, methods4, myaggregate, myreshapelong, myreshapewide, mysapply, myscale, 
     mysystem, mytapply, read.sv, read.tsv, table.prop, table.cases, table.cases.3, unix, DMHeatMap)
@@ -17,14 +19,14 @@ export(abline.shade, abline.shade.2, abline.pt.slope, abline.pts, butterfly.plot
 
 export(formatInt, formatDouble, make.latex.coef.table, mytex, mytex.begin, mytex.end, mywrite, mywrite.csv, roundup)
 
-export(dbern, dcorbern, dmixnorm, dnorm.norm.gamma, rbern, rejective.sampling, rnorm.cor, rnorm.norm.gamma, rmixnorm)
+export(dbern, dcorbern, dmixnorm, dnorm.norm.gamma, rbern, rejective.sampling, rnorm.ar, rnorm.norm.gamma, rmixnorm)
 
-export(coef.geese, getFixedEf, getFixedEf.glmerMod, getFixedEf.merMod, getFixedEf.mer, getFixedEf.coxph, getFixedEf.gam, getFixedEf.gee, getFixedEf.geese, getFixedEf.glm, getFixedEf.inla, 
+export(coef.geese, getFixedEf, getFixedEf.glmerMod, getFixedEf.merMod, getFixedEf.mer, getFixedEf.coxph, getFixedEf.svycoxph, getFixedEf.svyglm, getFixedEf.gam, getFixedEf.gee, getFixedEf.geese, getFixedEf.glm, getFixedEf.inla, 
     getFixedEf.lm, getFixedEf.lme, getFixedEf.logistf, getFixedEf.matrix, getFixedEf.MIresult, getFormattedSummary, 
     
     getVarComponent, getVarComponent.glmerMod, getVarComponent.merMod, getVarComponent.mer, getVarComponent.hyperpar.inla, getVarComponent.matrix, interaction.table, predict.geese, residuals.geese, vcov.geese, vcov.logistf, 
     vcov.tps, coef.tps, predict.tps, getFixedEf.tps,
-    risk.cal, sample.for.cv, rank.inv.norm, INT, marginal.risk)
+    risk.cal, sample.for.cv, rank.inv.norm, INT, marginal.risk, marginal.risk.boot)
 
 export(hosmerlem, quick.t.test, signtest, tukey.mtest, vector.t.test, summ, multi.outer, myfisher.test, mycor.test)
 
@@ -36,7 +38,7 @@ export(.as.double, DXD, symprod, txSy, tXDX, interpolate)
 
 export(make.timedep.dataset, sim.dat.tvarying.two, sim.dat.tvarying.three)
 
-export(cox.zph.2)
+export(cox.zph.2, p.adj.perm)
 
 export(cor.mixed, cor.mixed.vector, cor.mixed.formula, cor.mixed.default, add.mtext.label)
 
@@ -67,6 +69,8 @@ S3method(vcov,logistf)
 S3method(rep,matrix)
 S3method(rep,data.frame)
 S3method(rep,matrix.block)
+S3method(print,iorw)
+
 
 S3method(getVarComponent, hyperpar.inla)
 S3method(getVarComponent, matrix)
@@ -77,6 +81,8 @@ S3method(getVarComponent, mer)
 
 S3method(getFixedEf, MIresult)
 S3method(getFixedEf, coxph)
+S3method(getFixedEf, svycoxph)
+S3method(getFixedEf, svyglm)
 S3method(getFixedEf, gam)
 S3method(getFixedEf, gee)
 S3method(getFixedEf, geese)
@@ -119,3 +125,5 @@ importFrom("grDevices", "dev.control", "dev.copy", "dev.off",
            "nclass.FD", "nclass.Sturges", "nclass.scott", "tiff")
 importFrom("grDevices", "col2rgb", "dev.flush", "dev.hold")
 importFrom("grDevices", "colorRampPalette")
+importFrom("parallel", "mclapply")
+importFrom("utils", "data")

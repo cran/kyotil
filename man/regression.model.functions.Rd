@@ -8,6 +8,8 @@
 \alias{getFixedEf.gee}
 \alias{getFixedEf.geese}
 \alias{getFixedEf.glm}
+\alias{getFixedEf.svyglm}
+\alias{getFixedEf.svycoxph}
 \alias{getFixedEf.inla}
 \alias{getFixedEf.lm}
 \alias{getFixedEf.glmerMod}
@@ -72,6 +74,9 @@ logistic.regression = TRUE)
 \method{getFixedEf}{glm} (object, exp = FALSE, robust = TRUE, ret.robcov = FALSE, 
     ...)  
 
+\method{getFixedEf}{svyglm} (object, exp = FALSE, robust = TRUE, ...)  
+
+\method{getFixedEf}{svycoxph} (object, exp = FALSE, robust = TRUE, ...)  
 
 \method{getFixedEf}{inla}(object, ...)
 
