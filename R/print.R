@@ -9,6 +9,7 @@ mytex=function(dat=NULL, file.name="temp",
     append=FALSE, preamble="", input.foldername=NULL, save2input.only=NULL,
     caption=NULL, label=paste("tab",last(strsplit(file.name, "/")[[1]]),sep=" "), table.placement="h!",
     add.clear.page.between.tables=FALSE,
+    longtable=FALSE,
     verbose=FALSE,
 ...) {
         
@@ -54,7 +55,6 @@ mytex=function(dat=NULL, file.name="temp",
     
         include.rownames=include.rownames.0
         align=align.0
-        
         dat1 = dat[[i]]   
         if (is.null(dat1)) warning("some element of dat list is null")   
          
@@ -92,7 +92,7 @@ mytex=function(dat=NULL, file.name="temp",
             include.rownames=FALSE
             if (length(align)==ncol(dat1)) align=c("l",align) # need to extend align on the left
             .ncol=.ncol+1
-            str(align)
+            #str(align)
         } 
         
         if (is.null(digits)) if (is.integer(dat1)) digits=0
@@ -150,7 +150,7 @@ mytex=function(dat=NULL, file.name="temp",
         if(!save2input.only) print(..., xtable::xtable(dat1, 
                 digits=(if(is.null(digits)) rep(3, .ncol+1) else digits), # cannot use ifelse here!!!
                 display=(if(is.null(display)) rep("f", .ncol+1) else display), # or here
-                align=align, caption=caption, label=label, ...), 
+                align=align, caption=caption, label=label, ...), # for caption to work, floating needs to be T
             hline.after=hline.after, type = "latex", file = file.name%.%".tex", append = TRUE, floating = floating, table.placement=table.placement, 
             include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
             add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
@@ -161,7 +161,7 @@ mytex=function(dat=NULL, file.name="temp",
                 align=align, caption=caption, label=label, ...), 
             hline.after=hline.after, type = "latex", file = file.name.2%.%".tex", append = TRUE, floating = floating, table.placement=table.placement, 
             include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
-            add.to.row=add.to.row, sanitize.text.function =sanitize.text.function )
+            add.to.row=add.to.row, sanitize.text.function =sanitize.text.function, tabular.environment=ifelse(longtable, "longtable","tabular"))
         
         if(!save2input.only) cat ("\n", file=file.name%.%".tex", append=TRUE)
         #cat ("\n", file=file.name.2%.%".tex", append=TRUE) # don't add this line since extra lines at the end will prevent two tabular from being put on the same line

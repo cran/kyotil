@@ -49,7 +49,9 @@ iorw=function(formula.effect, formula.mediators, data, family=NULL, nboot=10000,
         temp.lreg <- glm(formula.mediators, data=dat, family="binomial") 
         iorw.weight=NULL # this is to trick R CMD check so that we don't get: Error in eval(extras, data, env) : object 'iorw.weight' not found
         dat$iorw.weight <- (1/exp(predict(temp.lreg, data=dat, type="link")))^dat[[trim(trt)]] 
+#        dat$iorw.weight = dat$iorw.weight^0.3
         
+                
         # Step 3: weighted regression to estimate direct effect
         if (coxreg) {
             direct.model <- survival::coxph(formula.effect, data=dat, weights=iorw.weight) 

@@ -21,16 +21,16 @@ export(formatInt, formatDouble, make.latex.coef.table, mytex, mytex.begin, mytex
 
 export(dbern, dcorbern, dmixnorm, dnorm.norm.gamma, rbern, rejective.sampling, rnorm.ar, rnorm.norm.gamma, rmixnorm)
 
-export(coef.geese, getFixedEf, getFixedEf.glmerMod, getFixedEf.merMod, getFixedEf.mer, getFixedEf.coxph, getFixedEf.svycoxph, getFixedEf.svyglm, getFixedEf.gam, getFixedEf.gee, getFixedEf.geese, getFixedEf.glm, getFixedEf.inla, 
+export(coef.geese, getFixedEf, getFixedEf.glmerMod, getFixedEf.merMod, getFixedEf.mer, getFixedEf.coxph, getFixedEf.svycoxph, getFixedEf.svyglm, getFixedEf.svy_vglm, getFixedEf.gam, getFixedEf.gee, getFixedEf.geese, getFixedEf.glm, getFixedEf.inla, 
     getFixedEf.lm, getFixedEf.lme, getFixedEf.logistf, getFixedEf.matrix, getFixedEf.MIresult, getFormattedSummary, 
     
     getVarComponent, getVarComponent.glmerMod, getVarComponent.merMod, getVarComponent.mer, getVarComponent.hyperpar.inla, getVarComponent.matrix, interaction.table, predict.geese, residuals.geese, vcov.geese, vcov.logistf, 
     vcov.tps, coef.tps, predict.tps, getFixedEf.tps,
-    risk.cal, sample.for.cv, rank.inv.norm, INT, marginal.risk, marginal.risk.boot)
+    risk.cal, sample.for.cv, rank.inv.norm, INT)
 
 export(hosmerlem, quick.t.test, signtest, tukey.mtest, vector.t.test, summ, multi.outer, myfisher.test, mycor.test)
 
-export(getK, trim, predict.pcc)
+export(getK, trim, predict.pcc, get.kfold.splits)
 
 export(pava, get.sim.res, getFormattedMCSummary, MCsummary, Deming, empty2na)
 
@@ -83,6 +83,7 @@ S3method(getFixedEf, MIresult)
 S3method(getFixedEf, coxph)
 S3method(getFixedEf, svycoxph)
 S3method(getFixedEf, svyglm)
+S3method(getFixedEf, svy_vglm)
 S3method(getFixedEf, gam)
 S3method(getFixedEf, gee)
 S3method(getFixedEf, geese)

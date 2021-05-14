@@ -75,3 +75,48 @@
 
 2020.10.12
     * freeze for CoVPN work
+
+2020.11.5
+    * modify getFormattedSummary
+
+2020.11.16
+    * update marginal.risk to work with model fits from both lm and svyglm for the marker model
+
+2020.11.19
+    * add marginal.risk.cat
+
+2020.11.19
+    * add marginal.risk.cont
+
+2020.11.24
+    * fix marginal.risk.boot
+
+2020.12.2
+    * remove marginal.risk functions to a new package
+
+2020.12.24
+    * add get.kfold.splits
+
+2020.12.29
+    * update corplot.formula: change main
+
+2020.1.4
+    * Update getFixedEf
+
+2020.1.11
+    * Update getFormattedSummary
+
+2020.2.2
+    * Update mymatplot
+
+2020.2.13
+    * Update getFormattedSummary
+
+2020.3.9
+    * Add date to Description
+
+2020.4.13
+    * Add add.loess to corplot
+
+2020.5.7
+    * Add support for longtable to mytex

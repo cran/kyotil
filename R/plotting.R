@@ -38,22 +38,22 @@ mydev.off=function(file="temp", ext=c("pdf"), res=200, mydev=NULL) {
             subfolder=concatList(c(tmp[-length(tmp)], "pdf"), sep="/")
             filename=if(file.exists(subfolder))  subfolder%.%"/"%.%last(tmp) else file
             dev.copy(pdf,        file=filename%.%"."%.%ext, width=.mydev$width, height=.mydev$height, paper="special")
-            cat("Saving figure to "%.%paste(getwd(),"/",filename,sep="")%.%"."%.%ext%.%"\n")        
+            cat("Saving figure to "%.%paste(filename,sep="")%.%"."%.%ext%.%"\n")        
         } else if (ext=="eps") {
             subfolder=concatList(c(tmp[-length(tmp)], "eps"), sep="/")
             filename=if(file.exists(subfolder))  subfolder%.%"/"%.%last(tmp) else file
             dev.copy(postscript, file=filename%.%"."%.%ext, width=.mydev$width, height=.mydev$height, paper="special", horizontal=FALSE)
-            cat("Saving figure to "%.%paste(getwd(),"/",filename,sep="")%.%"."%.%ext%.%"\n")        
+            cat("Saving figure to "%.%paste(filename,sep="")%.%"."%.%ext%.%"\n")        
         } else if (ext=="png") {
             subfolder=concatList(c(tmp[-length(tmp)], "png"), sep="/")
             filename=if(file.exists(subfolder))  subfolder%.%"/"%.%last(tmp) else file
             dev.copy(png,    filename=filename%.%"."%.%ext, width=.mydev$width, height=.mydev$height, units="in", res=res)
-            cat("Saving figure to "%.%paste(getwd(),"/",filename,sep="")%.%"."%.%ext%.%"\n")        
+            cat("Saving figure to "%.%paste(filename,sep="")%.%"."%.%ext%.%"\n")        
         } else if (ext=="tiff") {
             subfolder=concatList(c(tmp[-length(tmp)], "tiff"), sep="/")
             filename=if(file.exists(subfolder))  subfolder%.%"/"%.%last(tmp) else file
             dev.copy(tiff,   filename=filename%.%"."%.%ext, width=.mydev$width, height=.mydev$height, units="in", res=res, compression="jpeg")
-            cat("Saving figure to "%.%paste(getwd(),"/",filename,sep="")%.%"."%.%ext%.%"\n")        
+            cat("Saving figure to "%.%paste(filename,sep="")%.%"."%.%ext%.%"\n")        
         }
         dev.off()
     }
@@ -75,7 +75,7 @@ get.width.height=function(nrow,ncol){
 
     } else if (nrow==2 & ncol==3) {width=9.7; height=6.7
     } else if (nrow==2 & ncol==4) {width=13; height=6.7
-    } else if (nrow==2 & ncol==2) {width=8; height=8.5
+    } else if (nrow==2 & ncol==2) {width=8; height=8
     } else if (nrow==2 & ncol==1) {width=6.7; height=9.7
     
     } else if (nrow==3 & ncol==6) {width=17.5; height=9
@@ -170,7 +170,7 @@ mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height
         } else if (ext=="tiff") {
             tiff (filename=file%.%"."%.%ext, width=width, height=height, units="in", res=res, compression="jpeg", ...)
         }
-        cat("Saving figure to "%.%paste(getwd(),"/",file,sep="")%.%"\n")        
+        cat("Saving figure to "%.%paste(file,sep="")%.%"\n")        
     } else {
         print("not saving to file")
     }
@@ -202,17 +202,20 @@ mylegend=function(legend, x, y=NULL, lty=NULL,bty="n", ...) {
 # if cex.cor is negative, the sign is reversed and the font of cor is fixed. otherwise, by default, the font of cor is proportional to cor
 # allow cor to be spearman or pearson
 # will generating lots of warnings, ignore them
-panel.cor <- function(x, y, digits=2, prefix="", cex.cor, cor., ...)
+panel.cor <- function(x, y, digits=2, prefix="", cex.cor, cor., leading0=FALSE, cex.cor.dep=TRUE, ...)
 {
     usr <- par("usr"); on.exit(par(usr))
     par(usr = c(0, 1, 0, 1))
     r <- cor(x, y, method=ifelse(missing(cor.), "spearman", cor.), use="pairwise.complete.obs")
     txt <- format(c(r, 0.123456789), digits=digits)[1]
     txt <- paste(prefix, txt, sep="")
-    txt = sub("0","",txt)
+    if(!leading0) txt = sub("0","",txt)
     if(missing(cex.cor)) cex.cor <- 2.5
-    #text(0.5, 0.5, txt, cex = cex.cor) # do this if we don't want cex to depend on correlations
-    text(0.5, 0.5, txt, cex = ifelse(r<0,cex.cor*sqrt(-r), cex.cor * sqrt(r)) )
+    if(cex.cor.dep) {
+        text(0.5, 0.5, txt, cex = cex.cor*ifelse(abs(r)<0.1, sqrt(0.1), sqrt(abs(r)) ))
+    } else {
+        text(0.5, 0.5, txt, cex = cex.cor) # do this if we don't want cex to depend on correlations
+    }
 #    print(txt); text(.1, .1, "a"); text(.9, .9, "a")
 #    abline(v=1e3)
 }
@@ -276,7 +279,7 @@ mypairs=function(dat, ladder=FALSE, show.data.cloud=TRUE, ladder.add.line=T, lad
           diag.panel = NULL, text.panel = textPanel,
           label.pos = 0.5 + has.diag/3, line.main = 3,
           cex.labels = NULL, font.labels = 1, 
-          row1attop = TRUE, gap = 1, log = ""){
+          row1attop = TRUE, gap = 1, log = "", show.axis=TRUE){
     if(doText <- missing(text.panel) || is.function(text.panel))
     textPanel <-
         function(x = 0.5, y = 0.5, txt, cex, font)
@@ -357,14 +360,16 @@ mypairs=function(dat, ladder=FALSE, show.data.cloud=TRUE, ladder.add.line=T, lad
                       axes = FALSE, type = "n", ..., log = l)
             if( i==j | (i < j && has.lower) || (i > j && has.upper) ) { 
                 if (i!=j) box()# YF: add i==j 
-                if(i == 1  && (!(j %% 2L) || !has.upper || !has.lower ))
-                    localAxis(1L + 2L*row1attop, x[, j], x[, i], ...)
-                if(i == nc && (  j %% 2L  || !has.upper || !has.lower ))
-                    localAxis(3L - 2L*row1attop, x[, j], x[, i], ...)
-                if(j == 1  && (!(i %% 2L) || !has.upper || !has.lower ))
-                    localAxis(2L, x[, j], x[, i], ...)
-                if(j == nc && (  i %% 2L  || !has.upper || !has.lower ))
-                    localAxis(4L, x[, j], x[, i], ...)
+                if(show.axis){
+                    if(i == 1  && (!(j %% 2L) || !has.upper || !has.lower ))
+                        localAxis(1L + 2L*row1attop, x[, j], x[, i], ...)
+                    if(i == nc && (  j %% 2L  || !has.upper || !has.lower ))
+                        localAxis(3L - 2L*row1attop, x[, j], x[, i], ...)
+                    if(j == 1  && (!(i %% 2L) || !has.upper || !has.lower ))
+                        localAxis(2L, x[, j], x[, i], ...)
+                    if(j == nc && (  i %% 2L  || !has.upper || !has.lower ))
+                        localAxis(4L, x[, j], x[, i], ...)
+                }
                 mfg <- par("mfg")
                 if(i == j) {
                     if (has.diag) localDiagPanel(as.vector(x[, i]), ...)
@@ -533,7 +538,7 @@ myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box
         }
         if (write.p.at.top) {
             if (pvals[1]<0.05) title(main=sub, line=.5, font.main=3)
-        } else title(sub=sub)
+        } else title(sub=sub, line=2.5)
         res$pvals=pvals
     }
     
@@ -619,7 +624,7 @@ corplot.default=function(object,y,...){
 }
 
 # col can be used to highlight some points
-corplot.formula=function(formula,data,main="",method=c("pearson","spearman"),col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,col.lm=2,add.deming.fit=FALSE,col.deming=4,add=FALSE,
+corplot.formula=function(formula,data,main="",method=c("pearson","spearman"),col=1,cex=.5,add.diagonal.line=TRUE,add.lm.fit=FALSE,add.loess.fit=FALSE,col.lm=2,add.deming.fit=FALSE,col.deming=4,add=FALSE,
     log="",same.xylim=FALSE,xlim=NULL,ylim=NULL, ...){
     vars=dimnames(attr(terms(formula),"factors"))[[1]]
     cor.=NULL
@@ -627,8 +632,10 @@ corplot.formula=function(formula,data,main="",method=c("pearson","spearman"),col
         cor.=sapply (method, function (method) {
             cor(data[,vars[1]],data[,vars[2]],method=method,use="p")
         })
-        main=main%.%ifelse(main=="", "", ", ")
-        main=main%.%"cor: "%.%concatList(round(cor.,2),"|")
+        tmp=main==""
+        main=main%.%ifelse(tmp, "", " (")
+        main=main%.%"cor: "%.%concatList(round(cor.,2),"/")
+        main=main%.%ifelse(tmp, "", ")")
     }
 
     if (!add) {
@@ -645,6 +652,10 @@ corplot.formula=function(formula,data,main="",method=c("pearson","spearman"),col
     if(add.lm.fit) {
         fit=lm(formula, data)
         abline(fit,untf=log=="xy", col=col.lm)
+    }
+    if(add.loess.fit) {
+        fit=loess(formula, data)
+        mylines(fit$x,fit$fitted,col=col.lm)
     }
     if(add.deming.fit) {
         # this implementation is faster than the one by Therneau, Terry M.
@@ -687,19 +698,23 @@ abline.pt.slope=function(pt1, slope, x2=NULL, ...){
 # put a shade in a rectangle between a point and one of the four quadrants
 # pt is a vector of two values
 # col is red blue gree
-abline.shade=function(pt, quadrant=c(1,2,3,4), col=c(0,1,0), alpha=0.3){
-    usr <- par('usr')   #this may be useful
+abline.shade=function(pt, type=5, col=c(0,1,0), alpha=0.3){
+    usr <- par('usr')   
     # rec: xleft, ybottom, xright, ytop
     # usr: xleft, xright, ybottom, ytop
-    if (quadrant==1) {
+    # the first four types are quadrant
+    if (type==1) {
         rect(pt[1], pt[2], usr[2], usr[4], col=rgb(red=col[1], blue=col[2], green=col[3], alpha=alpha), border=NA) 
-    } else if (quadrant==2) {
+    } else if (type==2) {
         rect(pt[1], usr[3], usr[2], pt[2], col=rgb(red=col[1], blue=col[2], green=col[3], alpha=alpha), border=NA) 
-    } else if (quadrant==3) {
+    } else if (type==3) {
         rect(usr[1], usr[3], pt[1], pt[2], col=rgb(red=col[1], blue=col[2], green=col[3], alpha=alpha), border=NA) 
-    } else if (quadrant==4) {
+    } else if (type==4) {
         rect(usr[1], pt[2], pt[1], usr[4], col=rgb(red=col[1], blue=col[2], green=col[3], alpha=alpha), border=NA) 
-    } 
+    } else if (type==5) {
+        # between pt[1] and pt[2] horizontally
+        rect(pt[1], usr[3], pt[2], usr[4], col=rgb(red=col[1], blue=col[2], green=col[3], alpha=alpha), border=NA) 
+    } else stop("type not recognized")
     
 }
 
@@ -740,9 +755,10 @@ mymatplot=function(x, y, type="b", lty=c(1,2,1,2,1,2), pch=NULL, col=rep(c("dark
     # draw line first, then points
     if(type %in% c("l","b")) matplot(x, y.imputed, lty=lty, pch=pch, col=col, xlab=xlab, xaxt=xaxt, ylab=ylab, bg=bg, lwd=lwd, type="l", add=add, ...)
     if(type %in% c("p","b")) matplot(x, y, lty=lty, pch=pch, col=col, xlab=xlab, xaxt=xaxt, ylab=ylab, bg=bg, lwd=lwd, type="p", add=add | type!="p", ...)
-    
     if (xaxt=="n") 
-        if(missing.y & draw.x.axis) axis(side=1, at=x, labels=rownames(y)) else if (draw.x.axis) axis(side=1, at=x, labels=x)
+        if(missing.y & draw.x.axis) axis(side=1, at=if(is.null(at)) x else at, labels=if(is.null(at)) rownames(y) else at) else if (draw.x.axis) {
+            axis(side=1, at=if(is.null(at)) x else at, labels=if(is.null(at)) x else at)
+        }
     if (make.legend) {
         if (is.null(legend)) legend=colnames(y)
         if (length(unique(pch))>1) {
@@ -979,8 +995,8 @@ Pal <- function(pal, n=100, alpha=1) {
 
 }
 
-mylines=function(x, y, ...) {    
-    plot.xy(xy.coords(x[order(x)], y[order(x)]), type = "l", ...)
+mylines=function(x, y, type = "l", ...) {    
+    plot.xy(xy.coords(x[order(x)], y[order(x)]), type=type, ...)
 }
 
 

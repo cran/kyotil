@@ -1,7 +1,7 @@
 # type 3 and 7 do not give the right output for glm fits
 # robust can be passed as part of .... Sometimes robust=T generates errors
 # trim: get rid of white space in confidence intervals for alignment
-getFormattedSummary=function(fits, type=12, est.digits=2, se.digits=2, robust, random=FALSE, VE=FALSE, to.trim=FALSE, rows=NULL, coef.direct=FALSE, trunc.large.est=TRUE, scale.factor=1, p.digits=3, ...){
+getFormattedSummary=function(fits, type=12, est.digits=2, se.digits=2, robust, random=FALSE, VE=FALSE, to.trim=FALSE, rows=NULL, coef.direct=FALSE, trunc.large.est=TRUE, scale.factor=1, p.digits=3, remove.leading0=FALSE, p.adj.method="fdr", ...){
     
     if(is.null(names(fits))) names(fits)=seq_along(fits)
     idxes=seq_along(fits); names(idxes)=names(fits)
@@ -33,7 +33,6 @@ getFormattedSummary=function(fits, type=12, est.digits=2, se.digits=2, robust, r
             }
         }
         
-        
         # tmp should be: est, se, lb, ub, pvalue 
         tmp[,1]=tmp[,1]*scale.factor        
         if(ncol(tmp)>1) tmp[,2]=tmp[,2]*scale.factor   
@@ -47,19 +46,19 @@ getFormattedSummary=function(fits, type=12, est.digits=2, se.digits=2, robust, r
         # replace large values in est.
         # find a round that takes multipled digits!
         # trim is necessary here
-        est.=ifelse(too.big,">100",trim(formatDouble(est., est.digits)))
+        est.=ifelse(too.big,">100",trim(formatDouble(est., est.digits, remove.leading0=remove.leading0)))
         
         p.val.col=which(startsWith(tolower(colnames(tmp)),"p"))
         
         if(ncol(tmp)>1) {
             lb=tmp[,3,drop=FALSE]
             lb[too.big]=NA
-            lb=formatDouble(lb, est.digits) 
+            lb=formatDouble(lb, est.digits, remove.leading0=remove.leading0) 
             if(to.trim) lb=trim(lb)
             
             ub=tmp[,4,drop=FALSE]
             ub[too.big]=NA
-            ub=formatDouble(ub, est.digits) 
+            ub=formatDouble(ub, est.digits, remove.leading0=remove.leading0) 
             if(to.trim) ub=trim(ub)
         }
                 
@@ -70,42 +69,45 @@ getFormattedSummary=function(fits, type=12, est.digits=2, se.digits=2, robust, r
             out=drop(est. )
         else if (type==2)
             # est (se)
-            out=est. %.% " (" %.% formatDouble(tmp[,2,drop=FALSE], se.digits) %.% ")" %.% ifelse (round(tmp[,p.val.col],3)<=0.05, ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
+            out=est. %.% " (" %.% formatDouble(tmp[,2,drop=FALSE], se.digits, remove.leading0=remove.leading0) %.% ")" %.% ifelse (round(tmp[,p.val.col],3)<=0.05, ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==3) 
             # est (lb, up)
             out=est. %.% " (" %.% lb %.% ", " %.% ub %.% ")" 
         else if (type==4)
             # a space is inserted between est and se, they could be post-processed in swp
-            out=est. %.% " " %.% formatDouble(tmp[,2,drop=FALSE], est.digits)
+            out=est. %.% " " %.% formatDouble(tmp[,2,drop=FALSE], est.digits, remove.leading0=remove.leading0)
         else if (type==5)
             # est **
             out=est. %.%
                 ifelse (round(tmp[,p.val.col],3)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==6)
             # est (pval)*
-            out=est. %.% " (" %.% formatDouble(tmp[,p.val.col,drop=FALSE], 3) %.% ")" %.% ifelse (round(tmp[,p.val.col],3)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
+            out=est. %.% " (" %.% formatDouble(tmp[,p.val.col,drop=FALSE], 3, remove.leading0=remove.leading0) %.% ")" %.% ifelse (round(tmp[,p.val.col],3)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==7)
             # (lb, up)
             out=ifelse(drop(too.big), rep("",nrow(lb)), " (" %.% lb %.% ", " %.% ub %.% ")")
         else if (type==8)
             # est (p value #)
             out=est. %.% " (p value " %.% 
-                formatDouble(tmp[,p.val.col,drop=FALSE], 3) %.% ")" 
+                formatDouble(tmp[,p.val.col,drop=FALSE], 3, remove.leading0=remove.leading0) %.% ")" 
         else if (type==9)
             # est (pval)*
-            out=est. %.% " (" %.% formatDouble(tmp[,p.val.col,drop=FALSE], p.digits) %.% ")" 
+            out=est. %.% " (" %.% formatDouble(tmp[,p.val.col,drop=FALSE], p.digits, remove.leading0=remove.leading0) %.% ")" 
         else if (type==10)
             # pval
             out=format(round(tmp[,p.val.col,drop=TRUE], 3), nsmall=3, scientific=FALSE) 
         else if (type==11)
             # adj pval
-            out=format(round(p.adjust(tmp[,p.val.col,drop=TRUE], method="fdr"), p.digits), nsmall=3, scientific=FALSE) 
+            out=format(round(p.adjust(tmp[,p.val.col,drop=TRUE], method=p.adj.method), p.digits), nsmall=3, scientific=FALSE) 
         else if (type==12)
             # est (lb, up, pval *)
             out=est. %.% 
                 " (CI=" %.% lb %.% "," %.% ub %.% 
-                ", p=" %.% formatDouble(tmp[,p.val.col,drop=FALSE], 3) %.% ")" %.%
+                ", p=" %.% formatDouble(tmp[,p.val.col,drop=FALSE], 3, remove.leading0=remove.leading0) %.% ")" %.%
                 ifelse (round(tmp[,p.val.col],3)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"") 
+        else if (type==13) 
+            # (lb-up)
+            out="(" %.% lb %.% "-" %.% ub %.% ")" 
         else 
             stop ("getFormattedSummaries(). type not supported: "%.%type)
             
@@ -363,9 +365,9 @@ getFixedEf.svycoxph=function (object, exp=FALSE, robust=TRUE, ...){
     pval=pnorm(abs(hr/se), lower.tail=F)*2
     out=cbind(HR=hr,
             "se"=se,
-            "95% LL"=hr-qnorm(0.975)*se, 
-            "95% UL"=hr+qnorm(0.975)*se, 
-            "p-val"=pval
+            "(lower"=hr-qnorm(0.975)*se, 
+            "upper)"=hr+qnorm(0.975)*se, 
+            "p.value"=pval
         )
     if (exp) out[,c(1,3,4)]=exp(out[,c(1,3,4)])
     out
@@ -380,16 +382,33 @@ getFixedEf.svyglm=function (object, exp=FALSE, robust=TRUE, ...){
     or=tmp[,"Estimate"]
     se=tmp[,"Std. Error"]
     pval=tmp[,"Pr(>|t|)"]
-    out=cbind(HR=or,
+    out=cbind(OR=or,
             "se"=se,
-            "95% LL"=or-qnorm(0.975)*se, 
-            "95% UL"=or+qnorm(0.975)*se, 
-            "p-val"=pval
+            "(lower"=or-qnorm(0.975)*se, 
+            "upper)"=or+qnorm(0.975)*se, 
+            "p.value"=pval
         )
     if (exp) out[,c(1,3,4)]=exp(out[,c(1,3,4)])
     out
 #    round(sqrt(diag(attr(object$var,"phases")$phase1)),3)
 #    round(sqrt(diag(attr(object$var,"phases")$phase2)),3)    
+}
+
+
+getFixedEf.svy_vglm=function (object, exp=FALSE, robust=TRUE, ...){
+    if (!robust) warning("svy_vglm variance estimate is always design-based, which is close to robust variance estimate. No model-based variance estimate is available")
+    tmp=summary(object)$coeftable
+    or=tmp[,"Coef"]
+    se=tmp[,"SE"]
+    pval=tmp[,"p"]
+    out=cbind(HR=or,
+            "se"=se,
+            "(lower"=or-qnorm(0.975)*se, 
+            "upper)"=or+qnorm(0.975)*se, 
+            "p.value"=pval
+        )
+    if (exp) out[,c(1,3,4)]=exp(out[,c(1,3,4)])
+    out
 }
 
 
@@ -406,16 +425,16 @@ getFixedEf.coxph=function (object, exp=FALSE, robust=FALSE, ...){
     if (!exp) {
         cbind(HR=sum.fit$coef[,1], 
             "se"=sum.fit$coef[,se.idx],
-            "95% LL"=(sum.fit$coef[,1]-qnorm(0.975)*sum.fit$coef[,se.idx]), 
-            "95% UL"=(sum.fit$coef[,1]+qnorm(0.975)*sum.fit$coef[,se.idx]), 
-            "p-val"=pvals
+            "(lower"=(sum.fit$coef[,1]-qnorm(0.975)*sum.fit$coef[,se.idx]), 
+            "upper)"=(sum.fit$coef[,1]+qnorm(0.975)*sum.fit$coef[,se.idx]), 
+            "p.value"=pvals
         )
     } else {
         cbind(HR=sum.fit$coef[,2], 
             "se"=sum.fit$coef[,se.idx],
-            "95% LL"=exp(sum.fit$coef[,1]-qnorm(0.975)*sum.fit$coef[,se.idx]), 
-            "95% UL"=exp(sum.fit$coef[,1]+qnorm(0.975)*sum.fit$coef[,se.idx]), 
-            "p-val"=pvals
+            "(lower"=exp(sum.fit$coef[,1]-qnorm(0.975)*sum.fit$coef[,se.idx]), 
+            "upper)"=exp(sum.fit$coef[,1]+qnorm(0.975)*sum.fit$coef[,se.idx]), 
+            "p.value"=pvals
         )
     }
 #    round(sqrt(diag(attr(object$var,"phases")$phase1)),3)
