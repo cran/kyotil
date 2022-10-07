@@ -42,6 +42,10 @@ export(cox.zph.2, p.adj.perm)
 
 export(cor.mixed, cor.mixed.vector, cor.mixed.formula, cor.mixed.default, add.mtext.label)
 
+export(predictCompetingRisk, predictCompetingRisk2, pcr, pcr2)
+
+export(get_count_from_xy_coor)
+
 
 S3method(cor.mixed,vector)
 S3method(cor.mixed,formula)
@@ -121,7 +125,7 @@ importFrom("grDevices", "dev.new", "xy.coords")
 importFrom("grDevices", "pdf", "postscript","rgb", "png")
 importFrom("methods", "getAllSuperClasses", "getClass", "getGenerics",
          "getMethods", "is", "linearizeMlist")
-importFrom("utils", "capture.output", "read.csv", "tail", "write.csv", "str")
+importFrom("utils", "capture.output", "read.csv", "tail", "write.csv", "str", "read.table")
 importFrom("grDevices", "dev.control", "dev.copy", "dev.off",
            "nclass.FD", "nclass.Sturges", "nclass.scott", "tiff")
 importFrom("grDevices", "col2rgb", "dev.flush", "dev.hold")
