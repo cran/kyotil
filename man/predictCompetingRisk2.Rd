@@ -119,11 +119,18 @@ lung1$wt=rep(1, nrow(lung1))
 
 t0=1000
 formula.list=list(
-    Surv(time, status.1) ~ sex,
+    Surv(time, status.1) ~ age,
     Surv(time, status.2) ~ age
 )
 
 cif.2=pcr2(formula.list, lung1, t0)
+
+fit=coxph(formula.list[[1]], lung1)
+newdata=lung1
+newdata$time=t0
+coxpred = 1 - exp(-predict(fit, newdata=newdata, type="expected"))
+
+plot(cif.2, coxpred)
 
 ## results match those from riskRegression_2022.07.13 when weights are all 1
 #library(riskRegression)
