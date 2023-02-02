@@ -1,5 +1,5 @@
-0bcfa8b464f90e9ae29b998ed1cbe66d *ChangeLog
-e0958770b34292259a89afc0e16d457e *DESCRIPTION
+de69df17f20034df818b71a968934d60 *ChangeLog
+005b2083742f4288e05a537c64d1a6f5 *DESCRIPTION
 f9ce033db2987b0ad70cb36618005b10 *NAMESPACE
 44ed4354eca051b50a4414beafd20e38 *R/DMHeatMap.R
 7b8aa8455ff186ced3219dfb81c6eb1b *R/Deming.R
@@ -35,8 +35,8 @@ be332f8929097accd87c10f32c7628c6 *R/wtd.hist.R
 a6ee814b4c30cf97134d178b41cf1214 *README.md
 e0cf46379294b9fec244914a441ae14d *build/vignette.rds
 6229cdd87cbfff92a6ba2832ba87d649 *data/kid.rda
-fb01831c20ebfe51da2d508a34d5186a *inst/CITATION
-47cb9c310e595c0684ea6c028a27030a *inst/doc/kyotil-vignette.pdf
+862eb1fca2cac60a210a91ee15182329 *inst/CITATION
+0f44aa5bb4e5aa0826eb6790b73187ba *inst/doc/kyotil-vignette.pdf
 a616e808bd826e929f56223020649675 *inst/unitTests/Makefile
 515b18df7e17596dc38b9dbea407b26f *inst/unitTests/runRUnitTests.R
 605a53e445aba9ee89e10bcf6a5239f1 *inst/unitTests/runit.kernel.R
@@ -64,7 +64,7 @@ b7c03f7edcf1492e7aabd215cf0124fa *man/matrix2.Rd
 e4a81f58754ab8b6887d7cd7431a8c87 *man/misc.Rd
 d0f35e407672a37a37c9fefc71fc0e21 *man/p.adj.perm.Rd
 36137d96f9886216facf2322cd487498 *man/plotting.Rd
-44225d887c28f30ac580e311ad8e6d1b *man/predictCompetingRisk2.Rd
+d945358475ed84d8317e0cd0e156b748 *man/predictCompetingRisk2.Rd
 a733a8896b8c7a5224fd8bcca692b6ac *man/print.Rd
 c735a3b3d0e5cf99ef477d4c010e6e39 *man/random.Rd
 82c2f64a91c9b9a4caf5fb31184fd81b *man/regression.model.functions.Rd
