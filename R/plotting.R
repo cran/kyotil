@@ -29,7 +29,7 @@ myfigure=function (mfrow=c(1,1), mfcol=NULL, width=NULL, height=NULL, oma=NULL, 
     }    
     if(!is.null(bg)) par(bg=bg)
 }
-mydev.off=function(file="temp", ext=c("pdf"), res=200, mydev=NULL) {        
+mydev.off=function(file="temp", ext=c("pdf"), res=200, mydev=NULL, silent=TRUE) {        
     if (!is.null(mydev)) .mydev=mydev
     exts=unlist(strsplit(ext, ","))
     tmp=strsplit(file,"/")[[1]]
@@ -38,22 +38,22 @@ mydev.off=function(file="temp", ext=c("pdf"), res=200, mydev=NULL) {
             subfolder=concatList(c(tmp[-length(tmp)], "pdf"), sep="/")
             filename=if(file.exists(subfolder))  subfolder%.%"/"%.%last(tmp) else file
             dev.copy(pdf,        file=filename%.%"."%.%ext, width=.mydev$width, height=.mydev$height, paper="special")
-            cat("Saving figure to "%.%paste(filename,sep="")%.%"."%.%ext%.%"\n")        
+            if (!silent) cat("Saving figure to "%.%paste(filename,sep="")%.%"."%.%ext%.%"\n")        
         } else if (ext=="eps") {
             subfolder=concatList(c(tmp[-length(tmp)], "eps"), sep="/")
             filename=if(file.exists(subfolder))  subfolder%.%"/"%.%last(tmp) else file
             dev.copy(postscript, file=filename%.%"."%.%ext, width=.mydev$width, height=.mydev$height, paper="special", horizontal=FALSE)
-            cat("Saving figure to "%.%paste(filename,sep="")%.%"."%.%ext%.%"\n")        
+            if (!silent) cat("Saving figure to "%.%paste(filename,sep="")%.%"."%.%ext%.%"\n")        
         } else if (ext=="png") {
             subfolder=concatList(c(tmp[-length(tmp)], "png"), sep="/")
             filename=if(file.exists(subfolder))  subfolder%.%"/"%.%last(tmp) else file
             dev.copy(png,    filename=filename%.%"."%.%ext, width=.mydev$width, height=.mydev$height, units="in", res=res)
-            cat("Saving figure to "%.%paste(filename,sep="")%.%"."%.%ext%.%"\n")        
+            if (!silent) cat("Saving figure to "%.%paste(filename,sep="")%.%"."%.%ext%.%"\n")        
         } else if (ext=="tiff") {
             subfolder=concatList(c(tmp[-length(tmp)], "tiff"), sep="/")
             filename=if(file.exists(subfolder))  subfolder%.%"/"%.%last(tmp) else file
             dev.copy(tiff,   filename=filename%.%"."%.%ext, width=.mydev$width, height=.mydev$height, units="in", res=res, compression="jpeg")
-            cat("Saving figure to "%.%paste(filename,sep="")%.%"."%.%ext%.%"\n")        
+            if (!silent) cat("Saving figure to "%.%paste(filename,sep="")%.%"."%.%ext%.%"\n")        
         }
         dev.off()
     }
@@ -144,7 +144,7 @@ get.width.height=function(nrow,ncol){
 mypdf=function (...) mypostscript(ext="pdf",...)
 mypng=function(...) mypostscript(ext="png",...)
 mytiff=function(...) mypostscript(ext="tiff",...)
-mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height=NULL, ext=c("eps","pdf","png","tiff"), oma=NULL, mar=NULL,main.outer=FALSE, save2file=TRUE, res=200, ...) {    
+mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height=NULL, ext=c("eps","pdf","png","tiff"), oma=NULL, mar=NULL,main.outer=FALSE, save2file=TRUE, res=200, silent=TRUE, ...) {    
     
     ext=match.arg(ext)
     
@@ -170,9 +170,9 @@ mypostscript=function (file="temp", mfrow=c(1,1), mfcol=NULL, width=NULL, height
         } else if (ext=="tiff") {
             tiff (filename=file%.%"."%.%ext, width=width, height=height, units="in", res=res, compression="jpeg", ...)
         }
-        cat("Saving figure to "%.%paste(file,sep="")%.%"\n")        
+        if (!silent) cat("Saving figure to "%.%paste(file,sep="")%.%"\n")        
     } else {
-        print("not saving to file")
+        if (!silent) print("not saving to file")
     }
     
     if (!is.null(mfcol)) par(mfcol=mfcol)
@@ -549,9 +549,9 @@ myboxplot.formula=function(formula, data, cex=.5, xlab="", ylab="", main="", box
 myboxplot.data.frame=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test="", paired=FALSE, ...){
     myboxplot.list(as.list(object), cex=cex, ylab=ylab, xlab=xlab, main=main, box=box, at=at, pch=pch, col=col, test=test, ...)
 }
-myboxplot.matrix=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test="", paired=FALSE, ...){
-    myboxplot.list(as.list(as.data.frame(object)), cex=cex, ylab=ylab, xlab=xlab, main=main, box=box, at=at, pch=pch, col=col, test=test, ...)
-}
+# myboxplot.matrix=function(object, cex=.5, ylab="", xlab="", main="", box=TRUE, at=NULL, pch=1, col=1, test="", paired=FALSE, ...){
+#     myboxplot.list(as.list(as.data.frame(object)), cex=cex, ylab=ylab, xlab=xlab, main=main, box=box, at=at, pch=pch, col=col, test=test, ...)
+# }
 
 myboxplot.list=function(object, paired=FALSE, ...){
     
@@ -634,7 +634,7 @@ corplot.formula=function(formula,data,main="",method=c("pearson","spearman"),col
         })
         tmp=main==""
         main=main%.%ifelse(tmp, "", " (")
-        main=main%.%"cor: "%.%concatList(round(cor.,2),"/")
+        main=main%.%"cor: "%.%concatList(formatDouble(cor.,2),"/")
         main=main%.%ifelse(tmp, "", ")")
     }
 
@@ -782,16 +782,16 @@ myhist=function(x, add.norm=TRUE, col.norm="blue", ...){
 
 
 # eclipse
-plot.ellipse=function(x0,y0,a=1,b=1,theta=0,alpha=0,add=TRUE,...) {
-    theta <- seq(0, 2 * pi, length=500)
-#    x <- x0 + a * cos(theta)
-#    y <- y0 + b * sin(theta)    
-    x <- x0 + a * cos(theta) * cos(alpha) - b * sin(theta) * sin(alpha)
-    y <- y0 + a * cos(theta) * sin(alpha) + b * sin(theta) * cos(alpha)
-    if(add) {
-        lines(x,y,...)
-    } else plot(x, y, type = "l",...)
-}
+# plot.ellipse=function(x0,y0,a=1,b=1,theta=0,alpha=0,add=TRUE,...) {
+#     theta <- seq(0, 2 * pi, length=500)
+# #    x <- x0 + a * cos(theta)
+# #    y <- y0 + b * sin(theta)    
+#     x <- x0 + a * cos(theta) * cos(alpha) - b * sin(theta) * sin(alpha)
+#     y <- y0 + a * cos(theta) * sin(alpha) + b * sin(theta) * cos(alpha)
+#     if(add) {
+#         lines(x,y,...)
+#     } else plot(x, y, type = "l",...)
+# }
 
 add.mtext.label=function(text, cex=1.4, adj=-0.2) mtext(side=3, line=2, adj=adj, text=text, cex=cex, font=2, xpd=NA)
 

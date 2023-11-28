@@ -5,6 +5,7 @@
 \alias{predict.pcc}
 \alias{rank.inv.norm}
 \alias{INT}
+\alias{dec_to_binary}
 \title{
 Misc Functions
 }
@@ -19,24 +20,28 @@ empty2na(x)
 \method{predict}{pcc}(object, newdat, ...)
 rank.inv.norm(x)
 INT(x)
+dec_to_binary (x,d) 
 
 }
 \arguments{
 
   \item{x}{
-    %%     ~~Describe \code{x} here~~
+    tbdx
+    }
+  \item{d}{
+    number of digits in the returned binary representation, including leading 0's
     }
   \item{wt}{
-    %%     ~~Describe \code{var.equal} here~~
+    tbdvar.equal
     }
   \item{object}{
-    %%     ~~Describe \code{var.equal} here~~
+    tbdvar.equal
     }
   \item{newdat}{
-    %%     ~~Describe \code{var.equal} here~~
+    tbdvar.equal
     }
   \item{...}{
-    %%     ~~Describe \code{var.equal} here~~
+    tbdvar.equal
     }
 }
 
@@ -46,4 +51,7 @@ INT(x)
 
 \details{
  rank.inv.norm: rank-based inverse normal/gaussian transformation
+
+ 
+ dec_to_binary covert a decimal number to a binary representation with d digits
 }

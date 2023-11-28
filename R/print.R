@@ -11,6 +11,7 @@ mytex=function(dat=NULL, file.name="temp",
     add.clear.page.between.tables=FALSE,
     longtable=FALSE,
     verbose=FALSE,
+	silent=TRUE,
 ...) {
         
 #    if(exists("tablePath") && file.exists(tablePath)) {
@@ -135,8 +136,8 @@ mytex=function(dat=NULL, file.name="temp",
         #print(add.to.row)
  
         if (length(dat)>1) {
-            if(!save2input.only) cat (ifelse(add.clear.page.between.tables, "\\clearpage"%.%names(dat)[i]%.%"\n\n", "\\vspace{20pt}"%.%names(dat)[i]%.%"\n\n"), file=file.name%.%".tex", append=TRUE)
-            cat (ifelse(add.clear.page.between.tables, "\\clearpage"%.%names(dat)[i]%.%"\n\n", "\\vspace{20pt}"%.%names(dat)[i]%.%"\n\n"), file=file.name.2%.%".tex", append=TRUE)
+            if(!save2input.only) cat (ifelse(add.clear.page.between.tables, names(dat)[i]%.%"\n\n", "\\vspace{20pt}"%.%names(dat)[i]%.%"\n\n"), file=file.name%.%".tex", append=TRUE)
+            cat (ifelse(add.clear.page.between.tables, names(dat)[i]%.%"\n\n", "\\vspace{20pt}"%.%names(dat)[i]%.%"\n\n"), file=file.name.2%.%".tex", append=TRUE)
         }
         #if (!is.null(attr(dat1,"caption"))) caption=attr(dat1,"caption") else caption=NULL
         
@@ -163,6 +164,10 @@ mytex=function(dat=NULL, file.name="temp",
             include.rownames=include.rownames, include.colnames=include.colnames, comment=comment, 
             add.to.row=add.to.row, sanitize.text.function =sanitize.text.function, tabular.environment=ifelse(longtable, "longtable","tabular"))
         
+        if(i!=length(dat) & add.clear.page.between.tables) {
+          cat ("\\clearpage\n", file=file.name.2%.%".tex", append=TRUE)
+        }
+        
         if(!save2input.only) cat ("\n", file=file.name%.%".tex", append=TRUE)
         #cat ("\n", file=file.name.2%.%".tex", append=TRUE) # don't add this line since extra lines at the end will prevent two tabular from being put on the same line
         # restore some variables that have changed in this function
@@ -173,7 +178,7 @@ mytex=function(dat=NULL, file.name="temp",
     if(!append) {
         if(!save2input.only) mytex.end(file.name%.%".tex")
     }
-    if(!save2input.only) cat ("Writing table to "%.%getwd()%.%"/"%.%file.name%.%"\n")
+    if(!save2input.only & !silent) cat ("Writing table to "%.%getwd()%.%"/"%.%file.name%.%"\n")
 }
 #x=matrix(0,2,2,dimnames=list(a=1:2, b=1:2));  mytex(x)
 #x=matrix(0,2,2,dimnames=list(a=1:2, 1:2));  mytex(x)
@@ -298,7 +303,7 @@ mywrite=function(x, ...){
 
 # default row.names to FALSE
 # file name needs no file extension
-mywrite.csv = function(x, file="tmp", row.names=FALSE, digits=NULL, ...) {  
+mywrite.csv = function(x, file="tmp", row.names=FALSE, digits=NULL, silent=TRUE, ...) {  
     if (!is.null(digits)) {
         if(length(digits)==1) {
             x=round(x,digits)
@@ -310,7 +315,7 @@ mywrite.csv = function(x, file="tmp", row.names=FALSE, digits=NULL, ...) {
     }
     x[is.na(x)]=""
     write.csv(x, file=file%.%".csv", row.names=row.names, ...)
-    cat("Writing table to "%.%getwd()%.%"/"%.%file%.%".csv\n")
+    if(!silent) cat("Writing table to "%.%getwd()%.%"/"%.%file%.%".csv\n")
 }
 
 

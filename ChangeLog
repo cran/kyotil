@@ -141,3 +141,41 @@
 
 2023.02.02
     * Fix typo in ?prc2
+
+2023.04.24
+    * Add dec_to_binary and cove.boost.collapse.strata
+
+2023.04.26
+    * Add marker.name.to.assay and put this function and
+	cove.boost.collapse.strata in for_correlates_repos.R
+
+2023.05.31
+    * Bug fix p.adj.perm from Sue Li
+
+2023.06.05
+    * Remove trim function, which is also present in glue package
+
+2023.06.10
+    * update pcr2 to handle the situation when there are no competing events
+
+2023.06.11
+    * add trim back because glue is not as good as paste0, no better to have
+	trim in kyotil so that there is no need to load glue just for trim
+
+2023.06.12
+    * update pcr2 
+
+2023.06.13
+    * make myfigure and mytex silent by default
+
+2023.06.15
+	* when there are no cases of interest, return NA
+
+2023.07.19
+	* update cove.boost.collapse.strata
+
+2023.07.20
+	* make ph2 factor in cove.boost.collapse.strata
+
+2023.11.22
+	* move auc functions from aucm to kyotil
