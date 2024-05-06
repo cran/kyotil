@@ -1,13 +1,13 @@
 65558a6e91e64ca0b15f417d790c3b30 *ChangeLog
-104e22537f2e37cced0767c753daf68b *DESCRIPTION
-7b38c3e851e604877eda8bfaea90a6ba *NAMESPACE
+d24442e8817249867da139c47fd9a961 *DESCRIPTION
+6a5dfdaa0db8f30b5b2048fc5f6bfd6f *NAMESPACE
 44ed4354eca051b50a4414beafd20e38 *R/DMHeatMap.R
 7b8aa8455ff186ced3219dfb81c6eb1b *R/Deming.R
 90b3ecc726f1ef7f2274173f45b0378e *R/P.adj.perm.R
 6768c64d133d44582f92349108b16b5f *R/VEplot.R
 c103b6b87b72ca7f3b5d5f2cb18b48af *R/age_calc.R
 fd110d9a591bb2b96359f4e61c99ff01 *R/auc.R
-2f4ba53585b8863be87167b28d44fa8c *R/base.R
+6de2b2a73caca63590ded35882ef5e5a *R/base.R
 dcbc0adb4d821422726de813ea386e5b *R/binaryloess.R
 e9aaf7849035fce73c652bfc2539c7f0 *R/cox.zph.2.R
 95da26a1b6f6b6b6f80e3399208cfa28 *R/cross_validation.R
@@ -21,10 +21,10 @@ dbb81564d62f7e930861c5b9aebdf963 *R/math.R
 2bb8ecc2705ff132771d99831ff5d05f *R/matrix2.R
 c964d446d400e5bc7f0c79a4014a3fbd *R/misc.R
 bdadd18daf081e03d1b258f41a662219 *R/na.approx.R
-5a970b93bf5e6b073251440ab8a11434 *R/plotting.R
+e0a74e6a7998beb5bdea2a8b0050a51e *R/plotting.R
 8f5dac7a649e9a9d89555e63e3626aa3 *R/print.R
 da90767ad93f4b3fdee06ee5bea18fce *R/random.R
-9bfc5e58d4abfc2b8b4fd950894bb66c *R/regression.model.functions.R
+a4097b27c1ef2023aff329cc79937ff7 *R/regression.model.functions.R
 51c056941964e4cb3ef6839c25b760ba *R/roc.R
 c011e4787ab8ddf285cc3d3ae125f0d1 *R/sim.dat.tvarying.three.R
 faf1dc6a7f9cfef081db96b9ca6eb9ff *R/sim.dat.tvarying.two.R
@@ -36,7 +36,7 @@ a6ee814b4c30cf97134d178b41cf1214 *README.md
 e0cf46379294b9fec244914a441ae14d *build/vignette.rds
 6229cdd87cbfff92a6ba2832ba87d649 *data/kid.rda
 862eb1fca2cac60a210a91ee15182329 *inst/CITATION
-c02f6a486eb5084955517dd676b800f6 *inst/doc/kyotil-vignette.pdf
+38f7bb083ea40f366681405be372bc43 *inst/doc/kyotil-vignette.pdf
 a616e808bd826e929f56223020649675 *inst/unitTests/Makefile
 515b18df7e17596dc38b9dbea407b26f *inst/unitTests/runRUnitTests.R
 605a53e445aba9ee89e10bcf6a5239f1 *inst/unitTests/runit.kernel.R
@@ -48,7 +48,7 @@ e207daa3a068bdbc854dd52ae1a98e44 *man/Deming.Rd
 a9cd5bd7e143dd43de0e3bb0afc5aba3 *man/VEplot.Rd
 a55c1aad1407784fba05b4c86b5d35d3 *man/age_calc.Rd
 ac2a2154388743c9114384d353203ddb *man/auc.Rd
-118c65f3534db236f24135bcd76b6a90 *man/base.Rd
+a44b0562266621220d8e024441859cbc *man/base.Rd
 620edc5c9b7e50e4bf37c11f2e46c50f *man/binaryloess.Rd
 fc621eb58524e0177fa50a8fa3a9fc8b *man/cox.zph.2.Rd
 c089126806a11f4dcd7eb10b6ee6b0f5 *man/cross_validation.Rd
@@ -80,7 +80,7 @@ fdcb94a6fabea1846c05c7a134ac4ce3 *src/Call_matrix.c
 7bd7e5d6e4aac0c9a1cedb6ac1a1318d *src/fromKutil.c
 cbae3f1b48dd200fb0d5240eafa923b8 *src/kernels.c
 8a0741595b183c32e76e6eb95c09c6e2 *src/kernels.h
-4ce644da0a57f62a4b54053993fcd716 *src/matrix.c
+f2839b38e976ed7728b50092fb4bdfd8 *src/matrix.c
 dbcc18bfaccf37e648b096b0f3ab16f9 *src/matrix.h
 d4e6facff74660d8e4b8bb7559123097 *src/registerDynamicSymbol.c
 00b4a4de6303e9a027648dcb5878c8c4 *src/sresids.c

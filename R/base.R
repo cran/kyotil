@@ -45,7 +45,8 @@ cbinduneven=function(li) {
       data.frame(x)
       
     } else if (is.matrix(x)) {
-      x <- unique(x, MARGIN = 1)
+      # comment out b/c it messes things up
+      # x <- unique(x, MARGIN = 1)
       data.frame(x, row.names = rownames(x))
       
     } else {
@@ -72,7 +73,7 @@ cbinduneven=function(li) {
   li = lapply(li, function (x) {
     new=setdiff(nams, rownames(x))
     for (i in new) x <- add_na_row(x, i)
-    x[nams,]
+    x[nams,,drop=FALSE]
   })  
   
   do.call(cbind, li)
@@ -393,16 +394,17 @@ table.cases.3=function(case,group1,group2){
     res
 }
 
+## linearizeMlist is no longer visible
 # from Thomas, found on R user group
-methods4<-function(classes, super=FALSE, ANY=FALSE){ 
-    if (super) classes<-unlist(sapply(classes, function(cl) getAllSuperClasses(getClass(cl)))) 
-    if (ANY) classes<-c(classes,"ANY") 
-    gens<-getGenerics()@.Data 
-    sigs<-lapply(gens, function(g) linearizeMlist(getMethods(g))@classes) 
-    names(sigs)<-gens@.Data 
-    sigs<-lapply(sigs, function(gen){ gen[unlist(sapply(gen, function(sig) any(sig %in% classes)))]}) 
-    sigs[sapply(sigs,length)>0] 
-} 
+# methods4<-function(classes, super=FALSE, ANY=FALSE){ 
+#     if (super) classes<-unlist(sapply(classes, function(cl) getAllSuperClasses(getClass(cl)))) 
+#     if (ANY) classes<-c(classes,"ANY") 
+#     gens<-getGenerics()@.Data 
+#     sigs<-lapply(gens, function(g) linearizeMlist(getMethods(g))@classes) 
+#     names(sigs)<-gens@.Data 
+#     sigs<-lapply(sigs, function(gen){ gen[unlist(sapply(gen, function(sig) any(sig %in% classes)))]}) 
+#     sigs[sapply(sigs,length)>0] 
+# } 
  
 
 # p1 and p2 are two points. return y that corresponds to x on the line between p1 and p2
