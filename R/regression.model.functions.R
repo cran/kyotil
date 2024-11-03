@@ -1,14 +1,23 @@
 # type 3 and 7 do not give the right output for glm fits
 # robust can be passed as part of .... Sometimes robust=T generates errors
 # trim: get rid of white space in confidence intervals for alignment
-getFormattedSummary=function(fits, type=12, est.digits=2, se.digits=2, robust, random=FALSE, VE=FALSE, to.trim=FALSE, rows=NULL, coef.direct=FALSE, trunc.large.est=TRUE, scale.factor=1, p.digits=3, remove.leading0=FALSE, p.adj.method="fdr", ...){
+getFormattedSummary=function(fits, type=12, est.digits=2, se.digits=2, robust, random=FALSE, VE=FALSE, 
+                             to.trim=FALSE, rows=NULL, coef.direct=FALSE, trunc.large.est=TRUE, 
+                             scale.factor=1, p.digits=3, remove.leading0=FALSE, p.adj.method="fdr", ...){
     
     if(is.null(names(fits))) names(fits)=seq_along(fits)
     idxes=seq_along(fits); names(idxes)=names(fits)
     
+    if (type==11) {
+      # check to make sure there is only one coef selected
+      if(length(rows)!=1) stop("type=11 requires only one coef selected")
+    }
+    
     if(length(robust)==1) robust=rep(robust,length(fits)) else if (length(robust)!=length(fits)) stop("length of robust needs to match length of fits")    
     
     res = sapply(idxes, simplify="array", function (fit.idx) {
+        
+        # "est","se","(lower","upper)","p.value"
         
         fit=fits[[fit.idx]]
         if(coef.direct) {
@@ -64,7 +73,10 @@ getFormattedSummary=function(fits, type=12, est.digits=2, se.digits=2, robust, r
                 
         # str(lb); str(ub); str(est.) # make sure they are not data frames 
         
-        if (type==1)
+        if (type==0)
+            # return tmp
+            out=drop(tmp)
+        else if (type==1)
             # est only
             out=drop(est. )
         else if (type==2)
@@ -72,7 +84,7 @@ getFormattedSummary=function(fits, type=12, est.digits=2, se.digits=2, robust, r
             out=est. %.% " (" %.% formatDouble(tmp[,2,drop=FALSE], se.digits, remove.leading0=remove.leading0) %.% ")" %.% ifelse (round(tmp[,p.val.col],3)<=0.05, ifelse (tmp[,p.val.col]<0.01,"**","*"),"")
         else if (type==3) 
             # est (lb, ub)
-            out=est. %.% " (" %.% lb %.% "-" %.% ub %.% ")" 
+            out=est. %.% " (" %.% lb %.% "," %.% ub %.% ")" 
         else if (type==7)
           # (lb, ub)
           out=ifelse(drop(too.big), rep("",nrow(lb)), " (" %.% lb %.% ", " %.% ub %.% ")")
@@ -96,12 +108,16 @@ getFormattedSummary=function(fits, type=12, est.digits=2, se.digits=2, robust, r
         else if (type==10) {
             # pval
             tmp.out=tmp[,p.val.col,drop=TRUE]
-            out = ifelse(tmp.out<10^(-p.digits), paste0("<0.",concatList(rep("0",p.digits-1)),"1"), format(round(tmp.out, p.digits), nsmall=p.digits, scientific=FALSE) )
+            out = ifelse(tmp.out<10^(-p.digits), paste0("<0.",concatList(rep("0",p.digits-1)),"1"), 
+                         format(round(tmp.out, p.digits), nsmall=p.digits, scientific=FALSE) )
         }
-        else if (type==11)
-            # adj pval
-            out=format(round(p.adjust(tmp[,p.val.col,drop=TRUE], method=p.adj.method), p.digits), nsmall=3, scientific=FALSE) 
-        else if (type==12)
+        else if (type==11) {
+            # adj pval will be done later
+            # here check to make sure there is only one coef selected
+            out=tmp[,p.val.col]
+            stopifnot(nrow(out)==1 & ncol(out)==1)
+  
+        } else if (type==12)
             # est (lb, up, pval *)
             out=est. %.% 
                 " (CI=" %.% lb %.% "," %.% ub %.% 
@@ -109,10 +125,13 @@ getFormattedSummary=function(fits, type=12, est.digits=2, se.digits=2, robust, r
                 ifelse (round(tmp[,p.val.col],3)<=0.05,ifelse (tmp[,p.val.col]<0.01,"**","*"),"") 
         else 
             stop ("getFormattedSummary(). type not supported: "%.%type)
-            
-        names(out)=rownames(tmp)
-        out=gsub("NA","",out)
-        out=gsub("\\( +\\)","",out)
+        
+        if(type!=0) {
+            names(out)=rownames(tmp)
+            out=gsub("NA","",out)
+            out=gsub("\\( +\\)","",out)
+        }
+        
         out
     })
         
@@ -124,6 +143,11 @@ getFormattedSummary=function(fits, type=12, est.digits=2, se.digits=2, robust, r
     # if there is only one coefficient, we need this
         res=matrix(res, nrow=1)
         colnames(res)=names(fits)
+    }
+    
+    if(type==11) {
+      res=format(round(p.adjust(res, method=p.adj.method), p.digits), nsmall=3, scientific=FALSE) 
+      names(res)=names(fits)
     }
     
     res
@@ -182,7 +206,7 @@ getFixedEf.gee = function (object,exp=FALSE,  ...) {
     out
 }
 
-getFixedEf.MIresult=function(object, ...) {
+getFixedEf.MIresult=function(object,exp=FALSE, ...) {
     capture.output({
         tmp=summary(object)
     }, type="output") # type = message captures stderr, type=output is for stdout
@@ -190,7 +214,13 @@ getFixedEf.MIresult=function(object, ...) {
     tmp=tmp[,names(tmp)!="missInfo"] # MIresult has this string column  #tmp=subset(tmp, select=-missInfo) fails check
     tmp=as.matrix(tmp)# data frame fails in format and formatDouble
     
-    cbind(tmp, "p.val"=2*pt(abs(tmp[,1]/tmp[,2]), df=object$df, lower.tail = FALSE))
+    out = cbind(tmp, "p.val"=2*pt(abs(tmp[,1]/tmp[,2]), df=object$df, lower.tail = FALSE))
+    
+    if(exp) {
+        out[,c(1,3,4)]=exp(out[,c(1,3,4)])
+    }
+    
+    out
 }
 
 #get estimates, variances, sd from lmer fit
@@ -235,12 +265,19 @@ getFixedEf.lme = function (object, ...) {
 #     nlme::VarCorr(object)
 # }
 
-getFixedEf.lmerMod = function (object, ...) {
+getFixedEf.lmerMod = function (object, exp=F, ...) {
     betas <- nlme::fixef(object)
     se <- sqrt (diag (getVarComponent(object)))
     zval <- betas / se 
     pval <- 2 * pnorm(abs(zval), lower.tail = FALSE) 
-    cbind(betas, se, zval, pval) 
+    out=cbind(betas, 
+              se, 
+              "(lower"=betas-qnorm(0.975)*se, 
+              "upper)"=betas+qnorm(0.975)*se, 
+              zval, 
+              pval) 
+    if(exp) out[,c(1,3,4)]=exp(out[,c(1,3,4)])
+    out
 }
 getVarComponent.lmerMod = function (object, ...) {
     as.matrix(vcov(object)) # otherwise will complain about S4 class convertibility problem
@@ -268,11 +305,14 @@ getFixedEf.gam = function (object, ...) {
     cbind (temp$p.coef, temp$se[1:length(temp$p.coef)])
 }
 
-getFixedEf.lm = function (object, ...) {
+getFixedEf.lm = function (object, exp=F, ...) {
     out=summary(object)$coef
     ci=confint(object)    
     out=cbind(out[,1:2], ci, out[,4])
     colnames(out)[5]="p-val"
+    if(exp) {
+        out[,c(1,3,4)]=exp(out[,c(1,3,4)])
+    }
     out
 }
 

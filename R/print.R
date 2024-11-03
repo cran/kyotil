@@ -276,7 +276,7 @@ make.latex.coef.table = function (models, model.names=NULL, row.major=FALSE, rou
 }
 
 
-roundup=function (value, digits, na.to.empty=TRUE, remove.leading0=TRUE) {
+roundup=function (value, digits, na.to.empty=TRUE, remove.leading0=FALSE) {
     if (length(digits)==1) {
         out=format(round(value, digits), nsmall=digits, scientific=FALSE) 
     } else {
@@ -296,13 +296,13 @@ formatDouble=roundup
 
 prettyprint=function (value, digit=2) {
   if (value>=1e4) {
-      format(value, digit=2, scientific=T) 
+    gsub("e\\+0*", "x10^", format(value, digit=digit, scientific=T) )
   } else if (value>=100) {
       round(value)
   } else if (value>=1) {
       round(value,1)
   } else {
-      signif(value, 2)
+      signif(value, digit)
   }
 }
 
@@ -342,7 +342,7 @@ myprint.default = function (..., newline=TRUE, digits=3, print.name=TRUE) {
     object <- as.list(substitute(list(...)))[-1]
     x=list(...)
     for (i in 1:length(x)) {
-        if (is(x[[i]],"formula")) {cat(as.character(x[[i]]), "; "); next}
+        if (inherits(x[[i]],"formula")) {cat(as.character(x[[i]]), "; "); next}
         tmpname <- deparse(object[[i]])[1]
         #str(tmpname)
         #str(gsub("\\\\","\\",gsub("\"", "", tmpname)))
